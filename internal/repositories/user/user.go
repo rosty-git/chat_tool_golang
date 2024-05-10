@@ -22,3 +22,17 @@ func (r *Repository) Create(user *models.User) (*models.User, error) {
 
 	return user, nil
 }
+
+func (r *Repository) GetByEmail(email string) (*models.User, error) {
+	var user models.User
+	result := r.db.Where("email = ?", email).First(&user)
+
+	return &user, result.Error
+}
+
+func (r *Repository) GetById(id string) (*models.User, error) {
+	var user models.User
+	result := r.db.Where("id = ?", id).First(&user)
+
+	return &user, result.Error
+}

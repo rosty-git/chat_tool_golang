@@ -19,6 +19,10 @@ import (
 func GetMessages(c *gin.Context) {
 	slog.Info("GetMessages")
 
+	user, _ := c.Get("user")
+
+	slog.Info("GetMessages", "user", user)
+
 	c.JSON(200, gin.H{
 		"hello": "world!",
 	})

@@ -8,24 +8,51 @@ import (
 
 type userUseCase interface {
 	Registration(userName, email, password string) error
+	Login(email, password string) (string, error)
+}
+
+type config interface {
+	GetEnv() string
 }
 
 type UserV1Handler struct {
 	userUseCase userUseCase
+	config      config
 }
 
-func NewUserV1Handler(userUseCase userUseCase) *UserV1Handler {
+func NewUserV1Handler(userUseCase userUseCase, config config) *UserV1Handler {
 	return &UserV1Handler{
 		userUseCase: userUseCase,
+		config:      config,
 	}
 }
 
 func (uh *UserV1Handler) Login(c *gin.Context) {
 	slog.Info("Login")
 
-	c.JSON(200, gin.H{
-		"hello": "login",
-	})
+	type LoginForm struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	var form LoginForm
+	err := c.BindJSON(&form)
+	if err != nil {
+		slog.Error("BindJSON", "err", err)
+	}
+
+	slog.Info("Login", "form", form)
+
+	tokenString, err := uh.userUseCase.Login(form.Email, form.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to login user"})
+		return
+	}
+
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", tokenString, 3600*24*30, "/", "", true, true)
+
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func (uh *UserV1Handler) Registration(c *gin.Context) {

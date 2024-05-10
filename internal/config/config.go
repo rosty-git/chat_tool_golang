@@ -19,10 +19,15 @@ type MySqlConfig struct {
 	DbName string
 }
 
+type JwtConfig struct {
+	Secret string
+}
+
 type Config struct {
 	Env   string
 	Gin   GinConfig
 	MySql MySqlConfig
+	Jwt   JwtConfig
 }
 
 func (msc *MySqlConfig) ToDsnString() string {
@@ -70,6 +75,11 @@ func NewConfig() *Config {
 		slog.Error("MYSQL_DB_NAME env variable not set")
 	}
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		slog.Error("JWT_SECRET env variable not set")
+	}
+
 	return &Config{
 		Env: env,
 		Gin: GinConfig{
@@ -82,5 +92,16 @@ func NewConfig() *Config {
 			Port:   mySqlPort,
 			DbName: mySqlDbName,
 		},
+		Jwt: JwtConfig{
+			Secret: jwtSecret,
+		},
 	}
+}
+
+func (c *Config) GetJwtSecret() string {
+	return c.Jwt.Secret
+}
+
+func (c *Config) GetEnv() string {
+	return c.Env
 }

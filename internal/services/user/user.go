@@ -4,21 +4,30 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"github.com/elef-git/chat_tool_golang/internal/models"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"log/slog"
+	"time"
 )
 
 type userRepository interface {
 	Create(user *models.User) (*models.User, error)
+	GetByEmail(email string) (*models.User, error)
+}
+
+type config interface {
+	GetJwtSecret() string
 }
 
 type Service struct {
 	userRepository userRepository
+	config         config
 }
 
-func NewService(userRepository userRepository) *Service {
+func NewService(userRepository userRepository, config config) *Service {
 	return &Service{
 		userRepository: userRepository,
+		config:         config,
 	}
 }
 
@@ -55,4 +64,32 @@ func (s *Service) Registration(userName, email, password string) error {
 	slog.Info("Created user", "user", createdUser)
 
 	return nil
+}
+
+func (s *Service) Login(email, password string) (string, error) {
+	user, err := s.userRepository.GetByEmail(email)
+	if err != nil {
+		return "", err
+	}
+
+	// Compare hashed passwords
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password+user.Salt)); err != nil {
+		slog.Error("Wrong password", "err", err)
+
+		return "", err
+	}
+
+	// Generate a JWT token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(time.Second * 30).Unix(),
+	})
+
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString([]byte(s.config.GetJwtSecret()))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }

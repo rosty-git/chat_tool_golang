@@ -5,6 +5,7 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/config"
 	"github.com/elef-git/chat_tool_golang/internal/database"
 	"github.com/elef-git/chat_tool_golang/internal/handler"
+	"github.com/elef-git/chat_tool_golang/internal/middleware"
 	"github.com/elef-git/chat_tool_golang/internal/repositories/user"
 	"github.com/elef-git/chat_tool_golang/internal/routers"
 	"github.com/elef-git/chat_tool_golang/internal/services/user"
@@ -51,11 +52,12 @@ func main() {
 	}
 
 	userRepo := userrepository.NewUsersRepository(db)
-	userService := userservice.NewService(userRepo)
+	userService := userservice.NewService(userRepo, c)
 	userUseCase := userusecase.NewUseCase(userService)
-	userV1Handler := handler.NewUserV1Handler(userUseCase)
+	userV1Handler := handler.NewUserV1Handler(userUseCase, c)
 
-	router := routers.InitRouter(c.Env, userV1Handler)
+	m := middleware.NewMiddleware(userRepo, c)
+	router := routers.InitRouter(c.Env, userV1Handler, m)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", c.Gin.Port),
