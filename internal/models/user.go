@@ -7,4 +7,5 @@ type User struct {
 	Password string    `json:"-"`
 	Salt     string    `json:"-"`
 	Channels []Channel `gorm:"many2many:user_channels;"`
+	Contacts []User    `gorm:"many2many:user_contacts;"`
 }

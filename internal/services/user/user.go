@@ -14,6 +14,7 @@ import (
 type userRepository interface {
 	Create(user *models.User) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
+	GetById(Id uint64) (*models.User, error)
 }
 
 type config interface {
@@ -94,4 +95,24 @@ func (s *Service) Login(email, password string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func (s *Service) GetChannels(userID uint64) ([]models.Channel, error) {
+	slog.Info("Getting channels", "userID", userID)
+
+	user, err := s.userRepository.GetById(userID)
+	if err != nil {
+		return nil, err
+	}
+	return user.Channels, nil
+}
+
+func (s *Service) GetContacts(userID uint64) ([]models.User, error) {
+	slog.Info("Getting contacts", "userID", userID)
+
+	user, err := s.userRepository.GetById(userID)
+	if err != nil {
+		return nil, err
+	}
+	return user.Contacts, nil
 }

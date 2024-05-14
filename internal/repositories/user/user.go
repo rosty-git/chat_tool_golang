@@ -31,8 +31,10 @@ func (r *Repository) GetByEmail(email string) (*models.User, error) {
 }
 
 func (r *Repository) GetById(id uint64) (*models.User, error) {
+	slog.Info("GetById", "id", id)
+
 	var user models.User
-	result := r.db.First(&user, id)
+	result := r.db.Preload("Channels").Preload("Contacts").First(&user, id)
 
 	return &user, result.Error
 }

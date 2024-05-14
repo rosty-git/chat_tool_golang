@@ -3,7 +3,6 @@ package routers
 import (
 	_ "github.com/elef-git/chat_tool_golang/docs"
 	"github.com/elef-git/chat_tool_golang/internal/handler"
-	"github.com/elef-git/chat_tool_golang/internal/routers/api/v1"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
@@ -19,7 +18,7 @@ type config interface {
 	GetCorsAllowOrigins() []string
 }
 
-func InitRouter(env string, userV1Handler *handler.UserV1Handler, m middleware, c config) *gin.Engine {
+func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *handler.WsV1Handler, m middleware, c config) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
@@ -44,10 +43,12 @@ func InitRouter(env string, userV1Handler *handler.UserV1Handler, m middleware, 
 	}
 
 	apiV1 := rootV1.Group("/api")
-	//apiV1.Use(m.RequireAuth())
+	apiV1.Use(m.RequireAuth())
 	{
-		apiV1.GET("/messages", m.RequireAuth(), v1.GetMessages)
+		apiV1.GET("/channels", userV1Handler.GetChannels)
+		apiV1.GET("/contacts", userV1Handler.GetContacts)
 	}
+	rootV1.GET("/ws/", m.RequireAuth(), wsV1Handler.NewWsConnection)
 
 	return r
 }

@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
+	"log/slog"
 	"os"
 	"time"
 )
@@ -43,46 +44,56 @@ func New(dsn string, env string) (*gorm.DB, func() error, error) {
 func Initialize(db *gorm.DB) error {
 	err := db.AutoMigrate(&models.User{}, &models.Channel{})
 
-	if db.Migrator().HasTable(&models.User{}) {
-		var count int64
+	if db.Migrator().HasTable(&models.User{}) && db.Migrator().HasTable(&models.Channel{}) {
+		var usersCount int64
 
-		db.Model(&models.User{}).Count(&count)
+		db.Model(&models.User{}).Count(&usersCount)
 
-		if count == 0 {
-			users := []models.User{
-				{
-					Name:     "user1",
-					Email:    "user1@gmail.com",
-					Salt:     "7d59ac12ccec1b47d0d25b045d5aae3f",
-					Password: "$2a$10$o9oxvoVCz6Qdq3jyqOQPdu0LlpBU8rfwEQuxYDVcvjhxihOlN2uoG", // password1
-				},
-				{
-					Name:     "user2",
-					Email:    "user2@gmail.com",
-					Salt:     "7985cc34b27ef2e7ad20d490c234c5b0",
-					Password: "$2a$10$yY2X3qWyx.Xyq4D6anSFQOh6bu5StPZUKK77t4bKroSnFZa9k5GTq", // password2
-				},
-				{
-					Name:     "user3",
-					Email:    "user3@gmail.com",
-					Salt:     "43b68be506c2eb1cc07b530aade6644f",
-					Password: "$2a$10$xRgdxef7krGas/RbLNXStOBBR3KIZuCYRVBpmqjM0iEHRSjw3TvqO", //password3
-				},
+		users := []*models.User{
+			{
+				Name:     "user1",
+				Email:    "user1@gmail.com",
+				Salt:     "7d59ac12ccec1b47d0d25b045d5aae3f",
+				Password: "$2a$10$o9oxvoVCz6Qdq3jyqOQPdu0LlpBU8rfwEQuxYDVcvjhxihOlN2uoG", // password1
+			},
+			{
+				Name:     "user2",
+				Email:    "user2@gmail.com",
+				Salt:     "7985cc34b27ef2e7ad20d490c234c5b0",
+				Password: "$2a$10$yY2X3qWyx.Xyq4D6anSFQOh6bu5StPZUKK77t4bKroSnFZa9k5GTq", // password2
+			},
+			{
+				Name:     "user3",
+				Email:    "user3@gmail.com",
+				Salt:     "43b68be506c2eb1cc07b530aade6644f",
+				Password: "$2a$10$xRgdxef7krGas/RbLNXStOBBR3KIZuCYRVBpmqjM0iEHRSjw3TvqO", //password3
+			},
+		}
+
+		if usersCount == 0 {
+
+			for _, user := range users {
+				db.Create(user)
 			}
 
 			for _, user := range users {
-				db.Create(&user)
+				for _, userForAssociations := range users {
+					if userForAssociations.ID != user.ID {
+						err := db.Model(&user).Association("Contacts").Append(&models.User{ID: userForAssociations.ID})
+						if err != nil {
+							slog.Error("Association", "err", err)
+						}
+					}
+				}
 			}
 		}
-	}
 
-	if db.Migrator().HasTable(&models.Channel{}) {
-		var count int64
+		var channelsCount int64
 
-		db.Model(&models.Channel{}).Count(&count)
+		db.Model(&models.Channel{}).Count(&channelsCount)
 
-		if count == 0 {
-			channels := []models.Channel{
+		if channelsCount == 0 {
+			channels := []*models.Channel{
 				{
 					Name: "channel1",
 				},
@@ -96,6 +107,13 @@ func Initialize(db *gorm.DB) error {
 
 			for _, channel := range channels {
 				db.Create(&channel)
+			}
+
+			for _, user := range users {
+				err := db.Model(&user).Association("Channels").Append(channels)
+				if err != nil {
+					slog.Error("Association", "err", err)
+				}
 			}
 		}
 	}

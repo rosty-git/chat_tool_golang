@@ -55,9 +55,10 @@ func main() {
 	userService := userservice.NewService(userRepo, c)
 	userUseCase := userusecase.NewUseCase(userService)
 	userV1Handler := handler.NewUserV1Handler(userUseCase, c)
+	wsV1Handler := handler.NewWsV1Handler(c)
 
 	m := middleware.NewMiddleware(userRepo, c)
-	router := routers.InitRouter(c.Env, userV1Handler, m, c)
+	router := routers.InitRouter(c.Env, userV1Handler, wsV1Handler, m, c)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", c.Gin.Port),
