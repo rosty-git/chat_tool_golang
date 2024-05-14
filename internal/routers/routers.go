@@ -8,16 +8,28 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
+	"time"
 )
 
 type middleware interface {
 	RequireAuth() gin.HandlerFunc
 }
 
-func InitRouter(env string, userV1Handler *handler.UserV1Handler, m middleware) *gin.Engine {
+type config interface {
+	GetCorsAllowOrigins() []string
+}
+
+func InitRouter(env string, userV1Handler *handler.UserV1Handler, m middleware, c config) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
-	r.Use(cors.Default())
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     c.GetCorsAllowOrigins(),
+		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	if env == "dev" {
 		r.Use(gin.Logger())
@@ -35,7 +47,6 @@ func InitRouter(env string, userV1Handler *handler.UserV1Handler, m middleware) 
 	//apiV1.Use(m.RequireAuth())
 	{
 		apiV1.GET("/messages", m.RequireAuth(), v1.GetMessages)
-		//apiV1.GET("/messages", v1.GetMessages)
 	}
 
 	return r

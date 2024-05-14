@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"log/slog"
+	"strconv"
 	"time"
 )
 
@@ -17,6 +18,7 @@ type userRepository interface {
 
 type config interface {
 	GetJwtSecret() string
+	GetJwtTtl() time.Duration
 }
 
 type Service struct {
@@ -81,8 +83,8 @@ func (s *Service) Login(email, password string) (string, error) {
 
 	// Generate a JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.ID,
-		"exp": time.Now().Add(time.Second * 30).Unix(),
+		"sub": strconv.FormatUint(user.ID, 10),
+		"exp": time.Now().Add(time.Second * s.config.GetJwtTtl()).Unix(),
 	})
 
 	// Sign and get the complete encoded token as a string using the secret

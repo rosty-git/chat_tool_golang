@@ -13,6 +13,12 @@ type userUseCase interface {
 
 type config interface {
 	GetEnv() string
+	GetAuthCookieName() string
+	GetAuthCookieMaxAge() int
+	GetAuthCookiePath() string
+	GetAuthCookieDomain() string
+	GetAuthCookieSecure() bool
+	GetAuthCookieHttpOnly() bool
 }
 
 type UserV1Handler struct {
@@ -50,7 +56,15 @@ func (uh *UserV1Handler) Login(c *gin.Context) {
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", tokenString, 3600*24*30, "/", "", true, true)
+	c.SetCookie(
+		uh.config.GetAuthCookieName(),
+		tokenString,
+		uh.config.GetAuthCookieMaxAge(),
+		uh.config.GetAuthCookiePath(),
+		uh.config.GetAuthCookieDomain(),
+		uh.config.GetAuthCookieSecure(),
+		uh.config.GetAuthCookieHttpOnly(),
+	)
 
 	c.JSON(http.StatusOK, gin.H{})
 }

@@ -5,6 +5,9 @@ import (
 	"github.com/joho/godotenv"
 	"log/slog"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type GinConfig struct {
@@ -21,17 +24,29 @@ type MySqlConfig struct {
 
 type JwtConfig struct {
 	Secret string
+	Ttl    int
+}
+
+type CorsConfig struct {
+	AllowOrigins []string
+}
+
+type AuthCookieConfig struct {
+	Name          string
+	MaxAgeSeconds int
+	Path          string
+	Domain        string
+	Secure        bool
+	HttpOnly      bool
 }
 
 type Config struct {
-	Env   string
-	Gin   GinConfig
-	MySql MySqlConfig
-	Jwt   JwtConfig
-}
-
-func (msc *MySqlConfig) ToDsnString() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", msc.User, msc.Pass, msc.Host, msc.Port, msc.DbName)
+	Env        string
+	Gin        GinConfig
+	MySql      MySqlConfig
+	Jwt        JwtConfig
+	Cors       CorsConfig
+	AuthCookie AuthCookieConfig
 }
 
 func NewConfig() *Config {
@@ -52,12 +67,12 @@ func NewConfig() *Config {
 
 	mySqlUser := os.Getenv("MYSQL_USER")
 	if mySqlUser == "" {
-		slog.Error("MYSQL_USER env variable not set")
+		panic("MYSQL_USER env variable not set")
 	}
 
 	mySqlPass := os.Getenv("MYSQL_PASS")
 	if mySqlPass == "" {
-		slog.Error("MYSQL_PASS env variable not set")
+		panic("MYSQL_PASS env variable not set")
 	}
 
 	mySqlHost := os.Getenv("MYSQL_HOST")
@@ -72,12 +87,66 @@ func NewConfig() *Config {
 
 	mySqlDbName := os.Getenv("MYSQL_DB_NAME")
 	if mySqlDbName == "" {
-		slog.Error("MYSQL_DB_NAME env variable not set")
+		panic("MYSQL_DB_NAME env variable not set")
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
-		slog.Error("JWT_SECRET env variable not set")
+		panic("JWT_SECRET env variable not set")
+	}
+
+	jwtTtlSeconds := os.Getenv("JWT_TTL_SECONDS")
+	if jwtTtlSeconds == "" {
+		panic("JWT_TTL_SECONDS env variable not set")
+	}
+	jwtTtl, err := strconv.Atoi(jwtTtlSeconds)
+	if err != nil {
+		panic(fmt.Sprintf("JWT_TTL_SECONDS env variable not valid: %s", jwtTtlSeconds))
+	}
+
+	corsAllowOrigins := os.Getenv("CORS_ALLOW_ORIGINS")
+	var corsAllowOriginsSlice []string
+	if corsAllowOrigins == "" {
+		corsAllowOriginsSlice = []string{"*"}
+		slog.Warn("CORS_ALLOW_ORIGINS env variable has default value '*'")
+	} else {
+		corsAllowOriginsSlice = strings.Split(corsAllowOrigins, ",")
+	}
+
+	AuthCookieName := os.Getenv("AUTH_COOKIE_NAME")
+	if AuthCookieName == "" {
+		AuthCookieName = "Authorization"
+	}
+
+	AuthCookieMaxAgeSeconds := os.Getenv("AUTH_COOKIE_MAX_AGE_SECONDS")
+	if AuthCookieMaxAgeSeconds == "" {
+		AuthCookieMaxAgeSeconds = "2592000" // 30 days
+	}
+	AuthCookieMaxAge, err := strconv.Atoi(AuthCookieMaxAgeSeconds)
+	if err != nil {
+		panic(fmt.Sprintf("AUTH_COOKIE_MAX_AGE_SECONDS env variable not valid: %s", AuthCookieMaxAge))
+	}
+
+	AuthCookiePath := os.Getenv("AUTH_COOKIE_PATH")
+	if AuthCookiePath == "" {
+		AuthCookiePath = "/"
+	}
+
+	AuthCookieDomain := os.Getenv("AUTH_COOKIE_DOMAIN")
+	if AuthCookieDomain == "" {
+		AuthCookieDomain = "localhost"
+	}
+
+	AuthCookieSecure := os.Getenv("AUTH_COOKIE_SECURE")
+	AuthCookieSecureBool, err := strconv.ParseBool(AuthCookieSecure)
+	if err != nil {
+		panic("AUTH_COOKIE_SECURE env variable not valid")
+	}
+
+	AuthCookieHttpOnly := os.Getenv("AUTH_COOKIE_HTTPONLY")
+	AuthCookieHttpOnlyBool, err := strconv.ParseBool(AuthCookieHttpOnly)
+	if err != nil {
+		panic("AUTH_COOKIE_HTTPONLY env variable not valid")
 	}
 
 	return &Config{
@@ -94,14 +163,62 @@ func NewConfig() *Config {
 		},
 		Jwt: JwtConfig{
 			Secret: jwtSecret,
+			Ttl:    jwtTtl,
+		},
+		Cors: CorsConfig{
+			AllowOrigins: corsAllowOriginsSlice,
+		},
+		AuthCookie: AuthCookieConfig{
+			Name:          AuthCookieName,
+			MaxAgeSeconds: AuthCookieMaxAge,
+			Path:          AuthCookiePath,
+			Domain:        AuthCookieDomain,
+			Secure:        AuthCookieSecureBool,
+			HttpOnly:      AuthCookieHttpOnlyBool,
 		},
 	}
+}
+
+func (msc *MySqlConfig) ToDsnString() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", msc.User, msc.Pass, msc.Host, msc.Port, msc.DbName)
+}
+
+func (c *Config) GetEnv() string {
+	return c.Env
 }
 
 func (c *Config) GetJwtSecret() string {
 	return c.Jwt.Secret
 }
 
-func (c *Config) GetEnv() string {
-	return c.Env
+func (c *Config) GetJwtTtl() time.Duration {
+	return time.Duration(c.Jwt.Ttl)
+}
+
+func (c *Config) GetCorsAllowOrigins() []string {
+	return c.Cors.AllowOrigins
+}
+
+func (c *Config) GetAuthCookieName() string {
+	return c.AuthCookie.Name
+}
+
+func (c *Config) GetAuthCookiePath() string {
+	return c.AuthCookie.Path
+}
+
+func (c *Config) GetAuthCookieDomain() string {
+	return c.AuthCookie.Domain
+}
+
+func (c *Config) GetAuthCookieMaxAge() int {
+	return c.AuthCookie.MaxAgeSeconds
+}
+
+func (c *Config) GetAuthCookieSecure() bool {
+	return c.AuthCookie.Secure
+}
+
+func (c *Config) GetAuthCookieHttpOnly() bool {
+	return c.AuthCookie.HttpOnly
 }

@@ -30,9 +30,9 @@ func (r *Repository) GetByEmail(email string) (*models.User, error) {
 	return &user, result.Error
 }
 
-func (r *Repository) GetById(id string) (*models.User, error) {
+func (r *Repository) GetById(id uint64) (*models.User, error) {
 	var user models.User
-	result := r.db.Where("id = ?", id).First(&user)
+	result := r.db.First(&user, id)
 
 	return &user, result.Error
 }

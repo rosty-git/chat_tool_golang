@@ -40,7 +40,7 @@ func main() {
 
 	logger.InitLogger(c.Env)
 
-	db, closer, err := database.New(c.MySql.ToDsnString())
+	db, closer, err := database.New(c.MySql.ToDsnString(), c.Env)
 	if err != nil {
 		slog.Error("Failed to connect to database")
 	}
@@ -57,7 +57,7 @@ func main() {
 	userV1Handler := handler.NewUserV1Handler(userUseCase, c)
 
 	m := middleware.NewMiddleware(userRepo, c)
-	router := routers.InitRouter(c.Env, userV1Handler, m)
+	router := routers.InitRouter(c.Env, userV1Handler, m, c)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", c.Gin.Port),

@@ -7,15 +7,17 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 type config interface {
 	GetJwtSecret() string
+	GetAuthCookieName() string
 }
 
 type userRepository interface {
-	GetById(string) (*models.User, error)
+	GetById(uint64) (*models.User, error)
 }
 
 type Middleware struct {
@@ -32,20 +34,11 @@ func NewMiddleware(userRepository userRepository, config config) *Middleware {
 
 func (m *Middleware) RequireAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		slog.Info("RequireAuth")
-		//u, err := c.Cookie("U")
-		//if err != nil {
-		//	slog.Error("Get cookie err:", "err", err)
-		//} else {
-		//	slog.Info("Get cookie cookie:", "cookie", u)
-		//}
-
 		// Get the cookie off the request
-		tokenString, err := c.Cookie("Authorization")
+		tokenString, err := c.Cookie(m.config.GetAuthCookieName())
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 		}
-		slog.Info("tokenString:", tokenString)
 
 		// Decode/validate it
 		token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -64,13 +57,19 @@ func (m *Middleware) RequireAuth() gin.HandlerFunc {
 				c.AbortWithStatus(http.StatusUnauthorized)
 			}
 
-			id, ok := claims["sub"]
+			sub, ok := claims["sub"]
 			if !ok {
 				c.AbortWithStatus(http.StatusUnauthorized)
 			}
 
+			id, err := strconv.ParseUint(sub.(string), 10, 64)
+			if err != nil {
+				slog.Error("RequireAuth", "err", err)
+				c.AbortWithStatus(http.StatusUnauthorized)
+			}
+
 			// Find the user with token Subject
-			user, err := m.userRepository.GetById(id.(string))
+			user, err := m.userRepository.GetById(id)
 			if err != nil {
 				c.AbortWithStatus(http.StatusUnauthorized)
 			}
