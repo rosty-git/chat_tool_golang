@@ -1,0 +1,22 @@
+<ul class="list-disc contacts-main">
+  <li class="nested-list-item">
+    <div (click)="onClick()">
+      @if (collapsed) {
+        <ng-icon name="heroChevronRightMini"></ng-icon>
+      } @else {
+        <ng-icon name="heroChevronDownMini"></ng-icon>
+      }
+      Contacts
+    </div>
+    <ul class="nested-list">
+      @for (contact of contacts; track contact.id) {
+        <li
+          [style.display]="collapsed ? 'none' : 'block'"
+          (click)="setActive(contact.id)"
+          [ngClass]="{ 'bg-sky-700': active === contact.id, 'bg-sky-900': active !== contact.id }">
+          {{ contact.name }}
+        </li>
+      }
+    </ul>
+  </li>
+</ul>

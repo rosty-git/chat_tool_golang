@@ -3,3 +3,4 @@ tmp/
 .env
 front/node_modules
 .nx
+.vscode/

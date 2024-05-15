@@ -2,10 +2,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { HeaderComponent } from './header/header.component';
-import { LoginComponent } from './login/login.component';
-import { MessageListComponent } from './message-list/message-list.component';
-import { SidebarComponent } from './sidebar/sidebar.component';
+import { MessengerComponent } from './messenger/messenger.component';
 
 @Component({
   selector: 'app-root',
@@ -13,10 +10,7 @@ import { SidebarComponent } from './sidebar/sidebar.component';
   imports: [
     RouterOutlet,
     HttpClientModule,
-    LoginComponent,
-    HeaderComponent,
-    MessageListComponent,
-    SidebarComponent,
+    MessengerComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

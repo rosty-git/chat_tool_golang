@@ -1,0 +1,22 @@
+<ul class="list-disc channels-main">
+  <li class="nested-list-item">
+    <div (click)="onClick()">
+      @if (collapsed) {
+        <ng-icon name="heroChevronRightMini"></ng-icon>
+      } @else {
+        <ng-icon name="heroChevronDownMini"></ng-icon>
+      }
+      Channels
+    </div>
+    <ul class="nested-list">
+      @for (channel of channels; track channel.id) {
+        <li
+          [style.display]="collapsed ? 'none' : 'block'"
+          (click)="setActive(channel.id)"
+          [ngClass]="{ 'bg-sky-700': active === channel.id, 'bg-sky-900': active !== channel.id }">
+          {{ channel.name }}
+        </li>
+      }
+    </ul>
+  </li>
+</ul>

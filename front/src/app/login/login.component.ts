@@ -1,11 +1,9 @@
 // import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { retry } from 'rxjs';
-// import { WebSocketService } from '../web-socket.service';
-import { webSocket } from 'rxjs/webSocket';
+import { Router } from '@angular/router';
 
-import { GlobalVariable } from '../../global';
+// import { WebSocketService } from '../web-socket.service';
 import { ApiService } from '../api.service';
 
 @Component({
@@ -18,7 +16,7 @@ import { ApiService } from '../api.service';
 export class LoginComponent {
   constructor(
     private api: ApiService,
-    // private webSocket: WebSocketService,
+    private router: Router,
   ) {}
 
   loginForm = new FormGroup({
@@ -27,8 +25,6 @@ export class LoginComponent {
   });
 
   submit() {
-    console.log('SUBMIT');
-
     this.api
       .post('/v1/auth/login', {
         email: this.loginForm.value.login,
@@ -38,6 +34,7 @@ export class LoginComponent {
         next: (response: unknown) => {
           console.log('auth ok', response);
           this.loginForm.reset();
+          this.router.navigate(['messenger']);
         },
 
         error: (err) => {
@@ -48,17 +45,5 @@ export class LoginComponent {
           console.log('is completed');
         },
       });
-  }
-
-  showMessages(): void {
-    const subject = webSocket(`${GlobalVariable.BASE_WS_URL}/v1/ws/`);
-
-    subject.subscribe({
-      next: (msg) => console.log('message received', msg), // Called whenever there is a message from the server.
-      error: (err) => {
-        console.log(err);
-      }, // Called if at any point WebSocket API signals some kind of error.
-      complete: () => console.log('complete'), // Called when connection is closed (for whatever reason).
-    });
   }
 }
