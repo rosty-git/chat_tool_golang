@@ -13,7 +13,7 @@
         <li
           [style.display]="collapsed ? 'none' : 'block'"
           (click)="setActive(contact.id)"
-          [ngClass]="{ 'bg-sky-700': active === contact.id, 'bg-sky-900': active !== contact.id }">
+          [ngClass]="{ 'bg-sky-700': active === contact.id && store.isContactsActive() }">
           {{ contact.name }}
         </li>
       }

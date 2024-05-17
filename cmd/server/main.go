@@ -6,8 +6,10 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/database"
 	"github.com/elef-git/chat_tool_golang/internal/handler"
 	"github.com/elef-git/chat_tool_golang/internal/middleware"
+	channelrepository "github.com/elef-git/chat_tool_golang/internal/repositories/channel"
 	"github.com/elef-git/chat_tool_golang/internal/repositories/user"
 	"github.com/elef-git/chat_tool_golang/internal/routers"
+	channelservice "github.com/elef-git/chat_tool_golang/internal/services/channel"
 	"github.com/elef-git/chat_tool_golang/internal/services/user"
 	userusecase "github.com/elef-git/chat_tool_golang/internal/usecase/user"
 	"github.com/elef-git/chat_tool_golang/pkg/logger"
@@ -51,9 +53,14 @@ func main() {
 		slog.Error("Failed to initialize database")
 	}
 
-	userRepo := userrepository.NewUsersRepository(db)
+	userRepo := userrepository.NewRepository(db)
+	channelRepo := channelrepository.NewRepository(db)
+
 	userService := userservice.NewService(userRepo, c)
-	userUseCase := userusecase.NewUseCase(userService)
+	channelService := channelservice.NewService(channelRepo)
+
+	userUseCase := userusecase.NewUseCase(userService, channelService)
+
 	userV1Handler := handler.NewUserV1Handler(userUseCase, c)
 	wsV1Handler := handler.NewWsV1Handler(c)
 

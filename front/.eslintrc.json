@@ -1,13 +1,20 @@
 {
   "root": true,
-  "ignorePatterns": ["projects/**/*"],
-  "plugins": ["unused-imports", "simple-import-sort"],
+  "ignorePatterns": [
+    "projects/**/*"
+  ],
+  "plugins": [
+    "unused-imports",
+    "simple-import-sort"
+  ],
   "parserOptions": {
     "project": "./tsconfig.json"
   },
   "overrides": [
     {
-      "files": ["*.ts"],
+      "files": [
+        "*.ts"
+      ],
       "extends": [
         "airbnb-base",
         "airbnb-typescript/base",
@@ -17,8 +24,14 @@
       ],
       "rules": {
         "no-console": "off",
-        "linebreak-style": ["error", "unix"],
-        "max-len": ["error", 120],
+        "linebreak-style": [
+          "error",
+          "unix"
+        ],
+        "max-len": [
+          "error",
+          120
+        ],
         "import/first": "error",
         "import/newline-after-import": "error",
         "import/no-duplicates": "error",
@@ -35,14 +48,22 @@
             "argsIgnorePattern": "^_"
           }
         ],
-        "@typescript-eslint/indent": ["error", 2],
-        "@typescript-eslint/quotes": ["error", "single"],
+        "@typescript-eslint/indent": [
+          "error",
+          2
+        ],
+        "@typescript-eslint/quotes": [
+          "error",
+          "single"
+        ],
         "@typescript-eslint/no-shadow": "error",
         "@angular-eslint/directive-selector": [
           "error",
           {
             "type": "attribute",
-            "prefix": ["app"],
+            "prefix": [
+              "app"
+            ],
             "style": "camelCase"
           }
         ],
@@ -50,21 +71,33 @@
           "error",
           {
             "type": "element",
-            "prefix": ["app"],
+            "prefix": [
+              "app"
+            ],
             "style": "kebab-case"
           }
         ]
       }
     },
     {
-      "files": ["*.html"],
-      "extends": ["plugin:@angular-eslint/template/recommended"],
+      "files": [
+        "*.html"
+      ],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended"
+      ],
       "rules": {}
     },
     {
-      "files": ["*.html"],
-      "excludedFiles": ["*inline-template-*.component.html"],
-      "extends": ["plugin:prettier/recommended"],
+      "files": [
+        "*.html"
+      ],
+      "excludedFiles": [
+        "*inline-template-*.component.html"
+      ],
+      "extends": [
+        "plugin:prettier/recommended"
+      ],
       "rules": {
         "prettier/prettier": [
           "error",
@@ -77,6 +110,14 @@
           }
         ]
       }
+    },
+    {
+      "files": [
+        "*.ts"
+      ],
+      "extends": [
+        "plugin:@ngrx/recommended"
+      ]
     }
   ]
 }

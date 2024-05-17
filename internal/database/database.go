@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
-	"log/slog"
 	"os"
 	"time"
 )
@@ -42,7 +41,7 @@ func New(dsn string, env string) (*gorm.DB, func() error, error) {
 }
 
 func Initialize(db *gorm.DB) error {
-	err := db.AutoMigrate(&models.User{}, &models.Channel{})
+	err := db.AutoMigrate(&models.User{}, &models.Channel{}, &models.ChannelMembers{}, &models.Posts{})
 
 	if db.Migrator().HasTable(&models.User{}) && db.Migrator().HasTable(&models.Channel{}) {
 		var usersCount int64
@@ -71,20 +70,8 @@ func Initialize(db *gorm.DB) error {
 		}
 
 		if usersCount == 0 {
-
 			for _, user := range users {
 				db.Create(user)
-			}
-
-			for _, user := range users {
-				for _, userForAssociations := range users {
-					if userForAssociations.ID != user.ID {
-						err := db.Model(&user).Association("Contacts").Append(&models.User{ID: userForAssociations.ID})
-						if err != nil {
-							slog.Error("Association", "err", err)
-						}
-					}
-				}
 			}
 		}
 
@@ -96,23 +83,61 @@ func Initialize(db *gorm.DB) error {
 			channels := []*models.Channel{
 				{
 					Name: "channel1",
+					Type: models.ChannelTypeOpen,
 				},
 				{
 					Name: "channel2",
+					Type: models.ChannelTypeOpen,
 				},
 				{
 					Name: "channel3",
+					Type: models.ChannelTypeOpen,
 				},
 			}
 
 			for _, channel := range channels {
 				db.Create(&channel)
+
+				for _, user := range users {
+					channelMembers := models.ChannelMembers{
+						UserID:       user.ID,
+						ChannelID:    channel.ID,
+						LastViewedAt: time.Now(),
+					}
+					db.Create(&channelMembers)
+				}
 			}
 
-			for _, user := range users {
-				err := db.Model(&user).Association("Channels").Append(channels)
-				if err != nil {
-					slog.Error("Association", "err", err)
+			for _, user1 := range users {
+				for _, user2 := range users {
+					if user1.ID != user2.ID {
+						var directChannelsCount int64
+
+						db.Where(models.Channel{Name: user1.ID + "__" + user2.ID}).Or(models.Channel{Name: user2.ID + "__" + user1.ID}).Find(&models.Channel{}).Count(&directChannelsCount)
+
+						if directChannelsCount == 0 {
+							newChannel := models.Channel{
+								Type: models.ChannelTypeDirect,
+								Name: user1.ID + "__" + user2.ID,
+							}
+
+							db.Create(&newChannel)
+
+							channelMembers := models.ChannelMembers{
+								UserID:       user1.ID,
+								ChannelID:    newChannel.ID,
+								LastViewedAt: time.Now(),
+							}
+							db.Create(&channelMembers)
+
+							channelMembers1 := models.ChannelMembers{
+								UserID:       user2.ID,
+								ChannelID:    newChannel.ID,
+								LastViewedAt: time.Now(),
+							}
+							db.Create(&channelMembers1)
+						}
+					}
 				}
 			}
 		}

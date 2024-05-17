@@ -2,22 +2,29 @@ package userusecase
 
 import (
 	"github.com/elef-git/chat_tool_golang/internal/models"
+	"log/slog"
+	"strings"
 )
 
 type userService interface {
 	Registration(userName, email, password string) error
 	Login(email, password string) (string, error)
-	GetChannels(userID uint64) ([]models.Channel, error)
-	GetContacts(userId uint64) ([]models.User, error)
+	GetById(userID string) (*models.User, error)
+}
+
+type channelService interface {
+	GetByUserId(userID string, channelType models.ChannelType) ([]*models.Channel, error)
 }
 
 type UseCase struct {
-	userService userService
+	userService    userService
+	channelService channelService
 }
 
-func NewUseCase(userService userService) *UseCase {
+func NewUseCase(userService userService, channelService channelService) *UseCase {
 	return &UseCase{
-		userService: userService,
+		userService:    userService,
+		channelService: channelService,
 	}
 }
 
@@ -29,10 +36,29 @@ func (uc *UseCase) Login(email, password string) (string, error) {
 	return uc.userService.Login(email, password)
 }
 
-func (uc *UseCase) GetChannels(userID uint64) ([]models.Channel, error) {
-	return uc.userService.GetChannels(userID)
-}
+func (uc *UseCase) GetChannelsByUserId(userID string, channelType models.ChannelType) ([]*models.Channel, error) {
+	channels, err := uc.channelService.GetByUserId(userID, channelType)
+	if err != nil {
+		return nil, err
+	}
 
-func (uc *UseCase) GetContacts(userID uint64) ([]models.User, error) {
-	return uc.userService.GetContacts(userID)
+	if channelType == models.ChannelTypeDirect {
+		for _, channel := range channels {
+			contactID := strings.Replace(channel.Name, userID, "", 1)
+			contactID = strings.Replace(contactID, "__", "", 1)
+
+			slog.Info("GetChannelsByUserId", "contactID", contactID)
+
+			user, err := uc.userService.GetById(contactID)
+			if err != nil {
+				return nil, err
+			}
+
+			channel.Name = user.Name
+
+			slog.Info("GetChannelsByUserId", "channel", channel)
+		}
+	}
+
+	return channels, err
 }

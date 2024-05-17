@@ -180,7 +180,7 @@ func NewConfig() *Config {
 }
 
 func (msc *MySqlConfig) ToDsnString() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", msc.User, msc.Pass, msc.Host, msc.Port, msc.DbName)
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", msc.User, msc.Pass, msc.Host, msc.Port, msc.DbName)
 }
 
 func (c *Config) GetEnv() string {

@@ -5,9 +5,7 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -17,7 +15,7 @@ type config interface {
 }
 
 type userRepository interface {
-	GetById(uint64) (*models.User, error)
+	GetById(string2 string) (*models.User, error)
 }
 
 type Middleware struct {
@@ -62,19 +60,13 @@ func (m *Middleware) RequireAuth() gin.HandlerFunc {
 				c.AbortWithStatus(http.StatusUnauthorized)
 			}
 
-			id, err := strconv.ParseUint(sub.(string), 10, 64)
-			if err != nil {
-				slog.Error("RequireAuth", "err", err)
-				c.AbortWithStatus(http.StatusUnauthorized)
-			}
-
 			// Find the user with token Subject
-			user, err := m.userRepository.GetById(id)
+			user, err := m.userRepository.GetById(sub.(string))
 			if err != nil {
 				c.AbortWithStatus(http.StatusUnauthorized)
 			}
 
-			if user.ID == 0 {
+			if user.ID == "" {
 				c.AbortWithStatus(http.StatusUnauthorized)
 			}
 

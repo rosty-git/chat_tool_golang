@@ -13,7 +13,7 @@
         <li
           [style.display]="collapsed ? 'none' : 'block'"
           (click)="setActive(channel.id)"
-          [ngClass]="{ 'bg-sky-700': active === channel.id, 'bg-sky-900': active !== channel.id }">
+          [ngClass]="{ 'bg-sky-700': active === channel.id && store.isChannelsActive() }">
           {{ channel.name }}
         </li>
       }

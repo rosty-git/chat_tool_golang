@@ -11,8 +11,8 @@ import (
 type userUseCase interface {
 	Registration(userName, email, password string) error
 	Login(email, password string) (string, error)
-	GetChannels(userId uint64) ([]models.Channel, error)
-	GetContacts(userId uint64) ([]models.User, error)
+	GetChannelsByUserId(userId string, channelType models.ChannelType) ([]*models.Channel, error)
+	//GetContacts(userId uint64) ([]models.User, error)
 }
 
 type UserV1Handler struct {
@@ -110,30 +110,39 @@ func (uh *UserV1Handler) GetChannels(c *gin.Context) {
 		slog.Error("user not found")
 
 		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
 	}
 
-	channels, err := uh.userUseCase.GetChannels(user.ID)
+	queryChannelType := c.Query("channelType")
+	channelType, ok := models.ChannelTypesMap[queryChannelType]
+	if !ok || queryChannelType == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "channelType is required"})
+		return
+	}
+
+	channels, err := uh.userUseCase.GetChannelsByUserId(user.ID, channelType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get channels"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"channels": channels})
 }
 
-func (uh *UserV1Handler) GetContacts(c *gin.Context) {
-	slog.Info("UserV1Handler GetContacts")
-
-	user, err := getUser(c)
-	if err != nil {
-		slog.Error("user not found")
-
-		c.JSON(http.StatusInternalServerError, gin.H{})
-	}
-
-	contacts, err := uh.userUseCase.GetContacts(user.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get contacts"})
-	}
-
-	c.JSON(http.StatusOK, gin.H{"contacts": contacts})
-}
+//func (uh *UserV1Handler) GetContacts(c *gin.Context) {
+//	slog.Info("UserV1Handler GetContacts")
+//
+//	user, err := getUser(c)
+//	if err != nil {
+//		slog.Error("user not found")
+//
+//		c.JSON(http.StatusInternalServerError, gin.H{})
+//	}
+//
+//	contacts, err := uh.userUseCase.GetContacts(user.ID)
+//	if err != nil {
+//		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get contacts"})
+//	}
+//
+//	c.JSON(http.StatusOK, gin.H{"contacts": contacts})
+//}

@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroChevronDownMini,
@@ -7,6 +7,7 @@ import {
 } from '@ng-icons/heroicons/mini';
 
 import { type Contact } from '../sidebar/sidebar.component';
+import { AppStore } from '../store/app.store';
 
 @Component({
   selector: 'app-contacts',
@@ -17,6 +18,8 @@ import { type Contact } from '../sidebar/sidebar.component';
   viewProviders: [provideIcons({ heroChevronRightMini, heroChevronDownMini })],
 })
 export class ContactsComponent {
+  readonly store = inject(AppStore);
+
   @Input() contacts: Contact[] = [];
 
   collapsed = true;
@@ -29,5 +32,7 @@ export class ContactsComponent {
 
   setActive(id: number) {
     this.active = id;
+
+    this.store.setIsContactsActive(true);
   }
 }

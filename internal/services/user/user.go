@@ -7,14 +7,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"log/slog"
-	"strconv"
 	"time"
 )
 
 type userRepository interface {
 	Create(user *models.User) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
-	GetById(Id uint64) (*models.User, error)
+	GetById(Id string) (*models.User, error)
 }
 
 type config interface {
@@ -84,7 +83,7 @@ func (s *Service) Login(email, password string) (string, error) {
 
 	// Generate a JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": strconv.FormatUint(user.ID, 10),
+		"sub": user.ID,
 		"exp": time.Now().Add(time.Second * s.config.GetJwtTtl()).Unix(),
 	})
 
@@ -97,22 +96,6 @@ func (s *Service) Login(email, password string) (string, error) {
 	return tokenString, nil
 }
 
-func (s *Service) GetChannels(userID uint64) ([]models.Channel, error) {
-	slog.Info("Getting channels", "userID", userID)
-
-	user, err := s.userRepository.GetById(userID)
-	if err != nil {
-		return nil, err
-	}
-	return user.Channels, nil
-}
-
-func (s *Service) GetContacts(userID uint64) ([]models.User, error) {
-	slog.Info("Getting contacts", "userID", userID)
-
-	user, err := s.userRepository.GetById(userID)
-	if err != nil {
-		return nil, err
-	}
-	return user.Contacts, nil
+func (s *Service) GetById(UserID string) (*models.User, error) {
+	return s.userRepository.GetById(UserID)
 }

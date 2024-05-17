@@ -46,7 +46,7 @@ func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *h
 	apiV1.Use(m.RequireAuth())
 	{
 		apiV1.GET("/channels", userV1Handler.GetChannels)
-		apiV1.GET("/contacts", userV1Handler.GetContacts)
+		//apiV1.GET("/contacts", userV1Handler.GetContacts)
 	}
 	rootV1.GET("/ws/", m.RequireAuth(), wsV1Handler.NewWsConnection)
 

@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroChevronDownMini,
@@ -7,6 +7,7 @@ import {
 } from '@ng-icons/heroicons/mini';
 
 import { type Channel } from '../sidebar/sidebar.component';
+import { AppStore } from '../store/app.store';
 
 @Component({
   selector: 'app-channels',
@@ -17,6 +18,8 @@ import { type Channel } from '../sidebar/sidebar.component';
   viewProviders: [provideIcons({ heroChevronRightMini, heroChevronDownMini })],
 })
 export class ChannelsComponent {
+  readonly store = inject(AppStore);
+
   collapsed = true;
 
   active = 0;
@@ -29,5 +32,7 @@ export class ChannelsComponent {
 
   setActive(id: number) {
     this.active = id;
+
+    this.store.setIsChannelsActive(true);
   }
 }
