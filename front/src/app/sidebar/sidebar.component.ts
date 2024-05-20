@@ -1,16 +1,12 @@
+import { HttpParams } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 
 import { ApiService } from '../api.service';
-import { ChannelsComponent } from '../channels/channels.component';
-import { ContactsComponent } from '../contacts/contacts.component';
+import { DirectChannelsComponent } from '../directChannels/directChannels.component';
+import { OpenChannelsComponent } from '../openChannels/openChannels.component';
 
 export type Channel = {
-  id: number;
-  name: string;
-};
-
-export type Contact = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -18,30 +14,28 @@ export type ChannelsResp = {
   channels: Channel[];
 };
 
-export type ContactsResp = {
-  contacts: Contact[];
-};
-
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [ChannelsComponent, ContactsComponent],
+  imports: [OpenChannelsComponent, DirectChannelsComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent implements OnInit {
   constructor(private api: ApiService) {}
 
-  channels: Channel[] = [];
+  directChannels: Channel[] = [];
 
-  contacts: Contact[] = [];
+  openChannels: Channel[] = [];
 
   ngOnInit(): void {
-    this.api.get('/v1/api/channels').subscribe({
+    const directParams = new HttpParams().append('channelType', 'D');
+
+    this.api.get('/v1/api/channels', directParams).subscribe({
       next: (response) => {
         console.log('Get Channels', response);
 
-        this.channels = (response as ChannelsResp).channels;
+        this.directChannels = (response as ChannelsResp).channels;
       },
 
       error: (err: unknown) => {
@@ -49,11 +43,13 @@ export class SidebarComponent implements OnInit {
       },
     });
 
-    this.api.get('/v1/api/contacts').subscribe({
+    const openParams = new HttpParams().append('channelType', 'O');
+
+    this.api.get('/v1/api/channels', openParams).subscribe({
       next: (response) => {
         console.log('Get Contacts', response);
 
-        this.contacts = (response as ContactsResp).contacts;
+        this.openChannels = (response as ChannelsResp).channels;
       },
 
       error: (err) => {

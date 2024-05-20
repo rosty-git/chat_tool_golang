@@ -18,7 +18,7 @@ type config interface {
 	GetCorsAllowOrigins() []string
 }
 
-func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *handler.WsV1Handler, m middleware, c config) *gin.Engine {
+func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *handler.WsV1Handler, postV1Handler *handler.PostV1Handler, m middleware, c config) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
@@ -46,7 +46,8 @@ func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *h
 	apiV1.Use(m.RequireAuth())
 	{
 		apiV1.GET("/channels", userV1Handler.GetChannels)
-		//apiV1.GET("/contacts", userV1Handler.GetContacts)
+		apiV1.GET("/posts/:channelID", postV1Handler.GetPosts)
+		apiV1.POST("/posts", postV1Handler.AddPost)
 	}
 	rootV1.GET("/ws/", m.RequireAuth(), wsV1Handler.NewWsConnection)
 

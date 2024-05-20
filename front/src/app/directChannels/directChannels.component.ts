@@ -6,33 +6,34 @@ import {
   heroChevronRightMini,
 } from '@ng-icons/heroicons/mini';
 
-import { type Contact } from '../sidebar/sidebar.component';
+import { type Channel } from '../sidebar/sidebar.component';
 import { AppStore } from '../store/app.store';
 
 @Component({
-  selector: 'app-contacts',
+  selector: 'app-direct-channels',
   standalone: true,
   imports: [NgIconComponent, NgClass],
-  templateUrl: './contacts.component.html',
-  styleUrl: './contacts.component.scss',
+  templateUrl: './directChannels.component.html',
+  styleUrl: './directChannels.component.scss',
   viewProviders: [provideIcons({ heroChevronRightMini, heroChevronDownMini })],
 })
-export class ContactsComponent {
+export class DirectChannelsComponent {
   readonly store = inject(AppStore);
 
-  @Input() contacts: Contact[] = [];
+  @Input() channels: Channel[] = [];
 
   collapsed = true;
 
-  active = 0;
+  active = '';
 
   onClick(): void {
     this.collapsed = !this.collapsed;
   }
 
-  setActive(id: number) {
+  setActive(id: string) {
     this.active = id;
 
-    this.store.setIsContactsActive(true);
+    this.store.setIsContactsActive();
+    this.store.setActiveChannel(id);
   }
 }

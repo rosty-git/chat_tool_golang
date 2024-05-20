@@ -10,19 +10,19 @@ import { type Channel } from '../sidebar/sidebar.component';
 import { AppStore } from '../store/app.store';
 
 @Component({
-  selector: 'app-channels',
+  selector: 'app-open-channels',
   standalone: true,
   imports: [NgIconComponent, NgClass],
-  templateUrl: './channels.component.html',
-  styleUrl: './channels.component.scss',
+  templateUrl: './openChannels.component.html',
+  styleUrl: './openChannels.component.scss',
   viewProviders: [provideIcons({ heroChevronRightMini, heroChevronDownMini })],
 })
-export class ChannelsComponent {
+export class OpenChannelsComponent {
   readonly store = inject(AppStore);
 
   collapsed = true;
 
-  active = 0;
+  active = '';
 
   @Input() channels: Channel[] = [];
 
@@ -30,9 +30,10 @@ export class ChannelsComponent {
     this.collapsed = !this.collapsed;
   }
 
-  setActive(id: number) {
+  setActive(id: string) {
     this.active = id;
 
-    this.store.setIsChannelsActive(true);
+    this.store.setIsChannelsActive();
+    this.store.setActiveChannel(id);
   }
 }

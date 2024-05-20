@@ -7,10 +7,13 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/handler"
 	"github.com/elef-git/chat_tool_golang/internal/middleware"
 	channelrepository "github.com/elef-git/chat_tool_golang/internal/repositories/channel"
+	postrepository "github.com/elef-git/chat_tool_golang/internal/repositories/post"
 	"github.com/elef-git/chat_tool_golang/internal/repositories/user"
 	"github.com/elef-git/chat_tool_golang/internal/routers"
 	channelservice "github.com/elef-git/chat_tool_golang/internal/services/channel"
+	postservice "github.com/elef-git/chat_tool_golang/internal/services/post"
 	"github.com/elef-git/chat_tool_golang/internal/services/user"
+	postusecase "github.com/elef-git/chat_tool_golang/internal/usecase/post"
 	userusecase "github.com/elef-git/chat_tool_golang/internal/usecase/user"
 	"github.com/elef-git/chat_tool_golang/pkg/logger"
 	"log/slog"
@@ -55,17 +58,21 @@ func main() {
 
 	userRepo := userrepository.NewRepository(db)
 	channelRepo := channelrepository.NewRepository(db)
+	postRepo := postrepository.NewRepository(db)
 
 	userService := userservice.NewService(userRepo, c)
 	channelService := channelservice.NewService(channelRepo)
+	postService := postservice.NewService(postRepo)
 
-	userUseCase := userusecase.NewUseCase(userService, channelService)
+	userUseCase := userusecase.NewUseCase(userService, channelService, postService)
+	postUseCase := postusecase.NewUseCase(postService)
 
-	userV1Handler := handler.NewUserV1Handler(userUseCase, c)
+	userV1Handler := handler.NewUserV1Handler(c, userUseCase, postUseCase)
+	postV1Handler := handler.NewPostV1Handler(postUseCase)
 	wsV1Handler := handler.NewWsV1Handler(c)
 
 	m := middleware.NewMiddleware(userRepo, c)
-	router := routers.InitRouter(c.Env, userV1Handler, wsV1Handler, m, c)
+	router := routers.InitRouter(c.Env, userV1Handler, wsV1Handler, postV1Handler, m, c)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", c.Gin.Port),

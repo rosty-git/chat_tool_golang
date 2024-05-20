@@ -1,31 +1,18 @@
 package models
 
 import (
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"time"
 )
 
 type ChannelMembers struct {
-	ID        string `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	BaseModel
 
-	ChannelID    string `gorm:"size:191"`
-	Channel      Channel
-	UserID       string `gorm:"size:191"`
-	User         User
-	Roles        string
-	LastViewedAt time.Time
-	MsgCount     uint64
-	MentionCount uint64
-}
-
-func (cm *ChannelMembers) BeforeCreate(tx *gorm.DB) (err error) {
-	if cm.ID == "" {
-		cm.ID = uuid.New().String()
-	}
-
-	return
+	ChannelID    string    `json:"channel_id" gorm:"size:191"`
+	Channel      Channel   `json:"-"`
+	UserID       string    `json:"user_id" gorm:"size:191"`
+	User         User      `json:"-"`
+	Roles        string    `json:"roles"`
+	LastViewedAt time.Time `json:"last_viewed_at"`
+	MsgCount     uint64    `json:"msg_count"`
+	MentionCount uint64    `json:"mention_count"`
 }

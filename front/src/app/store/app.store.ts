@@ -5,22 +5,35 @@ import {
 type AppState = {
   isChannelsActive: boolean;
   isContactsActive: boolean;
+  activeChannel: string;
 };
 
 const initialState: AppState = {
   isChannelsActive: false,
   isContactsActive: false,
+  activeChannel: '',
 };
 
 export const AppStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withMethods((store) => ({
-    setIsChannelsActive(active: boolean): void {
-      patchState(store, () => ({ isChannelsActive: active, isContactsActive: false }));
+    setIsChannelsActive(): void {
+      patchState(store, () => ({
+        isChannelsActive: true,
+        isContactsActive: false,
+      }));
     },
-    setIsContactsActive(active: boolean): void {
-      patchState(store, () => ({ isContactsActive: active, isChannelsActive: false }));
+    setIsContactsActive(): void {
+      patchState(store, () => ({
+        isContactsActive: true,
+        isChannelsActive: false,
+      }));
+    },
+    setActiveChannel(channelId: string): void {
+      patchState(store, () => ({
+        activeChannel: channelId,
+      }));
     },
   })),
 );

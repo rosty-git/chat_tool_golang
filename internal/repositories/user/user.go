@@ -16,11 +16,10 @@ func NewRepository(db *gorm.DB) *Repository {
 
 func (r *Repository) Create(user *models.User) (*models.User, error) {
 	result := r.db.Create(user)
-	slog.Info("Result", "Error", result.Error, "RowsAffected", result.RowsAffected)
 
 	slog.Info("Created user: ", user)
 
-	return user, nil
+	return user, result.Error
 }
 
 func (r *Repository) GetByEmail(email string) (*models.User, error) {

@@ -9,12 +9,12 @@
       Contacts
     </div>
     <ul class="nested-list">
-      @for (contact of contacts; track contact.id) {
+      @for (channel of channels; track channel.id) {
         <li
           [style.display]="collapsed ? 'none' : 'block'"
-          (click)="setActive(contact.id)"
-          [ngClass]="{ 'bg-sky-700': active === contact.id && store.isContactsActive() }">
-          {{ contact.name }}
+          (click)="setActive(channel.id)"
+          [ngClass]="{ 'bg-sky-700': active === channel.id && store.isContactsActive() }">
+          {{ channel.name }}
         </li>
       }
     </ul>
