@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ChannelsComponent } from './channels.component';
+import { MessageInputComponent } from './message-input.component';
 
-describe('ChannelsComponent', () => {
-  let component: ChannelsComponent;
-  let fixture: ComponentFixture<ChannelsComponent>;
+describe('MessageInputComponent', () => {
+  let component: MessageInputComponent;
+  let fixture: ComponentFixture<MessageInputComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ChannelsComponent]
+      imports: [MessageInputComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(ChannelsComponent);
+    fixture = TestBed.createComponent(MessageInputComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -26,3 +26,28 @@ func (r *Repository) GetByUserId(userID string, channelType models.ChannelType) 
 
 	return channels, result.Error
 }
+
+func (r *Repository) GetMembers(channelID string) ([]*models.ChannelMembers, error) {
+	var channelMembers []*models.ChannelMembers
+
+	result := r.db.Preload("User").Find(&channelMembers, "channel_id = ?", channelID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return channelMembers, nil
+}
+
+func (r *Repository) GetUsers(channelID string) ([]*models.User, error) {
+	channelMembers, err := r.GetMembers(channelID)
+	if err != nil {
+		return nil, err
+	}
+
+	var users []*models.User
+	for _, channelMember := range channelMembers {
+		users = append(users, &channelMember.User)
+	}
+
+	return users, nil
+}

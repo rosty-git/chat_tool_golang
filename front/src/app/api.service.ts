@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
 
@@ -16,9 +16,10 @@ export class ApiService {
     });
   }
 
-  get(path: string): Observable<unknown> {
+  get(path: string, params?: HttpParams): Observable<unknown> {
     return this.http.get(`${GlobalVariable.BASE_API_URL}${path}`, {
       withCredentials: true,
+      params,
     });
   }
 }

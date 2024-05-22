@@ -40,10 +40,6 @@ export class LoginComponent {
         error: (err) => {
           console.error('auth error', err);
         },
-
-        complete() {
-          console.log('is completed');
-        },
       });
   }
 }

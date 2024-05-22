@@ -8,22 +8,17 @@ import (
 	"net/http"
 )
 
-type userUseCase interface {
-	Registration(userName, email, password string) error
-	Login(email, password string) (string, error)
-	GetChannelsByUserId(userId string, channelType models.ChannelType) ([]*models.Channel, error)
-	//GetContacts(userId uint64) ([]models.User, error)
-}
-
 type UserV1Handler struct {
-	userUseCase userUseCase
 	config      config
+	userUseCase userUseCase
+	postUseCase postUseCase
 }
 
-func NewUserV1Handler(userUseCase userUseCase, config config) *UserV1Handler {
+func NewUserV1Handler(config config, userUseCase userUseCase, postUseCase postUseCase) *UserV1Handler {
 	return &UserV1Handler{
-		userUseCase: userUseCase,
 		config:      config,
+		userUseCase: userUseCase,
+		postUseCase: postUseCase,
 	}
 }
 
@@ -128,21 +123,3 @@ func (uh *UserV1Handler) GetChannels(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"channels": channels})
 }
-
-//func (uh *UserV1Handler) GetContacts(c *gin.Context) {
-//	slog.Info("UserV1Handler GetContacts")
-//
-//	user, err := getUser(c)
-//	if err != nil {
-//		slog.Error("user not found")
-//
-//		c.JSON(http.StatusInternalServerError, gin.H{})
-//	}
-//
-//	contacts, err := uh.userUseCase.GetContacts(user.ID)
-//	if err != nil {
-//		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get contacts"})
-//	}
-//
-//	c.JSON(http.StatusOK, gin.H{"contacts": contacts})
-//}

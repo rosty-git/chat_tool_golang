@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MessageListComponent } from './message-list.component';
+import { OpenChannelsComponent } from './openChannels.component';
 
-describe('MessageListComponent', () => {
-  let component: MessageListComponent;
-  let fixture: ComponentFixture<MessageListComponent>;
+describe('OpenChannelsComponent', () => {
+  let component: OpenChannelsComponent;
+  let fixture: ComponentFixture<OpenChannelsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MessageListComponent],
+      imports: [OpenChannelsComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MessageListComponent);
+    fixture = TestBed.createComponent(OpenChannelsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

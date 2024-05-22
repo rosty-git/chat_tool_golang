@@ -4,9 +4,6 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"log"
-	"os"
 	"time"
 )
 
@@ -14,14 +11,14 @@ func New(dsn string, env string) (*gorm.DB, func() error, error) {
 	var gormConfig *gorm.Config
 	if env == "dev" {
 		gormConfig = &gorm.Config{
-			Logger: logger.New(
-				log.New(os.Stdout, "\r\n", log.LstdFlags), // You can customize the logger output
-				logger.Config{
-					SlowThreshold: time.Second, // SQL queries that take longer than this threshold will be logged as slow queries
-					LogLevel:      logger.Info, // Set log level to Log mode to log all queries
-					Colorful:      true,        // Enable colorful output
-				},
-			),
+			//Logger: logger.New(
+			//	log.New(os.Stdout, "\r\n", log.LstdFlags), // You can customize the logger output
+			//	logger.Config{
+			//		SlowThreshold: time.Second, // SQL queries that take longer than this threshold will be logged as slow queries
+			//		LogLevel:      logger.Info, // Set log level to Log mode to log all queries
+			//		Colorful:      true,        // Enable colorful output
+			//	},
+			//),
 		}
 	} else {
 		gormConfig = &gorm.Config{}
@@ -41,7 +38,7 @@ func New(dsn string, env string) (*gorm.DB, func() error, error) {
 }
 
 func Initialize(db *gorm.DB) error {
-	err := db.AutoMigrate(&models.User{}, &models.Channel{}, &models.ChannelMembers{}, &models.Posts{})
+	err := db.AutoMigrate(&models.User{}, &models.Channel{}, &models.ChannelMembers{}, &models.Post{})
 
 	if db.Migrator().HasTable(&models.User{}) && db.Migrator().HasTable(&models.Channel{}) {
 		var usersCount int64

@@ -7,6 +7,8 @@ import (
 
 type channelRepository interface {
 	GetByUserId(userId string, channelType models.ChannelType) ([]*models.Channel, error)
+	GetMembers(channelID string) ([]*models.ChannelMembers, error)
+	GetUsers(channelID string) ([]*models.User, error)
 }
 
 type Service struct {
@@ -19,8 +21,12 @@ func NewService(channelRepository channelRepository) *Service {
 	}
 }
 
-func (s Service) GetByUserId(userID string, channelType models.ChannelType) ([]*models.Channel, error) {
+func (s *Service) GetByUserId(userID string, channelType models.ChannelType) ([]*models.Channel, error) {
 	slog.Info("Channel service GetByUserId", "userID", userID, "channelType", channelType)
 
 	return s.channelRepository.GetByUserId(userID, channelType)
+}
+
+func (s *Service) GetUsers(channelID string) ([]*models.User, error) {
+	return s.channelRepository.GetUsers(channelID)
 }

@@ -1,0 +1,11 @@
+<div
+  class="message-item"
+  id="{{ id }}">
+  <div class="message-header">
+    <span class="user-name">{{ userName }}</span>
+    <span class="created-at">{{ created_at | date: "short" }}</span>
+  </div>
+  <div class="message-body">
+    <p>{{ message }}</p>
+  </div>
+</div>

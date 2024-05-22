@@ -1,39 +1,32 @@
 import { Injectable } from '@angular/core';
-
-import { GlobalVariable } from '../global';
+import { Observable } from 'rxjs';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WebSocketService {
-  private webSocket: Socket;
+  private socket$!: WebSocketSubject<unknown>;
 
-  constructor() {
-    this.webSocket = new Socket({
-      url: 'localhost:8080/',
-      options: {
-        path: '/v1/ws',
-        withCredentials: true,
-        reconnectionDelay: 5000,
-        autoConnect: false,
-        // transports: ['websocket'],
-      },
-    });
-
-    this.webSocket.connect();
+  connect(url: string): void {
+    this.socket$ = webSocket(url);
   }
 
-  connectSocket(message: unknown) {
-    this.webSocket.emit('connect', message);
+  sendMessage(message: unknown): void {
+    if (this.socket$) {
+      this.socket$.next(message);
+    } else {
+      console.error('WebSocket connection is not established.');
+    }
   }
 
-  // this method is used to get response from server
-  receiveStatus() {
-    return this.webSocket.fromEvent('/get-response');
+  getMessages(): Observable<unknown> {
+    return this.socket$.asObservable();
   }
 
-  // this method is used to end web socket connection
-  disconnectSocket() {
-    this.webSocket.disconnect();
+  close(): void {
+    if (this.socket$) {
+      this.socket$.complete();
+    }
   }
 }

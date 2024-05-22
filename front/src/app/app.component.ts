@@ -7,11 +7,7 @@ import { MessengerComponent } from './messenger/messenger.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    RouterOutlet,
-    HttpClientModule,
-    MessengerComponent,
-  ],
+  imports: [RouterOutlet, HttpClientModule, MessengerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
