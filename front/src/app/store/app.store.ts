@@ -3,36 +3,36 @@ import {
 } from '@ngrx/signals';
 
 type AppState = {
-  isOpenActive: boolean;
-  isDirectActive: boolean;
-  active: string;
+  isChannelsActive: boolean;
+  isContactsActive: boolean;
+  activeChannel: string;
 };
 
 const initialState: AppState = {
-  isOpenActive: false,
-  isDirectActive: false,
-  active: '',
+  isChannelsActive: false,
+  isContactsActive: false,
+  activeChannel: '',
 };
 
-export const ChannelsStore = signalStore(
+export const AppStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withMethods((store) => ({
     setIsChannelsActive(): void {
       patchState(store, () => ({
-        isOpenActive: true,
-        isDirectActive: false,
+        isChannelsActive: true,
+        isContactsActive: false,
       }));
     },
     setIsContactsActive(): void {
       patchState(store, () => ({
-        isOpenActive: false,
-        isDirectActive: true,
+        isContactsActive: true,
+        isChannelsActive: false,
       }));
     },
     setActiveChannel(channelId: string): void {
       patchState(store, () => ({
-        active: channelId,
+        activeChannel: channelId,
       }));
     },
   })),
