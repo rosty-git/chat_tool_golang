@@ -66,10 +66,10 @@ func main() {
 	channelService := channelservice.NewService(channelRepo)
 	postService := postservice.NewService(postRepo, wsChannel)
 
-	userUseCase := userusecase.NewUseCase(userService, channelService, postService)
+	userUseCase := userusecase.NewUseCase(userService, channelService)
 	postUseCase := postusecase.NewUseCase(postService, channelService)
 
-	userV1Handler := handler.NewUserV1Handler(c, userUseCase, postUseCase)
+	userV1Handler := handler.NewUserV1Handler(c, userUseCase)
 	postV1Handler := handler.NewPostV1Handler(postUseCase)
 	wsV1Handler := handler.NewWsV1Handler(c, wsChannel)
 

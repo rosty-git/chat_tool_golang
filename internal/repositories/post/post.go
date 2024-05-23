@@ -4,6 +4,7 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"gorm.io/gorm"
 	"log/slog"
+	"time"
 )
 
 type Repository struct {
@@ -24,11 +25,13 @@ func (r *Repository) Get(id string) (*models.Post, error) {
 	return &post, result.Error
 }
 
-func (r *Repository) GetByChannelId(channelID string, limit int) ([]*models.Post, error) {
+func (r *Repository) GetByChannelId(channelID string, limit int, afterCreatedAt time.Time) ([]*models.Post, error) {
 	slog.Info("postRepo GetByChannelId", "channelID", channelID, "limit", limit)
 
 	var posts []*models.Post
-	result := r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(&models.Post{ChannelID: channelID}).Order("created_at asc").Find(&posts)
+	result := r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+		"channel_id = ? AND created_at > ?", channelID, afterCreatedAt,
+	).Order("created_at asc").Find(&posts)
 
 	slog.Info("Result", "error", result.Error)
 

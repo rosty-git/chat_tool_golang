@@ -16,21 +16,15 @@ type channelService interface {
 	GetByUserId(userID string, channelType models.ChannelType) ([]*models.Channel, error)
 }
 
-type postService interface {
-	GetByChannelId(channelID string, limit int) ([]*models.Post, error)
-}
-
 type UseCase struct {
 	userService    userService
 	channelService channelService
-	postService    postService
 }
 
-func NewUseCase(userService userService, channelService channelService, postService postService) *UseCase {
+func NewUseCase(userService userService, channelService channelService) *UseCase {
 	return &UseCase{
 		userService:    userService,
 		channelService: channelService,
-		postService:    postService,
 	}
 }
 

@@ -1,6 +1,9 @@
 package handler
 
-import "github.com/elef-git/chat_tool_golang/internal/models"
+import (
+	"github.com/elef-git/chat_tool_golang/internal/models"
+	"time"
+)
 
 type config interface {
 	GetEnv() string
@@ -20,6 +23,6 @@ type userUseCase interface {
 }
 
 type postUseCase interface {
-	GetByChannelId(channelID string, limit int) ([]*models.Post, error)
+	GetByChannelId(channelID string, limit int, afterCreatedAt time.Time) ([]*models.Post, error)
 	Create(userID string, channelID string, message string) (*models.Post, error)
 }

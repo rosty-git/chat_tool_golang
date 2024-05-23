@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type PostV1Handler struct {
@@ -27,14 +27,27 @@ func (uh *PostV1Handler) GetPosts(c *gin.Context) {
 	var limitDefault int64 = 20
 	limit, err := strconv.ParseInt(c.Query("limit"), 10, 64)
 	if err != nil {
-		fmt.Println("Error parsing limit:", err)
+		slog.Error("Error parsing limit", "err", err)
 		limit = limitDefault
 	}
 	if limit > 100 {
 		limit = limitDefault
 	}
 
-	posts, err := uh.postUseCase.GetByChannelId(c.Param("channelID"), int(limit))
+	//afterCreatedAt
+	afterCreatedAtQuery := c.Query("afterCreatedAt")
+	if afterCreatedAtQuery == "" {
+		afterCreatedAtQuery = "1970-01-01T00:00:00.000Z"
+	}
+
+	afterCreatedAt, err := time.Parse(time.RFC3339, afterCreatedAtQuery)
+	if err != nil {
+		slog.Error("Error parsing afterCreatedAt", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid afterCreatedAt"})
+		return
+	}
+
+	posts, err := uh.postUseCase.GetByChannelId(c.Param("channelID"), int(limit), afterCreatedAt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get posts"})
 		return

@@ -16,7 +16,7 @@ type PostItem = {
   };
 };
 
-type GetPostsResp = {
+export type GetPostsResp = {
   posts: PostItem[];
 };
 

@@ -3,10 +3,11 @@ package postservice
 import (
 	"github.com/elef-git/chat_tool_golang/internal/handler"
 	"github.com/elef-git/chat_tool_golang/internal/models"
+	"time"
 )
 
 type postRepository interface {
-	GetByChannelId(channelID string, limit int) ([]*models.Post, error)
+	GetByChannelId(channelID string, limit int, afterCreatedAt time.Time) ([]*models.Post, error)
 	Create(userID string, channelID string, message string) (*models.Post, error)
 }
 
@@ -22,8 +23,8 @@ func NewService(channelRepository postRepository, wsChannel chan handler.WsMessa
 	}
 }
 
-func (s *Service) GetByChannelId(channelID string, limit int) ([]*models.Post, error) {
-	return s.postRepository.GetByChannelId(channelID, limit)
+func (s *Service) GetByChannelId(channelID string, limit int, afterCreatedAt time.Time) ([]*models.Post, error) {
+	return s.postRepository.GetByChannelId(channelID, limit, afterCreatedAt)
 }
 
 func (s *Service) Create(userID string, channelID string, message string) (*models.Post, error) {

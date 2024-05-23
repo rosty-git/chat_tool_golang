@@ -11,14 +11,12 @@ import (
 type UserV1Handler struct {
 	config      config
 	userUseCase userUseCase
-	postUseCase postUseCase
 }
 
-func NewUserV1Handler(config config, userUseCase userUseCase, postUseCase postUseCase) *UserV1Handler {
+func NewUserV1Handler(config config, userUseCase userUseCase) *UserV1Handler {
 	return &UserV1Handler{
 		config:      config,
 		userUseCase: userUseCase,
-		postUseCase: postUseCase,
 	}
 }
 
