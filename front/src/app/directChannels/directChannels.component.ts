@@ -7,7 +7,7 @@ import {
 } from '@ng-icons/heroicons/mini';
 
 import { type Channel } from '../sidebar/sidebar.component';
-import { AppStore } from '../store/app.store';
+import { ChannelsStore } from '../store/channels.store';
 
 @Component({
   selector: 'app-direct-channels',
@@ -18,7 +18,7 @@ import { AppStore } from '../store/app.store';
   viewProviders: [provideIcons({ heroChevronRightMini, heroChevronDownMini })],
 })
 export class DirectChannelsComponent {
-  readonly store = inject(AppStore);
+  readonly store = inject(ChannelsStore);
 
   @Input() channels: Channel[] = [];
 

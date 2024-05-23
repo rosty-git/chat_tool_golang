@@ -3,8 +3,9 @@ import { Component, effect, inject } from '@angular/core';
 import { getState } from '@ngrx/signals';
 
 import { ApiService } from '../api.service';
+import { DataService } from '../data.service';
 import { MessageItemComponent } from '../message-item/message-item.component';
-import { AppStore } from '../store/app.store';
+import { ChannelsStore } from '../store/channels.store';
 
 type PostItem = {
   id: string;
@@ -27,24 +28,33 @@ type GetPostsResp = {
   imports: [MessageItemComponent],
 })
 export class MessageBoxComponent {
-  readonly store = inject(AppStore);
+  readonly channelsStore = inject(ChannelsStore);
+
+  posts$ = this.dataService.posts$;
 
   postItems: PostItem[] = [];
 
-  constructor(private api: ApiService) {
+  constructor(
+    private api: ApiService,
+    private dataService: DataService,
+  ) {
     effect(() => {
-      const state = getState(this.store);
-      console.log('books state changed', state.activeChannel);
+      this.posts$.subscribe((posts) => {
+        this.postItems = posts;
+      });
+
+      const state = getState(this.channelsStore);
 
       const params = new HttpParams().append('limit', 20);
 
-      this.api.get(`/v1/api/posts/${state.activeChannel}`, params).subscribe({
+      this.api.get(`/v1/api/posts/${state.active}`, params).subscribe({
         next: (response) => {
           console.log('Get Channels', response);
 
-          this.postItems = (response as GetPostsResp).posts;
-        },
+          // this.postItems = (response as GetPostsResp).posts;
 
+          this.dataService.setPosts((response as GetPostsResp).posts);
+        },
         error: (err: unknown) => {
           console.error('error', err);
         },

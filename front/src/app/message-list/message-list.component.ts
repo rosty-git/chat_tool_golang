@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 
 import { MessageBoxComponent } from '../message-box/message-box.component';
 import { MessageInputComponent } from '../message-input/message-input.component';
-import { AppStore } from '../store/app.store';
+import { ChannelsStore } from '../store/channels.store';
 
 @Component({
   selector: 'app-message-list',
@@ -12,5 +12,5 @@ import { AppStore } from '../store/app.store';
   imports: [MessageBoxComponent, MessageInputComponent],
 })
 export class MessageListComponent {
-  readonly store = inject(AppStore);
+  readonly store = inject(ChannelsStore);
 }

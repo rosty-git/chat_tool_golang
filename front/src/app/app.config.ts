@@ -1,9 +1,13 @@
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { AppStore } from './store/app.store';
+import { ChannelsStore } from './store/channels.store';
 import { unauthorizedInterceptor } from './unauthorized.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -15,6 +19,6 @@ export const appConfig: ApplicationConfig = {
       useFactory: unauthorizedInterceptor,
       multi: true,
     },
-    AppStore,
+    ChannelsStore,
   ],
 };
