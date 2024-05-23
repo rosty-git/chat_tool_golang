@@ -14,6 +14,16 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db}
 }
 
+func (r *Repository) Get(id string) (*models.Post, error) {
+	slog.Info("postRepo Get", "id", id)
+
+	var post models.Post
+
+	result := r.db.Preload("User").First(&post, "id = ?", id)
+
+	return &post, result.Error
+}
+
 func (r *Repository) GetByChannelId(channelID string, limit int) ([]*models.Post, error) {
 	slog.Info("postRepo GetByChannelId", "channelID", channelID, "limit", limit)
 
@@ -34,8 +44,9 @@ func (r *Repository) Create(userID string, channelID string, message string) (*m
 		Message:   message,
 	}
 	result := r.db.Create(post)
+	if result.Error != nil {
+		return nil, result.Error
+	}
 
-	slog.Info("Created post: ", post)
-
-	return post, result.Error
+	return r.Get(post.ID)
 }
