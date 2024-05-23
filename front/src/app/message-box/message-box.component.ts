@@ -53,7 +53,12 @@ export class MessageBoxComponent {
 
           // this.postItems = (response as GetPostsResp).posts;
 
-          this.dataService.setPosts((response as GetPostsResp).posts);
+          const posts = (response as GetPostsResp).posts.sort(
+            (a, b) => new Date(a.created_at).getTime()
+              - new Date(b.created_at).getTime(),
+          );
+
+          this.dataService.setPosts(posts);
         },
         error: (err: unknown) => {
           console.error('error', err);

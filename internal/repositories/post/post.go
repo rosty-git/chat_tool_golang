@@ -31,7 +31,7 @@ func (r *Repository) GetByChannelId(channelID string, limit int, afterCreatedAt 
 	var posts []*models.Post
 	result := r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
 		"channel_id = ? AND created_at > ?", channelID, afterCreatedAt,
-	).Order("created_at asc").Find(&posts)
+	).Order("created_at desc").Find(&posts)
 
 	slog.Info("Result", "error", result.Error)
 
