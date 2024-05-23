@@ -1,7 +1,7 @@
-<div class="main flex flex-col h-screen">
+<div class="main flex flex-col h-screen max-h-screen">
   <app-header class="bg-slate-800 h-10 shrink-0"></app-header>
-  <div class="flex flex-row h-[calc(100vh)]">
-    <app-sidebar class="bg-sky-900 w-80 overflow-y-auto"></app-sidebar>
-    <app-message-list class="bg-white-500 w-screen overflow-y-auto"></app-message-list>
+  <div class="flex flex-row grow overflow-hidden">
+    <app-sidebar class="bg-sky-900 basis-1/4 overflow-y-auto"></app-sidebar>
+    <app-message-list class="bg-white-500 basis-3/4 h-full w-screen"></app-message-list>
   </div>
 </div>
