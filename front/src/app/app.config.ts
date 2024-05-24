@@ -7,13 +7,14 @@ import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
+import { cachingInterceptor } from './caching.interceptor';
 import { ChannelsStore } from './store/channels.store';
 import { unauthorizedInterceptor } from './unauthorized.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([unauthorizedInterceptor])),
+    provideHttpClient(withInterceptors([unauthorizedInterceptor, cachingInterceptor])),
     {
       provide: HTTP_INTERCEPTORS,
       useFactory: unauthorizedInterceptor,
