@@ -1,9 +1,19 @@
-@for (post of postItems; track post.id) {
-  <div>
-    <app-message-item
-      [message]="post.message"
-      [userName]="post.user.name"
-      [id]="post.id"
-      [created_at]="post.created_at"></app-message-item>
-  </div>
-}
+<div
+  class="posts-scroll"
+  infinite-scroll
+  [infiniteScrollDistance]="scrollDistance"
+  [infiniteScrollUpDistance]="scrollUpDistance"
+  [infiniteScrollThrottle]="throttle"
+  (scrolledUp)="onUp()"
+  (scrolled)="onScrollDown()"
+  [scrollWindow]="false">
+  @for (post of postItems; track post.id) {
+    <div>
+      <app-message-item
+        [message]="post.message"
+        [userName]="post.user.name"
+        [id]="post.id"
+        [created_at]="post.created_at"></app-message-item>
+    </div>
+  }
+</div>

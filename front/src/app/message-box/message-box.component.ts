@@ -1,6 +1,7 @@
 import { HttpParams } from '@angular/common/http';
 import { Component, effect, inject } from '@angular/core';
 import { getState } from '@ngrx/signals';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 import { ApiService } from '../api.service';
 import { DataService } from '../data.service';
@@ -25,7 +26,7 @@ export type GetPostsResp = {
   standalone: true,
   templateUrl: './message-box.component.html',
   styleUrl: './message-box.component.scss',
-  imports: [MessageItemComponent],
+  imports: [MessageItemComponent, InfiniteScrollModule],
 })
 export class MessageBoxComponent {
   readonly channelsStore = inject(ChannelsStore);
@@ -33,6 +34,12 @@ export class MessageBoxComponent {
   posts$ = this.dataService.posts$;
 
   postItems: PostItem[] = [];
+
+  throttle = 50;
+
+  scrollDistance = 2;
+
+  scrollUpDistance = 2;
 
   constructor(
     private api: ApiService,
@@ -65,5 +72,13 @@ export class MessageBoxComponent {
         },
       });
     });
+  }
+
+  onUp() {
+    console.log('scrolled up!', this);
+  }
+
+  onScrollDown() {
+    console.log('scrolled down!', this);
   }
 }
