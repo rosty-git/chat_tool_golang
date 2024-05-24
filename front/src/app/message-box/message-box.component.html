@@ -1,4 +1,6 @@
 <div
+  #scrollFrame
+  (scroll)="scrolled($event)"
   class="posts-scroll"
   infinite-scroll
   [infiniteScrollDistance]="scrollDistance"
