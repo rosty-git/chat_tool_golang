@@ -68,6 +68,8 @@ func (uh *PostV1Handler) AddPost(c *gin.Context) {
 	err := c.BindJSON(&mf)
 	if err != nil {
 		slog.Error("BindJSON", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
 	}
 
 	slog.Info("BindJSON", "mf", mf)
@@ -76,6 +78,7 @@ func (uh *PostV1Handler) AddPost(c *gin.Context) {
 	if !ok {
 		slog.Error("user not found")
 		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
 	}
 	user := authUser.(*models.User)
 
@@ -85,6 +88,7 @@ func (uh *PostV1Handler) AddPost(c *gin.Context) {
 	if err != nil {
 		slog.Error("Create post", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"post": post})

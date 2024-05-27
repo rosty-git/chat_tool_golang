@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
 type UserV1Handler struct {
@@ -120,4 +121,37 @@ func (uh *UserV1Handler) GetChannels(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"channels": channels})
+}
+
+func (uh *UserV1Handler) UpdateStatus(c *gin.Context) {
+	slog.Info("UserV1Handler UpdateStatus")
+
+	type StatusForm struct {
+		Status     string    `json:"status"`
+		Manual     bool      `json:"manual"`
+		DNDEndTime time.Time `json:"dnd_end_time"`
+	}
+
+	var sf StatusForm
+	err := c.BindJSON(&sf)
+	if err != nil {
+		slog.Error("BindJSON", "err", err)
+	}
+
+	authUser, ok := c.Get("user")
+	if !ok {
+		slog.Error("user not found")
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+	user := authUser.(*models.User)
+
+	status, err := uh.userUseCase.UpdateStatus(user.ID, sf.Status, sf.Manual, sf.DNDEndTime)
+	if err != nil {
+		slog.Error("Updated status", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": status})
 }

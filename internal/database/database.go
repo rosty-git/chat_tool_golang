@@ -38,7 +38,7 @@ func New(dsn string, env string) (*gorm.DB, func() error, error) {
 }
 
 func Initialize(db *gorm.DB) error {
-	err := db.AutoMigrate(&models.User{}, &models.Channel{}, &models.ChannelMembers{}, &models.Post{})
+	err := db.AutoMigrate(&models.User{}, &models.Channel{}, &models.ChannelMembers{}, &models.Post{}, &models.Status{})
 
 	if db.Migrator().HasTable(&models.User{}) && db.Migrator().HasTable(&models.Channel{}) {
 		var usersCount int64

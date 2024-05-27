@@ -4,12 +4,14 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"log/slog"
 	"strings"
+	"time"
 )
 
 type userService interface {
 	Registration(userName, email, password string) error
 	Login(email, password string) (string, error)
 	GetById(userID string) (*models.User, error)
+	UpdateStatus(userID string, status string, manual bool, dndEndTime time.Time) (*models.Status, error)
 }
 
 type channelService interface {
@@ -61,4 +63,8 @@ func (uc *UseCase) GetChannelsByUserId(userID string, channelType models.Channel
 	}
 
 	return channels, err
+}
+
+func (uc *UseCase) UpdateStatus(userID string, status string, manual bool, dndEndTime time.Time) (*models.Status, error) {
+	return uc.userService.UpdateStatus(userID, status, manual, dndEndTime)
 }

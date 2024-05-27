@@ -20,6 +20,7 @@ type userUseCase interface {
 	Registration(userName, email, password string) error
 	Login(email, password string) (string, error)
 	GetChannelsByUserId(userId string, channelType models.ChannelType) ([]*models.Channel, error)
+	UpdateStatus(userID string, status string, manual bool, dndEndTime time.Time) (*models.Status, error)
 }
 
 type postUseCase interface {
