@@ -192,7 +192,7 @@ func (c *Config) GetJwtSecret() string {
 }
 
 func (c *Config) GetJwtTtl() time.Duration {
-	return time.Duration(c.Jwt.Ttl)
+	return time.Duration(c.Jwt.Ttl) * 1_000_000_000
 }
 
 func (c *Config) GetCorsAllowOrigins() []string {

@@ -85,7 +85,7 @@ func (s *Service) Login(email, password string) (string, error) {
 	// Generate a JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
-		"exp": time.Now().Add(time.Second * s.config.GetJwtTtl()).Unix(),
+		"exp": time.Now().Add(s.config.GetJwtTtl()).Unix(),
 	})
 
 	// Sign and get the complete encoded token as a string using the secret

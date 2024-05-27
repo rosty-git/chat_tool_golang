@@ -5,6 +5,7 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"log/slog"
 	"net/http"
 	"time"
 )
@@ -12,6 +13,13 @@ import (
 type config interface {
 	GetJwtSecret() string
 	GetAuthCookieName() string
+	GetJwtTtl() time.Duration
+
+	GetAuthCookieMaxAge() int
+	GetAuthCookiePath() string
+	GetAuthCookieDomain() string
+	GetAuthCookieSecure() bool
+	GetAuthCookieHttpOnly() bool
 }
 
 type userRepository interface {
@@ -58,6 +66,32 @@ func (m *Middleware) RequireAuth() gin.HandlerFunc {
 			sub, ok := claims["sub"]
 			if !ok {
 				c.AbortWithStatus(http.StatusUnauthorized)
+			}
+
+			if (claims["exp"].(float64)-float64(time.Now().Unix()))/m.config.GetJwtTtl().Seconds() < 0.5 {
+				newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+					"sub": sub,
+					"exp": time.Now().Add(m.config.GetJwtTtl()).Unix(),
+				})
+
+				// Sign and get the complete encoded token as a string using the secret
+				newTokenString, err := newToken.SignedString([]byte(m.config.GetJwtSecret()))
+				if err != nil {
+					slog.Error("RequireAuth", "err", err)
+
+					c.Error(err)
+				}
+
+				c.SetSameSite(http.SameSiteLaxMode)
+				c.SetCookie(
+					m.config.GetAuthCookieName(),
+					newTokenString,
+					m.config.GetAuthCookieMaxAge(),
+					m.config.GetAuthCookiePath(),
+					m.config.GetAuthCookieDomain(),
+					m.config.GetAuthCookieSecure(),
+					m.config.GetAuthCookieHttpOnly(),
+				)
 			}
 
 			// Find the user with token Subject
