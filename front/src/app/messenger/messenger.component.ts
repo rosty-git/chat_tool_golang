@@ -75,8 +75,6 @@ export class MessengerComponent implements OnInit, OnDestroy {
             let params: HttpParams;
 
             if (lastCreatedAt !== '') {
-              console.log('append');
-
               params = new HttpParams()
                 .append('limit', 20)
                 .append('afterCreatedAt', lastCreatedAt);
@@ -96,6 +94,11 @@ export class MessengerComponent implements OnInit, OnDestroy {
                   );
 
                   this.dataService.addPosts(posts);
+
+                  const audio = new Audio(
+                    'assets/new-message-notification.wav',
+                  );
+                  audio.play();
                 },
                 error: (err: unknown) => {
                   console.error('error', err);
@@ -111,7 +114,6 @@ export class MessengerComponent implements OnInit, OnDestroy {
   }
 
   mouseMove(): void {
-    console.log('Mouse move');
     this.dataService.updateOnlineStatus();
   }
 }
