@@ -1,9 +1,7 @@
-// import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
-// import { WebSocketService } from '../web-socket.service';
 import { ApiService } from '../api.service';
 
 @Component({

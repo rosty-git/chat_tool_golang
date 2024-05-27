@@ -1,7 +1,8 @@
 <div class="basis-1/5 border-2">
   <form
     [formGroup]="messageForm"
-    (ngSubmit)="sendMessage()">
+    (ngSubmit)="sendMessage()"
+    (keydown.enter)="sendMessage()">
     <div class="-space-y-px">
       <textarea
         class="custom-textarea w-full h-40 p-2"
