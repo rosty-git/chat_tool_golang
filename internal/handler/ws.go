@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -74,7 +73,7 @@ func (wh *WsV1Handler) NewWsConnection(c *gin.Context) {
 	for {
 		select {
 		case msg := <-wh.channel:
-			fmt.Println("received", msg)
+			slog.Info("received", "msg", msg)
 
 			for _, userId := range msg.ToUsersIDs {
 				userConnections, ok := wh.connMap[userId]
@@ -96,7 +95,6 @@ func (wh *WsV1Handler) NewWsConnection(c *gin.Context) {
 					if len(wh.connMap[userId]) == 0 {
 						delete(wh.connMap, userId)
 					}
-
 				} else {
 					slog.Info("userConn not found")
 				}

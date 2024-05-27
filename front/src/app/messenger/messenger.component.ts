@@ -66,6 +66,8 @@ export class MessengerComponent implements OnInit, OnDestroy {
         const webSocketMsg = msg as WebSocketMsg;
 
         if (webSocketMsg.Action === 'new-post') {
+          const audio = new Audio('assets/new-message-notification.wav');
+
           if (this.channelsStore.active() === webSocketMsg.Payload.channel_id) {
             const lastCreatedAt = await firstValueFrom(
               this.dataService.lastCreatedAt$,
@@ -95,15 +97,14 @@ export class MessengerComponent implements OnInit, OnDestroy {
 
                   this.dataService.addPosts(posts);
 
-                  const audio = new Audio(
-                    'assets/new-message-notification.wav',
-                  );
                   audio.play();
                 },
                 error: (err: unknown) => {
                   console.error('error', err);
                 },
               });
+          } else {
+            audio.play();
           }
         }
       });
