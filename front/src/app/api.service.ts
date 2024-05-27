@@ -16,6 +16,12 @@ export class ApiService {
     });
   }
 
+  put(path: string, data: unknown): Observable<unknown> {
+    return this.http.put(`${GlobalVariable.BASE_API_URL}${path}`, data, {
+      withCredentials: true,
+    });
+  }
+
   get(path: string, params?: HttpParams): Observable<unknown> {
     return this.http.get(`${GlobalVariable.BASE_API_URL}${path}`, {
       withCredentials: true,

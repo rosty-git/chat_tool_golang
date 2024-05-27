@@ -109,4 +109,9 @@ export class MessengerComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.webSocketService.close();
   }
+
+  mouseMove(): void {
+    console.log('Mouse move');
+    this.dataService.updateOnlineStatus();
+  }
 }

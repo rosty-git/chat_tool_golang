@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
+import { ApiService } from './api.service';
+
 type PostItem = {
   id: string;
   message: string;
@@ -9,6 +11,8 @@ type PostItem = {
     name: string;
   };
 };
+
+const USER_UPDATE_STATUS_INTERVAL = 60_000;
 
 const getLastCreatedAt = (posts: PostItem[]): string => {
   if (posts.length === 0) {
@@ -25,6 +29,8 @@ const getLastCreatedAt = (posts: PostItem[]): string => {
   providedIn: 'root',
 })
 export class DataService {
+  constructor(private api: ApiService) {}
+
   private posts = new BehaviorSubject<PostItem[]>([]);
 
   private lastCreatedAt = new BehaviorSubject<string>('');
@@ -32,6 +38,10 @@ export class DataService {
   posts$ = this.posts.asObservable();
 
   lastCreatedAt$ = this.lastCreatedAt.asObservable();
+
+  userStatus = 'online';
+
+  userStatusLastUpdate = new Date().getTime() - 100_000;
 
   setPosts(newPosts: PostItem[]) {
     this.posts.next(newPosts);
@@ -53,5 +63,34 @@ export class DataService {
     this.posts.next(updatedPosts);
 
     this.lastCreatedAt.next(getLastCreatedAt(newPosts));
+  }
+
+  updateOnlineStatus() {
+    if (new Date().getTime() - this.userStatusLastUpdate > USER_UPDATE_STATUS_INTERVAL) {
+      console.log('Update status');
+
+      console.log(
+        'Last update',
+        this.userStatusLastUpdate - new Date().getTime(),
+      );
+
+      this.api
+        .put('/v1/api/statuses', {
+          status: 'online',
+          manual: false,
+          dnd_end_time: '2000-10-31T00:00:00.000-00:00',
+        })
+        .subscribe({
+          next: (response: unknown) => {
+            console.log('post created', response);
+          },
+
+          error: (err) => {
+            console.error('auth error', err);
+          },
+        });
+
+      this.userStatusLastUpdate = new Date().getTime();
+    }
   }
 }
