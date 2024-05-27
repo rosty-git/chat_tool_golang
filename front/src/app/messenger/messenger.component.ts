@@ -1,7 +1,5 @@
 import { HttpParams } from '@angular/common/http';
-import {
-  Component, inject, OnDestroy, OnInit,
-} from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { firstValueFrom, retry } from 'rxjs';
 
 import { GlobalVariable } from '../../global';
@@ -91,8 +89,9 @@ export class MessengerComponent implements OnInit, OnDestroy {
                   console.log('Get Channels', response);
 
                   const posts = (response as GetPostsResp).posts.sort(
-                    (a, b) => new Date(a.created_at).getTime()
-                      - new Date(b.created_at).getTime(),
+                    (a, b) =>
+                      new Date(a.created_at).getTime() -
+                      new Date(b.created_at).getTime(),
                   );
 
                   this.dataService.addPosts(posts);

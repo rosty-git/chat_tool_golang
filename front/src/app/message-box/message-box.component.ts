@@ -71,8 +71,9 @@ export class MessageBoxComponent implements AfterViewInit {
           console.log('Get Channels', response);
 
           const posts = (response as GetPostsResp).posts.sort(
-            (a, b) => new Date(a.created_at).getTime()
-              - new Date(b.created_at).getTime(),
+            (a, b) =>
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime(),
           );
 
           this.dataService.setPosts(posts);
@@ -109,7 +110,8 @@ export class MessageBoxComponent implements AfterViewInit {
 
   private isUserNearBottom(): boolean {
     const threshold = 150;
-    const position = this.scrollContainer.scrollTop + this.scrollContainer.offsetHeight;
+    const position =
+      this.scrollContainer.scrollTop + this.scrollContainer.offsetHeight;
     const height = this.scrollContainer.scrollHeight;
     return position > height - threshold;
   }

@@ -10,7 +10,7 @@ describe('MessageInputComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MessageInputComponent]
     })
-    .compileComponents();
+      .compileComponents();
     
     fixture = TestBed.createComponent(MessageInputComponent);
     component = fixture.componentInstance;
