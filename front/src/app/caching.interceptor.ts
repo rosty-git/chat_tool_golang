@@ -18,7 +18,6 @@ let cacheArr = new Array<CacheEntry>();
 const isCacheable = (req: HttpRequest<unknown>) => req.method === 'GET';
 
 export const cachingInterceptor: HttpInterceptorFn = (req, next) => {
-  console.log(req);
   const { urlWithParams } = req;
 
   if (!isCacheable(req)) {

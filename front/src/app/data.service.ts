@@ -1,15 +1,20 @@
+import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApiService } from './api.service';
 
-type PostItem = {
+export type PostItem = {
   id: string;
   message: string;
   created_at: string;
   user: {
     name: string;
   };
+};
+
+export type GetPostsResp = {
+  posts: PostItem[];
 };
 
 const USER_UPDATE_STATUS_INTERVAL = 60_000;
@@ -43,6 +48,10 @@ export class DataService {
 
   userStatusLastUpdate = new Date().getTime() - 100_000;
 
+  private postsLoading = new BehaviorSubject<boolean>(false);
+
+  postsLoading$ = this.postsLoading.asObservable();
+
   setPosts(newPosts: PostItem[]) {
     this.posts.next(newPosts);
 
@@ -65,15 +74,33 @@ export class DataService {
     this.lastCreatedAt.next(getLastCreatedAt(newPosts));
   }
 
+  getPosts(channelId: string, params: HttpParams) {
+    this.postsLoading.next(true);
+
+    this.api.get(`/v1/api/posts/${channelId}`, params).subscribe({
+      next: (response) => {
+        const posts = (response as GetPostsResp).posts.sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+        );
+
+        this.setPosts(posts);
+
+        this.postsLoading.next(false);
+      },
+      error: (err: unknown) => {
+        console.error('error', err);
+
+        this.postsLoading.next(false);
+      },
+    });
+  }
+
   updateOnlineStatus() {
-    if (new Date().getTime() - this.userStatusLastUpdate > USER_UPDATE_STATUS_INTERVAL) {
-      console.log('Update status');
-
-      console.log(
-        'Last update',
-        this.userStatusLastUpdate - new Date().getTime(),
-      );
-
+    if (
+      new Date().getTime() - this.userStatusLastUpdate >
+      USER_UPDATE_STATUS_INTERVAL
+    ) {
       this.api
         .put('/v1/api/statuses', {
           status: 'online',

@@ -4,10 +4,9 @@ import { firstValueFrom, retry } from 'rxjs';
 
 import { GlobalVariable } from '../../global';
 import { ApiService } from '../api.service';
-import { DataService } from '../data.service';
+import { DataService, type GetPostsResp } from '../data.service';
 import { HeaderComponent } from '../header/header.component';
 import { LoginComponent } from '../login/login.component';
-import { GetPostsResp } from '../message-box/message-box.component';
 import { MessageListComponent } from '../message-list/message-list.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { ChannelsStore } from '../store/channels.store';

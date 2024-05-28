@@ -9,13 +9,21 @@
   (scrolledUp)="onUp()"
   (scrolled)="onScrollDown()"
   [scrollWindow]="false">
-  @for (post of postItems; track post.id) {
-    <div>
-      <app-message-item
-        [message]="post.message"
-        [userName]="post.user.name"
-        [id]="post.id"
-        [created_at]="post.created_at"></app-message-item>
+  @if (postsLoading$) {
+    <div
+      class="h-full"
+      style="display: flex; align-items: center; justify-content: center">
+      <div>loading...</div>
     </div>
+  } @else {
+    @for (post of postItems; track post.id) {
+      <div>
+        <app-message-item
+          [message]="post.message"
+          [userName]="post.user.name"
+          [id]="post.id"
+          [created_at]="post.created_at"></app-message-item>
+      </div>
+    }
   }
 </div>

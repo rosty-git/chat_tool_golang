@@ -10,23 +10,9 @@ import {
 import { getState } from '@ngrx/signals';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
-import { ApiService } from '../api.service';
-import { DataService } from '../data.service';
+import { DataService, type PostItem } from '../data.service';
 import { MessageItemComponent } from '../message-item/message-item.component';
 import { ChannelsStore } from '../store/channels.store';
-
-type PostItem = {
-  id: string;
-  message: string;
-  created_at: string;
-  user: {
-    name: string;
-  };
-};
-
-export type GetPostsResp = {
-  posts: PostItem[];
-};
 
 @Component({
   selector: 'app-message-box',
@@ -46,6 +32,8 @@ export class MessageBoxComponent implements AfterViewInit {
 
   posts$ = this.dataService.posts$;
 
+  postsLoading$ = false;
+
   postItems: PostItem[] = [];
 
   throttle = 50;
@@ -54,34 +42,16 @@ export class MessageBoxComponent implements AfterViewInit {
 
   scrollUpDistance = 2;
 
-  constructor(
-    private api: ApiService,
-    private dataService: DataService,
-  ) {
+  constructor(private dataService: DataService) {
     this.scrollFrame = new ElementRef('');
     this.scrollContainer = this.scrollFrame as unknown as HTMLElement;
 
     effect(() => {
-      const state = getState(this.channelsStore);
+      const channelsState = getState(this.channelsStore);
 
       const params = new HttpParams().append('limit', 20);
 
-      this.api.get(`/v1/api/posts/${state.active}`, params).subscribe({
-        next: (response) => {
-          console.log('Get Channels', response);
-
-          const posts = (response as GetPostsResp).posts.sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
-
-          this.dataService.setPosts(posts);
-        },
-        error: (err: unknown) => {
-          console.error('error', err);
-        },
-      });
+      this.dataService.getPosts(channelsState.active, params);
 
       this.posts$.subscribe((posts) => {
         this.postItems = posts;
@@ -94,6 +64,10 @@ export class MessageBoxComponent implements AfterViewInit {
           });
         }, 1);
       });
+    });
+
+    this.dataService.postsLoading$.subscribe((value) => {
+      this.postsLoading$ = value;
     });
   }
 
