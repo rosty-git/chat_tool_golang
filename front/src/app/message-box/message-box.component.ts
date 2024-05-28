@@ -10,6 +10,7 @@ import {
 import { getState } from '@ngrx/signals';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
+import { GlobalVariable } from '../../global';
 import { DataService, type PostItem } from '../data.service';
 import { MessageItemComponent } from '../message-item/message-item.component';
 import { ChannelsStore } from '../store/channels.store';
@@ -49,7 +50,10 @@ export class MessageBoxComponent implements AfterViewInit {
     effect(() => {
       const channelsState = getState(this.channelsStore);
 
-      const params = new HttpParams().append('limit', 20);
+      const params = new HttpParams().append(
+        'limit',
+        GlobalVariable.POSTS_PAGE_SIZE,
+      );
 
       this.dataService.getPosts(channelsState.active, params);
 
