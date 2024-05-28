@@ -1,10 +1,8 @@
-import { HttpParams } from '@angular/common/http';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { firstValueFrom, retry } from 'rxjs';
+import { retry } from 'rxjs';
 
 import { GlobalVariable } from '../../global';
-import { ApiService } from '../api.service';
-import { DataService, type GetPostsResp } from '../data.service';
+import { DataService } from '../data.service';
 import { HeaderComponent } from '../header/header.component';
 import { LoginComponent } from '../login/login.component';
 import { MessageListComponent } from '../message-list/message-list.component';
@@ -45,7 +43,6 @@ export class MessengerComponent implements OnInit, OnDestroy {
 
   constructor(
     private webSocketService: WebSocketService,
-    private api: ApiService,
     private dataService: DataService,
   ) {}
 
@@ -66,40 +63,13 @@ export class MessengerComponent implements OnInit, OnDestroy {
           const audio = new Audio('assets/new-message-notification.wav');
 
           if (this.channelsStore.active() === webSocketMsg.Payload.channel_id) {
-            const lastCreatedAt = await firstValueFrom(
-              this.dataService.lastCreatedAt$,
-            );
-            console.log('lastCreatedAt', lastCreatedAt);
-
-            let params: HttpParams;
-
-            if (lastCreatedAt !== '') {
-              params = new HttpParams()
-                .append('limit', 20)
-                .append('afterCreatedAt', lastCreatedAt);
-            } else {
-              params = new HttpParams().append('limit', 20);
-            }
-
-            this.api
-              .get(`/v1/api/posts/${webSocketMsg.Payload.channel_id}`, params)
-              .subscribe({
-                next: (response) => {
-                  console.log('Get Channels', response);
-
-                  const posts = (response as GetPostsResp).posts.sort(
-                    (a, b) =>
-                      new Date(a.created_at).getTime() -
-                      new Date(b.created_at).getTime(),
-                  );
-
-                  this.dataService.addPosts(posts);
-
-                  audio.play();
-                },
-                error: (err: unknown) => {
-                  console.error('error', err);
-                },
+            this.dataService
+              .getPostsAfter({
+                channelId: webSocketMsg.Payload.channel_id,
+                limit: GlobalVariable.POSTS_PAGE_SIZE,
+              })
+              .then(() => {
+                audio.play();
               });
           } else {
             audio.play();

@@ -1,4 +1,3 @@
-import { HttpParams } from '@angular/common/http';
 import {
   AfterViewInit,
   Component,
@@ -43,6 +42,8 @@ export class MessageBoxComponent implements AfterViewInit {
 
   scrollUpDistance = 2;
 
+  firstTime = true;
+
   constructor(private dataService: DataService) {
     this.scrollFrame = new ElementRef('');
     this.scrollContainer = this.scrollFrame as unknown as HTMLElement;
@@ -50,23 +51,13 @@ export class MessageBoxComponent implements AfterViewInit {
     effect(() => {
       const channelsState = getState(this.channelsStore);
 
-      const params = new HttpParams().append(
-        'limit',
-        GlobalVariable.POSTS_PAGE_SIZE,
-      );
-
-      this.dataService.getPosts(channelsState.active, params);
+      this.dataService.getPosts({
+        channelId: channelsState.active,
+        limit: GlobalVariable.POSTS_PAGE_SIZE,
+      });
 
       this.posts$.subscribe((posts) => {
         this.postItems = posts;
-
-        setTimeout(() => {
-          this.scrollContainer.scroll({
-            top: this.scrollContainer.scrollHeight,
-            left: 0,
-            // behavior: 'smooth',
-          });
-        }, 1);
       });
     });
 
@@ -95,22 +86,31 @@ export class MessageBoxComponent implements AfterViewInit {
   }
 
   private scrollToBottom(): void {
-    this.scrollContainer.scroll({
-      top: this.scrollContainer.scrollHeight,
-      left: 0,
-      behavior: 'smooth',
-    });
+    setTimeout(() => {
+      this.scrollContainer.scroll({
+        top: this.scrollContainer.scrollHeight,
+        left: 0,
+        // behavior: this.firstTime ? 'smooth',
+        // behavior: this.firstTime ? 'instant' : 'smooth',
+      });
+      // this.firstTime = false;
+    }, 1);
   }
 
-  scrolled(event: unknown): void {
+  scrolled(event: Event): void {
     this.isNearBottom = this.isUserNearBottom();
   }
 
   onUp() {
-    console.log('scrolled up!');
+    const channelsState = getState(this.channelsStore);
+
+    this.dataService.getPostsBefore({
+      channelId: channelsState.active,
+      limit: GlobalVariable.POSTS_PAGE_SIZE,
+    });
   }
 
-  onScrollDown() {
-    console.log('scrolled down!');
-  }
+  // onScrollDown() {
+  //   console.log('scrolled down!');
+  // }
 }

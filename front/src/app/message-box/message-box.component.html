@@ -1,13 +1,12 @@
 <div
   #scrollFrame
   (scroll)="scrolled($event)"
-  class="posts-scroll"
+  class="posts-scroll p-2"
   infinite-scroll
   [infiniteScrollDistance]="scrollDistance"
   [infiniteScrollUpDistance]="scrollUpDistance"
   [infiniteScrollThrottle]="throttle"
   (scrolledUp)="onUp()"
-  (scrolled)="onScrollDown()"
   [scrollWindow]="false">
   @if (postsLoading$) {
     <div

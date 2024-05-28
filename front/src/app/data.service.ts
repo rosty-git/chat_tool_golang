@@ -19,15 +19,22 @@ export type GetPostsResp = {
 
 const USER_UPDATE_STATUS_INTERVAL = 60_000;
 
-const getLastCreatedAt = (posts: PostItem[]): string => {
+const getFirstAndLastCreatedAt = (
+  posts: PostItem[],
+): { last: string; first: string } => {
   if (posts.length === 0) {
-    return '';
+    return { last: '', first: '' };
   }
 
-  return posts.reduce(
-    (latest, post) => (post.created_at > latest ? post.created_at : latest),
-    posts[0].created_at,
+  const { last, first } = posts.reduce(
+    (acc, post) => ({
+      last: post.created_at > acc.last ? post.created_at : acc.last,
+      first: post.created_at < acc.first ? post.created_at : acc.first,
+    }),
+    { last: posts[0].created_at, first: posts[0].created_at },
   );
+
+  return { last, first };
 };
 
 @Injectable({
@@ -38,11 +45,15 @@ export class DataService {
 
   private posts = new BehaviorSubject<PostItem[]>([]);
 
-  private lastCreatedAt = new BehaviorSubject<string>('');
-
   posts$ = this.posts.asObservable();
 
+  private lastCreatedAt = new BehaviorSubject<string>('');
+
   lastCreatedAt$ = this.lastCreatedAt.asObservable();
+
+  private firstCreatedAt = new BehaviorSubject<string>('');
+
+  firstCreatedAt$ = this.firstCreatedAt.asObservable();
 
   userStatus = 'online';
 
@@ -52,13 +63,16 @@ export class DataService {
 
   postsLoading$ = this.postsLoading.asObservable();
 
-  setPosts(newPosts: PostItem[]) {
+  private setPosts(newPosts: PostItem[]) {
     this.posts.next(newPosts);
 
-    this.lastCreatedAt.next(getLastCreatedAt(newPosts));
+    const { last, first } = getFirstAndLastCreatedAt(newPosts);
+
+    this.lastCreatedAt.next(last);
+    this.firstCreatedAt.next(first);
   }
 
-  addPost(newPost: PostItem) {
+  private addPostAfter(newPost: PostItem) {
     const currentPosts = this.posts.getValue();
     const updatedPosts = [...currentPosts, newPost];
     this.posts.next(updatedPosts);
@@ -66,18 +80,32 @@ export class DataService {
     this.lastCreatedAt.next(newPost.created_at);
   }
 
-  addPosts(newPosts: PostItem[]) {
+  private addPostsAfter(newPosts: PostItem[]) {
     const currentPosts = this.posts.getValue();
     const updatedPosts = [...currentPosts, ...newPosts];
     this.posts.next(updatedPosts);
 
-    this.lastCreatedAt.next(getLastCreatedAt(newPosts));
+    const { last } = getFirstAndLastCreatedAt(newPosts);
+
+    this.lastCreatedAt.next(last);
   }
 
-  getPosts(channelId: string, params: HttpParams) {
+  private addPostsBefore(newPosts: PostItem[]) {
+    const currentPosts = this.posts.getValue();
+    const updatedPosts = [...newPosts, ...currentPosts];
+    this.posts.next(updatedPosts);
+
+    const { first } = getFirstAndLastCreatedAt(newPosts);
+
+    this.firstCreatedAt.next(first);
+  }
+
+  getPosts(options: { channelId: string; limit: number }) {
     this.postsLoading.next(true);
 
-    this.api.get(`/v1/api/posts/${channelId}`, params).subscribe({
+    const params = new HttpParams().append('limit', options.limit);
+
+    this.api.get(`/v1/api/posts/${options.channelId}`, params).subscribe({
       next: (response) => {
         const posts = (response as GetPostsResp).posts.sort(
           (a, b) =>
@@ -96,6 +124,94 @@ export class DataService {
     });
   }
 
+  getPostsAfter(options: { channelId: string; limit: number }) {
+    return new Promise((resolve, reject) => {
+      const last = this.lastCreatedAt.getValue();
+
+      let params: HttpParams;
+
+      if (last !== '') {
+        params = new HttpParams()
+          .append('limit', options.limit)
+          .append('after', last);
+      } else {
+        params = new HttpParams().append('limit', options.limit);
+      }
+
+      this.api.get(`/v1/api/posts/${options.channelId}`, params).subscribe({
+        next: (response) => {
+          const posts = (response as GetPostsResp).posts.sort(
+            (a, b) =>
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime(),
+          );
+
+          this.addPostsAfter(posts);
+
+          resolve(posts);
+        },
+        error: (err: unknown) => {
+          console.error('error', err);
+
+          reject(err);
+        },
+      });
+    });
+  }
+
+  getPostsBefore(options: { channelId: string; limit: number }) {
+    return new Promise((resolve, reject) => {
+      const first = this.firstCreatedAt.getValue();
+
+      let params: HttpParams;
+
+      if (first !== '') {
+        params = new HttpParams()
+          .append('limit', options.limit)
+          .append('before', first);
+      } else {
+        params = new HttpParams().append('limit', options.limit);
+      }
+
+      this.api.get(`/v1/api/posts/${options.channelId}`, params).subscribe({
+        next: (response) => {
+          const posts = (response as GetPostsResp).posts.sort(
+            (a, b) =>
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime(),
+          );
+
+          this.addPostsBefore(posts);
+
+          resolve(posts);
+        },
+        error: (err: unknown) => {
+          console.error('error', err);
+
+          reject(err);
+        },
+      });
+    });
+  }
+
+  sendPost(options: { message: string; channelId: string }) {
+    this.api
+      .post('/v1/api/posts', {
+        message: options.message,
+        channelId: options.channelId,
+      })
+      .subscribe({
+        next: (response: unknown) => {
+          console.log('post created', response);
+
+          this.addPostAfter((response as { post: PostItem }).post);
+        },
+        error: (err) => {
+          console.error('auth error', err);
+        },
+      });
+  }
+
   updateOnlineStatus() {
     if (
       new Date().getTime() - this.userStatusLastUpdate >
@@ -109,11 +225,11 @@ export class DataService {
         })
         .subscribe({
           next: (response: unknown) => {
-            console.log('post created', response);
+            console.log('status updated', response);
           },
 
           error: (err) => {
-            console.error('auth error', err);
+            console.error('status updated error', err);
           },
         });
 

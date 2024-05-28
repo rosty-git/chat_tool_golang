@@ -2,18 +2,8 @@ import { NgClass } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
-import { ApiService } from '../api.service';
 import { DataService } from '../data.service';
 import { ChannelsStore } from '../store/channels.store';
-
-type PostItem = {
-  id: string;
-  message: string;
-  created_at: string;
-  user: {
-    name: string;
-  };
-};
 
 @Component({
   selector: 'app-message-input',
@@ -26,7 +16,6 @@ export class MessageInputComponent {
   readonly store = inject(ChannelsStore);
 
   constructor(
-    private api: ApiService,
     private dataService: DataService,
   ) {}
 
@@ -36,24 +25,12 @@ export class MessageInputComponent {
 
   sendMessage() {
     if (this.messageForm.value.message) {
-      this.api
-        .post('/v1/api/posts', {
-          message: this.messageForm.value.message,
-          channel: this.store.active(),
-        })
-        .subscribe({
-          next: (response: unknown) => {
-            console.log('post created', response);
+      this.dataService.sendPost({
+        message: this.messageForm.value.message,
+        channelId: this.store.active(),
+      });
 
-            this.dataService.addPost((response as { post: PostItem }).post);
-
-            this.messageForm.reset();
-          },
-
-          error: (err) => {
-            console.error('auth error', err);
-          },
-        });
+      this.messageForm.reset();
     }
   }
 }
