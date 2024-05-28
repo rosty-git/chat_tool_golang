@@ -1,8 +1,9 @@
 package channelservice
 
 import (
-	"github.com/elef-git/chat_tool_golang/internal/models"
 	"log/slog"
+
+	"github.com/elef-git/chat_tool_golang/internal/models"
 )
 
 type channelRepository interface {

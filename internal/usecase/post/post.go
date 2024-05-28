@@ -1,9 +1,10 @@
 package postusecase
 
 import (
-	"github.com/elef-git/chat_tool_golang/internal/models"
 	"log/slog"
 	"time"
+
+	"github.com/elef-git/chat_tool_golang/internal/models"
 )
 
 type postService interface {

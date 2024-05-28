@@ -1,9 +1,10 @@
 package logger
 
 import (
-	"github.com/lmittmann/tint"
 	"log/slog"
 	"os"
+
+	"github.com/lmittmann/tint"
 )
 
 func InitLogger(env string) {

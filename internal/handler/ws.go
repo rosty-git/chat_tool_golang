@@ -2,12 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/elef-git/chat_tool_golang/internal/models"
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"log/slog"
 	"net/http"
 	"slices"
+
+	"github.com/elef-git/chat_tool_golang/internal/models"
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 type WsMessage struct {

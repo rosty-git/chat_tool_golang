@@ -1,10 +1,11 @@
 package userrepository
 
 import (
-	"github.com/elef-git/chat_tool_golang/internal/models"
-	"gorm.io/gorm"
 	"log/slog"
 	"time"
+
+	"github.com/elef-git/chat_tool_golang/internal/models"
+	"gorm.io/gorm"
 )
 
 type Repository struct {

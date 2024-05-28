@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"github.com/elef-git/chat_tool_golang/internal/models"
-	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/elef-git/chat_tool_golang/internal/models"
+	"github.com/gin-gonic/gin"
 )
 
 type PostV1Handler struct {

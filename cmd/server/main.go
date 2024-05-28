@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
+	"net/http"
+	"time"
+
 	"github.com/elef-git/chat_tool_golang/internal/config"
 	"github.com/elef-git/chat_tool_golang/internal/database"
 	"github.com/elef-git/chat_tool_golang/internal/handler"
@@ -16,9 +20,6 @@ import (
 	postusecase "github.com/elef-git/chat_tool_golang/internal/usecase/post"
 	userusecase "github.com/elef-git/chat_tool_golang/internal/usecase/user"
 	"github.com/elef-git/chat_tool_golang/pkg/logger"
-	"log/slog"
-	"net/http"
-	"time"
 )
 
 // @title           Swagger Example API

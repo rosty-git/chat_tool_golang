@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"log/slog"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 type GinConfig struct {

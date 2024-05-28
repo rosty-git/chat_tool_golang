@@ -1,9 +1,10 @@
 package postservice
 
 import (
+	"time"
+
 	"github.com/elef-git/chat_tool_golang/internal/handler"
 	"github.com/elef-git/chat_tool_golang/internal/models"
-	"time"
 )
 
 type postRepository interface {

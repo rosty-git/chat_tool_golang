@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"github.com/elef-git/chat_tool_golang/internal/models"
 	"time"
+
+	"github.com/elef-git/chat_tool_golang/internal/models"
 )
 
 type config interface {

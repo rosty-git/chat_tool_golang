@@ -2,8 +2,10 @@ package channelrepository
 
 import (
 	"github.com/elef-git/chat_tool_golang/internal/models"
-	"gorm.io/gorm"
+
 	"log/slog"
+
+	"gorm.io/gorm"
 )
 
 type Repository struct {

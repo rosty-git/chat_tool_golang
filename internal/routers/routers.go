@@ -1,13 +1,13 @@
 package routers
 
 import (
-	_ "github.com/elef-git/chat_tool_golang/docs"
+	"time"
+
 	"github.com/elef-git/chat_tool_golang/internal/handler"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
-	"time"
 )
 
 type middleware interface {

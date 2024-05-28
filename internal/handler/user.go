@@ -2,11 +2,12 @@ package handler
 
 import (
 	"errors"
-	"github.com/elef-git/chat_tool_golang/internal/models"
-	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/elef-git/chat_tool_golang/internal/models"
+	"github.com/gin-gonic/gin"
 )
 
 type UserV1Handler struct {

@@ -2,12 +2,13 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/elef-git/chat_tool_golang/internal/models"
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/elef-git/chat_tool_golang/internal/models"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type config interface {

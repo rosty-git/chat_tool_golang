@@ -1,10 +1,11 @@
 package userusecase
 
 import (
-	"github.com/elef-git/chat_tool_golang/internal/models"
 	"log/slog"
 	"strings"
 	"time"
+
+	"github.com/elef-git/chat_tool_golang/internal/models"
 )
 
 type userService interface {

@@ -3,11 +3,12 @@ package userservice
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"log/slog"
+	"time"
+
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"log/slog"
-	"time"
 )
 
 type userRepository interface {

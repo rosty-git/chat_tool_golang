@@ -1,10 +1,11 @@
 package database
 
 import (
+	"time"
+
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"time"
 )
 
 func New(dsn string, env string) (*gorm.DB, func() error, error) {
