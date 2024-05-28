@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/gin-gonic/gin"
@@ -36,19 +35,20 @@ func (uh *PostV1Handler) GetPosts(c *gin.Context) {
 	}
 
 	//afterCreatedAt
-	afterCreatedAtQuery := c.Query("afterCreatedAt")
-	if afterCreatedAtQuery == "" {
-		afterCreatedAtQuery = "1970-01-01T00:00:00.000Z"
-	}
+	after := c.Query("after")
+	before := c.Query("before")
+	//if afterCreatedAtQuery == "" {
+	//	afterCreatedAtQuery = "1970-01-01T00:00:00.000Z"
+	//}
+	//
+	//afterCreatedAt, err := time.Parse(time.RFC3339, afterCreatedAtQuery)
+	//if err != nil {
+	//	slog.Error("Error parsing after", "err", err)
+	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid after param"})
+	//	return
+	//}
 
-	afterCreatedAt, err := time.Parse(time.RFC3339, afterCreatedAtQuery)
-	if err != nil {
-		slog.Error("Error parsing afterCreatedAt", "err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid afterCreatedAt"})
-		return
-	}
-
-	posts, err := uh.postUseCase.GetByChannelId(c.Param("channelID"), int(limit), afterCreatedAt)
+	posts, err := uh.postUseCase.GetByChannelId(c.Param("channelID"), int(limit), before, after)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get posts"})
 		return
@@ -61,8 +61,8 @@ func (uh *PostV1Handler) AddPost(c *gin.Context) {
 	slog.Info("PostV1Handler AddPost")
 
 	type MessageForm struct {
-		Channel string `json:"channel"`
-		Message string `json:"message"`
+		ChannelId string `json:"channelId"`
+		Message   string `json:"message"`
 	}
 
 	var mf MessageForm
@@ -85,7 +85,7 @@ func (uh *PostV1Handler) AddPost(c *gin.Context) {
 
 	slog.Info("AddPost", "user", user)
 
-	post, err := uh.postUseCase.Create(user.ID, mf.Channel, mf.Message)
+	post, err := uh.postUseCase.Create(user.ID, mf.ChannelId, mf.Message)
 	if err != nil {
 		slog.Error("Create post", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})

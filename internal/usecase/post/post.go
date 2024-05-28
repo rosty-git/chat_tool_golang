@@ -2,13 +2,12 @@ package postusecase
 
 import (
 	"log/slog"
-	"time"
 
 	"github.com/elef-git/chat_tool_golang/internal/models"
 )
 
 type postService interface {
-	GetByChannelId(channelID string, limit int, afterCreatedAt time.Time) ([]*models.Post, error)
+	GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error)
 	Create(userID string, channelID string, message string) (*models.Post, error)
 	NotifyReceivers(userID []string, message interface{})
 }
@@ -29,8 +28,8 @@ func NewUseCase(postService postService, channelService channelService) *UseCase
 	}
 }
 
-func (uc *UseCase) GetByChannelId(channelID string, limit int, afterCreatedAt time.Time) ([]*models.Post, error) {
-	return uc.postService.GetByChannelId(channelID, limit, afterCreatedAt)
+func (uc *UseCase) GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error) {
+	return uc.postService.GetByChannelId(channelID, limit, before, after)
 }
 
 func (uc *UseCase) Create(userID string, channelID string, message string) (*models.Post, error) {

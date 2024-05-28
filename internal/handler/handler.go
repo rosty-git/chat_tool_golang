@@ -25,6 +25,6 @@ type userUseCase interface {
 }
 
 type postUseCase interface {
-	GetByChannelId(channelID string, limit int, afterCreatedAt time.Time) ([]*models.Post, error)
+	GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error)
 	Create(userID string, channelID string, message string) (*models.Post, error)
 }

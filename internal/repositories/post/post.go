@@ -26,13 +26,39 @@ func (r *Repository) Get(id string) (*models.Post, error) {
 	return &post, result.Error
 }
 
-func (r *Repository) GetByChannelId(channelID string, limit int, afterCreatedAt time.Time) ([]*models.Post, error) {
-	slog.Info("postRepo GetByChannelId", "channelID", channelID, "limit", limit)
+func (r *Repository) GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error) {
+	slog.Info("postRepo GetByChannelId", "channelID", channelID, "limit", limit, "before", before, "after", after)
 
 	var posts []*models.Post
-	result := r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
-		"channel_id = ? AND created_at > ?", channelID, afterCreatedAt,
-	).Order("created_at desc").Find(&posts)
+	var result *gorm.DB
+
+	if before != "" {
+		beforeCreatedAt, err := time.Parse(time.RFC3339, before)
+		if err != nil {
+			slog.Error("Error parsing before", "err", err)
+
+			return nil, err
+		}
+
+		result = r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+			"channel_id = ? AND created_at < ?", channelID, beforeCreatedAt,
+		).Order("created_at desc").Find(&posts)
+	} else if after != "" {
+		afterCreatedAt, err := time.Parse(time.RFC3339, after)
+		if err != nil {
+			slog.Error("Error parsing after", "err", err)
+
+			return nil, err
+		}
+
+		result = r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+			"channel_id = ? AND created_at > ?", channelID, afterCreatedAt,
+		).Order("created_at desc").Find(&posts)
+	} else {
+		result = r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+			"channel_id = ?", channelID,
+		).Order("created_at desc").Find(&posts)
+	}
 
 	slog.Info("Result", "error", result.Error)
 
