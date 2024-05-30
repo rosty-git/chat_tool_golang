@@ -17,8 +17,6 @@ export type GetPostsResp = {
   posts: PostItem[];
 };
 
-const USER_UPDATE_STATUS_INTERVAL = 60_000;
-
 const getFirstAndLastCreatedAt = (
   posts: PostItem[],
 ): { last: string; first: string } => {
@@ -55,7 +53,9 @@ export class DataService {
 
   firstCreatedAt$ = this.firstCreatedAt.asObservable();
 
-  userStatus = 'online';
+  private userStatus = new BehaviorSubject<string>('online');
+
+  userStatus$ = this.userStatus.asObservable();
 
   userStatusLastUpdate = new Date().getTime() - 100_000;
 
@@ -212,28 +212,50 @@ export class DataService {
       });
   }
 
+  updateStatus(options: {
+    status: string;
+    manual: boolean;
+    dndEndTime?: string;
+  }) {
+    return new Promise((resolve, reject) => {
+      const payload: {
+        status: string;
+        manual: boolean;
+        dnd_end_time?: string;
+      } = { status: options.status, manual: options.manual };
+      if (options.dndEndTime) {
+        payload.dnd_end_time = options.dndEndTime;
+      }
+
+      this.api.put('/v1/api/statuses', payload).subscribe({
+        next: (response: unknown) => {
+          console.log('status updated', response);
+
+          this.userStatus.next(options.status);
+
+          resolve(response);
+        },
+
+        error: (err) => {
+          console.error('status updated error', err);
+
+          reject(err);
+        },
+      });
+    });
+  }
+
   updateOnlineStatus() {
-    if (
-      new Date().getTime() - this.userStatusLastUpdate >
-      USER_UPDATE_STATUS_INTERVAL
-    ) {
-      this.api
-        .put('/v1/api/statuses', {
-          status: 'online',
-          manual: false,
-          dnd_end_time: '2000-10-31T00:00:00.000-00:00',
-        })
-        .subscribe({
-          next: (response: unknown) => {
-            console.log('status updated', response);
-          },
+    return this.updateStatus({
+      status: 'online',
+      manual: false,
+    });
+  }
 
-          error: (err) => {
-            console.error('status updated error', err);
-          },
-        });
-
-      this.userStatusLastUpdate = new Date().getTime();
-    }
+  setAwayStatus() {
+    return this.updateStatus({
+      status: 'away',
+      manual: false,
+    });
   }
 }

@@ -15,7 +15,7 @@ type userRepository interface {
 	Create(user *models.User) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
 	GetById(Id string) (*models.User, error)
-	CreateOrUpdateStatus(userID string, status string, manual bool, dndEndTime time.Time) (*models.Status, error)
+	CreateOrUpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
 }
 
 type config interface {
@@ -102,6 +102,6 @@ func (s *Service) GetById(UserID string) (*models.User, error) {
 	return s.userRepository.GetById(UserID)
 }
 
-func (s *Service) UpdateStatus(userID string, status string, manual bool, endTime time.Time) (*models.Status, error) {
+func (s *Service) UpdateStatus(userID string, status string, manual bool, endTime string) (*models.Status, error) {
 	return s.userRepository.CreateOrUpdateStatus(userID, status, manual, endTime)
 }

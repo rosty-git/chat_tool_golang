@@ -6,10 +6,18 @@ import (
 
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
+type GormDb interface {
+	Create(value interface{}) (tx *gorm.DB)
+	Where(query interface{}, args ...interface{}) (tx *gorm.DB)
+	First(dest interface{}, conds ...interface{}) (tx *gorm.DB)
+	Model(value interface{}) (tx *gorm.DB)
+}
+
 type Repository struct {
-	db *gorm.DB
+	db GormDb
 }
 
 func NewRepository(db *gorm.DB) *Repository {
@@ -19,7 +27,7 @@ func NewRepository(db *gorm.DB) *Repository {
 func (r *Repository) Create(user *models.User) (*models.User, error) {
 	result := r.db.Create(user)
 
-	slog.Info("Created user: ", user)
+	slog.Info("Created user: ", "user", user)
 
 	return user, result.Error
 }
@@ -40,7 +48,7 @@ func (r *Repository) GetById(id string) (*models.User, error) {
 	return &user, result.Error
 }
 
-func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manual bool, dndEndTime time.Time) (*models.Status, error) {
+func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manual bool, dndEndTime string) (*models.Status, error) {
 	slog.Info("CreateOrUpdateStatus", "user_id", userID, "newStatus", newStatus, "manual", manual, "dndEndTime", dndEndTime)
 
 	var oldStatus *models.Status
@@ -52,26 +60,31 @@ func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manua
 		return nil, err
 	}
 
-	var status *models.Status
+	var status models.Status
 
 	statusUpdate := &models.Status{
 		UserID:         userID,
 		Status:         newStatus,
 		Manual:         manual,
 		LastActivityAt: time.Now(),
-		DNDEndTime:     dndEndTime,
-		PrevStatus:     "",
 	}
 
 	if oldStatus.UserID == "" {
-		result := r.db.Model(status).Create(statusUpdate)
+		result := r.db.Model(&status).Clauses(clause.Returning{}).Create(statusUpdate)
 
-		return status, result.Error
+		slog.Info("Created status: ", "status", status)
+
+		return &status, result.Error
 	} else {
+		if manual {
+			statusUpdate.PrevStatus = oldStatus.Status
+		}
 		statusUpdate.PrevStatus = oldStatus.Status
 
-		result := r.db.Model(status).Where("user_id = ?", userID).Updates(statusUpdate)
+		result := r.db.Model(&status).Clauses(clause.Returning{}).Where("user_id = ?", userID).Updates(statusUpdate)
 
-		return status, result.Error
+		slog.Info("Updated status: ", "status", status)
+
+		return &status, result.Error
 	}
 }

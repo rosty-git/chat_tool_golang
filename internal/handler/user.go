@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/gin-gonic/gin"
@@ -128,9 +127,9 @@ func (uh *UserV1Handler) UpdateStatus(c *gin.Context) {
 	slog.Info("UserV1Handler UpdateStatus")
 
 	type StatusForm struct {
-		Status     string    `json:"status"`
-		Manual     bool      `json:"manual"`
-		DNDEndTime time.Time `json:"dnd_end_time"`
+		Status     string `json:"status"`
+		Manual     bool   `json:"manual"`
+		DNDEndTime string `json:"dnd_end_time"`
 	}
 
 	var sf StatusForm

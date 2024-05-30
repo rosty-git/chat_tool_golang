@@ -26,6 +26,9 @@ type NewPostPayload = {
   message: string;
 };
 
+const USER_UPDATE_ONLINE_STATUS_INTERVAL = 60_000;
+const USER_UPDATE_AWAY_STATUS_INTERVAL = 180_000;
+
 @Component({
   selector: 'app-messenger',
   standalone: true,
@@ -41,10 +44,18 @@ type NewPostPayload = {
 export class MessengerComponent implements OnInit, OnDestroy {
   readonly channelsStore = inject(ChannelsStore);
 
+  private awayTimeoutId: ReturnType<typeof setTimeout>;
+
+  private userOnlineStatusLastUpdate = new Date().getTime() - 100_000;
+
   constructor(
     private webSocketService: WebSocketService,
     private dataService: DataService,
-  ) {}
+  ) {
+    this.awayTimeoutId = setTimeout(() => {
+      this.dataService.setAwayStatus();
+    }, USER_UPDATE_AWAY_STATUS_INTERVAL);
+  }
 
   ngOnInit(): void {
     this.webSocketService.connect(`${GlobalVariable.BASE_WS_URL}/v1/ws/`);
@@ -83,6 +94,19 @@ export class MessengerComponent implements OnInit, OnDestroy {
   }
 
   mouseMove(): void {
-    this.dataService.updateOnlineStatus();
+    if (
+      new Date().getTime() - this.userOnlineStatusLastUpdate >
+      USER_UPDATE_ONLINE_STATUS_INTERVAL
+    ) {
+      this.dataService.updateOnlineStatus().finally(() => {
+        this.userOnlineStatusLastUpdate = new Date().getTime();
+
+        clearTimeout(this.awayTimeoutId);
+
+        this.awayTimeoutId = setTimeout(() => {
+          this.dataService.setAwayStatus();
+        }, USER_UPDATE_AWAY_STATUS_INTERVAL);
+      });
+    }
   }
 }

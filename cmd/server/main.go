@@ -44,9 +44,9 @@ import (
 func main() {
 	c := config.NewConfig()
 
-	logger.InitLogger(c.Env)
+	logger.InitLogger(c)
 
-	db, closer, err := database.New(c.MySql.ToDsnString(), c.Env)
+	db, closer, err := database.New(c)
 	if err != nil {
 		slog.Error("Failed to connect to database")
 	}

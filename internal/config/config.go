@@ -223,3 +223,7 @@ func (c *Config) GetAuthCookieSecure() bool {
 func (c *Config) GetAuthCookieHttpOnly() bool {
 	return c.AuthCookie.HttpOnly
 }
+
+func (c *Config) GetDsn() string {
+	return c.MySql.ToDsnString()
+}

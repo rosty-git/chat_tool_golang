@@ -8,9 +8,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func New(dsn string, env string) (*gorm.DB, func() error, error) {
+type Config interface {
+	GetEnv() string
+	GetDsn() string
+}
+
+func New(c Config) (*gorm.DB, func() error, error) {
 	var gormConfig *gorm.Config
-	if env == "dev" {
+	if c.GetEnv() == "dev" {
 		gormConfig = &gorm.Config{
 			//Logger: logger.New(
 			//	log.New(os.Stdout, "\r\n", log.LstdFlags), // You can customize the logger output
@@ -25,7 +30,7 @@ func New(dsn string, env string) (*gorm.DB, func() error, error) {
 		gormConfig = &gorm.Config{}
 	}
 
-	db, err := gorm.Open(mysql.Open(dsn), gormConfig)
+	db, err := gorm.Open(mysql.Open(c.GetDsn()), gormConfig)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -7,8 +7,12 @@ import (
 	"github.com/lmittmann/tint"
 )
 
-func InitLogger(env string) {
-	if env == "dev" {
+type Config interface {
+	GetEnv() string
+}
+
+func InitLogger(c Config) {
+	if c.GetEnv() == "dev" {
 		slog.SetDefault(slog.New(
 			tint.NewHandler(os.Stderr, &tint.Options{
 				Level:     slog.LevelDebug,
