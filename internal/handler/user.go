@@ -155,3 +155,29 @@ func (uh *UserV1Handler) UpdateStatus(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": status})
 }
+
+func (uh *UserV1Handler) GetChannelMembers(c *gin.Context) {
+	user, err := getUser(c)
+	if err != nil {
+		slog.Error("user not found")
+
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	channelUsers, err := uh.userUseCase.GetUsersByChannelId(c.Param("channelID"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get channels"})
+		return
+	}
+
+	var usersIDs []string
+
+	for _, channelUser := range channelUsers {
+		if channelUser.ID != user.ID {
+			usersIDs = append(usersIDs, channelUser.ID)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"members": usersIDs})
+}

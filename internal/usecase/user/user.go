@@ -16,6 +16,7 @@ type userService interface {
 
 type channelService interface {
 	GetByUserId(userID string, channelType models.ChannelType) ([]*models.Channel, error)
+	GetUsers(channelID string) ([]*models.User, error)
 }
 
 type UseCase struct {
@@ -63,6 +64,10 @@ func (uc *UseCase) GetChannelsByUserId(userID string, channelType models.Channel
 	}
 
 	return channels, err
+}
+
+func (uc *UseCase) GetUsersByChannelId(channelID string) ([]*models.User, error) {
+	return uc.channelService.GetUsers(channelID)
 }
 
 func (uc *UseCase) UpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error) {
