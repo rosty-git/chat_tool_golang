@@ -26,8 +26,8 @@ type NewPostPayload = {
   message: string;
 };
 
-const USER_UPDATE_ONLINE_STATUS_INTERVAL = 60_000;
-const USER_UPDATE_AWAY_STATUS_INTERVAL = 180_000;
+const USER_UPDATE_ONLINE_STATUS_INTERVAL = 90_000;
+const USER_UPDATE_AWAY_STATUS_INTERVAL = 300_000;
 
 @Component({
   selector: 'app-messenger',

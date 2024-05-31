@@ -85,15 +85,15 @@ func Initialize(db *gorm.DB) error {
 		if channelsCount == 0 {
 			channels := []*models.Channel{
 				{
-					Name: "channel1",
+					Name: "Channel 1",
 					Type: models.ChannelTypeOpen,
 				},
 				{
-					Name: "channel2",
+					Name: "Channel 2",
 					Type: models.ChannelTypeOpen,
 				},
 				{
-					Name: "channel3",
+					Name: "Channel 3",
 					Type: models.ChannelTypeOpen,
 				},
 			}

@@ -6,15 +6,22 @@
       } @else {
         <ng-icon name="heroChevronDownMini"></ng-icon>
       }
-      Contacts
+      DIRECT MESSAGES
     </div>
     <ul class="nested-list">
       @for (channel of channels; track channel.id) {
         <li
+          (mouseover)="mouseover(channel.id)"
+          (mouseout)="mouseout()"
           [style.display]="collapsed ? 'none' : 'block'"
           (click)="setActive(channel.id)"
-          [ngClass]="{ 'bg-sky-700': store.active() === channel.id && store.isDirectActive() }">
-          {{ channel.name }}
+          [ngClass]="{
+            'li-active': store.active() === channel.id && store.isDirectActive(),
+            'li-mouse-on': this.mouseOn === channel.id
+          }">
+          <div class="channel-item">
+            <div class="channel-name">{{ channel.name }}</div>
+          </div>
         </li>
       }
     </ul>

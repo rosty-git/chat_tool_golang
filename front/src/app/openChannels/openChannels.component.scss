@@ -4,8 +4,33 @@ ul {
 
 .channels-main {
     color: gainsboro;
-    font-size: 12px;
-    font-weight: 600;
     cursor: pointer;
     user-select: none;
+
+    font-family: "Open Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color:rgba(255, 255, 255, 0.64);
+}
+
+.globe-icon {
+  font-size: 18px;
+}
+
+.channel-item {
+  display: flex;
+  align-items: center;
+}
+
+.channel-name {
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.li-active {
+  background-color: rgba(255, 255, 255, 0.08)
+}
+
+.li-mouse-on {
+  background-color: rgb(27, 63, 145);
 }

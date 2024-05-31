@@ -5,6 +5,7 @@ import {
   heroChevronDownMini,
   heroChevronRightMini,
 } from '@ng-icons/heroicons/mini';
+import { heroGlobeAlt } from '@ng-icons/heroicons/outline';
 
 import { type Channel } from '../sidebar/sidebar.component';
 import { ChannelsStore } from '../store/channels.store';
@@ -15,7 +16,9 @@ import { ChannelsStore } from '../store/channels.store';
   imports: [NgIconComponent, NgClass],
   templateUrl: './openChannels.component.html',
   styleUrl: './openChannels.component.scss',
-  viewProviders: [provideIcons({ heroChevronRightMini, heroChevronDownMini })],
+  viewProviders: [
+    provideIcons({ heroChevronRightMini, heroChevronDownMini, heroGlobeAlt }),
+  ],
 })
 export class OpenChannelsComponent {
   readonly store = inject(ChannelsStore);
@@ -23,6 +26,8 @@ export class OpenChannelsComponent {
   collapsed = true;
 
   active = '';
+
+  mouseOn = '';
 
   @Input() channels: Channel[] = [];
 
@@ -35,5 +40,13 @@ export class OpenChannelsComponent {
 
     this.store.setIsChannelsActive();
     this.store.setActiveChannel(id);
+  }
+
+  mouseover(channelId: string) {
+    this.mouseOn = channelId;
+  }
+
+  mouseout() {
+    this.mouseOn = ''
   }
 }

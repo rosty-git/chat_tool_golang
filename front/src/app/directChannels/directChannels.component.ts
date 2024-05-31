@@ -26,6 +26,8 @@ export class DirectChannelsComponent {
 
   active = '';
 
+  mouseOn = '';
+
   onClick(): void {
     this.collapsed = !this.collapsed;
   }
@@ -35,5 +37,13 @@ export class DirectChannelsComponent {
 
     this.store.setIsContactsActive();
     this.store.setActiveChannel(id);
+  }
+
+  mouseover(channelId: string) {
+    this.mouseOn = channelId;
+  }
+
+  mouseout() {
+    this.mouseOn = '';
   }
 }
