@@ -20,6 +20,7 @@ type userUseCase interface {
 	Login(email, password string) (string, error)
 	GetChannelsByUserId(userId string, channelType models.ChannelType) ([]*models.Channel, error)
 	UpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
+	GetStatus(userID string) (*models.Status, error)
 	GetUsersByChannelId(channelID string) ([]*models.User, error)
 }
 

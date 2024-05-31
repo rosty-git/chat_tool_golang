@@ -51,7 +51,7 @@ func (r *Repository) GetById(id string) (*models.User, error) {
 func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manual bool, dndEndTime string) (*models.Status, error) {
 	slog.Info("CreateOrUpdateStatus", "user_id", userID, "newStatus", newStatus, "manual", manual, "dndEndTime", dndEndTime)
 
-	var oldStatus *models.Status
+	var oldStatus models.Status
 	err := r.db.Model(&models.Status{}).
 		Where("user_id = ?", userID).
 		Find(&oldStatus).
@@ -91,4 +91,17 @@ func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manua
 
 		return &status, result.Error
 	}
+}
+
+func (r *Repository) GetStatus(userID string) (*models.Status, error) {
+	var status models.Status
+	err := r.db.Model(&models.Status{}).
+		Where("user_id = ?", userID).
+		Find(&status).
+		Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &status, err
 }

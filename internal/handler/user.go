@@ -156,6 +156,19 @@ func (uh *UserV1Handler) UpdateStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": status})
 }
 
+func (uh *UserV1Handler) GetStatus(c *gin.Context) {
+	slog.Info("UserV1Handler GetStatus")
+
+	status, err := uh.userUseCase.GetStatus(c.Param("userID"))
+	if err != nil {
+		slog.Error("Get status", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": status})
+}
+
 func (uh *UserV1Handler) GetChannelMembers(c *gin.Context) {
 	user, err := getUser(c)
 	if err != nil {

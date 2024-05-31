@@ -73,3 +73,7 @@ func (uc *UseCase) GetUsersByChannelId(channelID string) ([]*models.User, error)
 func (uc *UseCase) UpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error) {
 	return uc.userService.UpdateStatus(userID, status, manual, dndEndTime)
 }
+
+func (uc *UseCase) GetStatus(userID string) (*models.Status, error) {
+	return uc.userService.GetStatus(userID)
+}
