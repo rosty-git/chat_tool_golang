@@ -70,6 +70,10 @@ func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manua
 	}
 
 	if oldStatus.UserID == "" {
+		if dndEndTime == "" {
+			statusUpdate.DNDEndTime = time.Now()
+		}
+
 		result := r.db.Model(&status).Clauses(clause.Returning{}).Create(statusUpdate)
 
 		slog.Info("Created status: ", "status", status)
