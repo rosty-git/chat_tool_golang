@@ -93,6 +93,8 @@ export class MessengerComponent implements OnInit, OnDestroy {
         }
       });
 
+    this.dataService.getUser();
+
     this.dataService.getOpenChannels();
     this.dataService.getDirectChannels();
   }

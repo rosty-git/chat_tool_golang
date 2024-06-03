@@ -82,7 +82,7 @@ func (uh *UserV1Handler) Registration(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
 
-func getUser(c *gin.Context) (*models.User, error) {
+func getUserFromRequest(c *gin.Context) (*models.User, error) {
 	authUser, ok := c.Get("user")
 	if !ok {
 		return nil, errors.New("user not found")
@@ -99,7 +99,7 @@ func getUser(c *gin.Context) (*models.User, error) {
 func (uh *UserV1Handler) GetChannels(c *gin.Context) {
 	slog.Info("UserV1Handler GetChannels")
 
-	user, err := getUser(c)
+	user, err := getUserFromRequest(c)
 	if err != nil {
 		slog.Error("user not found")
 
@@ -170,7 +170,7 @@ func (uh *UserV1Handler) GetStatus(c *gin.Context) {
 }
 
 func (uh *UserV1Handler) GetChannelMembers(c *gin.Context) {
-	user, err := getUser(c)
+	user, err := getUserFromRequest(c)
 	if err != nil {
 		slog.Error("user not found")
 
@@ -193,4 +193,16 @@ func (uh *UserV1Handler) GetChannelMembers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"members": usersIDs})
+}
+
+func (uh *UserV1Handler) GetUser(c *gin.Context) {
+	user, err := getUserFromRequest(c)
+	if err != nil {
+		slog.Error("user not found")
+
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": user})
 }

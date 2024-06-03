@@ -1,6 +1,8 @@
 <ul class="list-disc channels-main">
   <li class="nested-list-item">
-    <div (click)="onClick()">
+    <div
+      (click)="onClick()"
+      class="channels-title">
       @if (collapsed) {
         <ng-icon name="heroChevronRightMini"></ng-icon>
       } @else {

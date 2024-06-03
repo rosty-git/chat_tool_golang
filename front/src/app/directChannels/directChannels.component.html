@@ -1,6 +1,8 @@
 <ul class="list-disc contacts-main">
   <li class="nested-list-item">
-    <div (click)="onClick()">
+    <div
+      (click)="onClick()"
+      class="channels-title">
       @if (collapsed) {
         <ng-icon name="heroChevronRightMini"></ng-icon>
       } @else {
@@ -20,7 +22,12 @@
             'li-mouse-on': this.mouseOn === channel.id
           }">
           <div class="channel-item">
-            <div class="channel-name">{{ channel.name }}</div>
+            <app-user-avatar
+              class="pl-3 my-2"
+              size="small"
+              [userId]="channel.membersIds[0]"
+              [userName]="channel.name"></app-user-avatar>
+            <div class="pl-1 channel-name">{{ channel.name }}</div>
           </div>
         </li>
       }

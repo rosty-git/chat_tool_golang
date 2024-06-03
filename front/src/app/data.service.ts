@@ -2,6 +2,7 @@ import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
+import { GlobalVariable } from '../global';
 import { ApiService } from './api.service';
 
 export type PostItem = {
@@ -26,6 +27,7 @@ export type ChannelsState = {
 export type Channel = {
   id: string;
   name: string;
+  membersIds: string[];
 };
 
 export type ChannelsResp = {
@@ -56,7 +58,10 @@ const getFirstAndLastCreatedAt = (
 export class DataService {
   constructor(private api: ApiService) {
     this.channelsActive$.subscribe((value) => {
-      this.getPosts({ channelId: value.active, limit: 20 });
+      this.getPosts({
+        channelId: value.active,
+        limit: GlobalVariable.POSTS_PAGE_SIZE,
+      });
     });
   }
 
@@ -101,6 +106,14 @@ export class DataService {
   private directChannels = new BehaviorSubject<Channel[]>([]);
 
   directChannels$ = this.directChannels.asObservable();
+
+  private userId = new BehaviorSubject<string>('');
+
+  userId$ = this.userId.asObservable();
+
+  private userName = new BehaviorSubject<string>('');
+
+  userName$ = this.userName.asObservable();
 
   private setPosts(newPosts: PostItem[]) {
     this.posts.next(newPosts);
@@ -157,22 +170,6 @@ export class DataService {
     this.setPosts(posts);
 
     this.postsLoading.next(false);
-
-    // const { members } = (await this.api.get(
-    //   `/v1/api/channels/${options.channelId}/members`,
-    // )) as { members: string[] };
-
-    // console.log({ members });
-
-    // eslint-disable-next-line no-restricted-syntax
-    // for (const member of members) {
-    //   console.log(member);
-
-    //   // eslint-disable-next-line no-await-in-loop
-    //   const status = await this.api.get(`/v1/api/statuses/${member}`);
-
-    //   console.log({ status });
-    // }
   }
 
   getPostsAfter(options: { channelId: string; limit: number }) {
@@ -321,27 +318,23 @@ export class DataService {
     this.channelsActive.next(newState);
   }
 
-  async getStatuses(channels: Channel[]) {
-    console.log(channels);
-
+  async getStatusesForChannelMembers(channels: Channel[]) {
     // eslint-disable-next-line no-restricted-syntax
     for (const channel of channels) {
-      // eslint-disable-next-line no-await-in-loop
-      const { members } = (await this.api.get(
-        `/v1/api/channels/${channel.id}/members`,
-      )) as { members: string[] };
-      console.log({ members });
-
-      // eslint-disable-next-line no-restricted-syntax
-      for (const member of members) {
-        console.log(member);
+      // eslint-disable-next-line no-await-in-loop, no-restricted-syntax
+      for (const userId of channel.membersIds) {
         // eslint-disable-next-line no-await-in-loop
-        const { status } = (await this.api.get(
-          `/v1/api/statuses/${member}`,
-        )) as { status: { user_id: string; status: string } };
-        console.log({ status });
+        await this.getAndSetStatus(userId);
       }
     }
+  }
+
+  async getAndSetStatus(userId: string) {
+    const { status } = (await this.api.get(`/v1/api/statuses/${userId}`)) as {
+      status: { user_id: string; status: string };
+    };
+
+    this.setStatus(status.user_id, status.status);
   }
 
   async getOpenChannels() {
@@ -351,9 +344,19 @@ export class DataService {
 
     const openChannels = (resp as ChannelsResp).channels;
 
+    // eslint-disable-next-line no-restricted-syntax
+    for (const channel of openChannels) {
+      // eslint-disable-next-line no-await-in-loop
+      const { members } = (await this.api.get(
+        `/v1/api/channels/${channel.id}/members`,
+      )) as { members: string[] };
+
+      channel.membersIds = members;
+    }
+
     this.openChannels.next(openChannels);
 
-    this.getStatuses(openChannels);
+    this.getStatusesForChannelMembers(openChannels);
   }
 
   async getDirectChannels() {
@@ -363,8 +366,33 @@ export class DataService {
 
     const directChannels = (resp as ChannelsResp).channels;
 
+    // eslint-disable-next-line no-restricted-syntax
+    for (const channel of directChannels) {
+      // eslint-disable-next-line no-await-in-loop
+      const { members } = (await this.api.get(
+        `/v1/api/channels/${channel.id}/members`,
+      )) as { members: string[] };
+
+      channel.membersIds = members;
+    }
+
     this.directChannels.next(directChannels);
 
-    this.getStatuses(directChannels);
+    this.getStatusesForChannelMembers(directChannels);
+  }
+
+  getUser() {
+    this.api
+      .get('/v1/api/users/iam')
+      .then((resp) => {
+        const { user } = resp as { user: { id: string; name: string } };
+
+        this.userId.next(user.id);
+
+        this.userName.next(user.name);
+
+        this.getAndSetStatus(user.id);
+      })
+      .catch((err) => console.error(err));
   }
 }

@@ -51,6 +51,7 @@ func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *h
 		apiV1.POST("/posts", postV1Handler.AddPost)
 		apiV1.PUT("/statuses", userV1Handler.UpdateStatus)
 		apiV1.GET("/statuses/:userID", userV1Handler.GetStatus)
+		apiV1.GET("/users/iam", userV1Handler.GetUser)
 	}
 	rootV1.GET("/ws/", m.RequireAuth(), wsV1Handler.NewWsConnection)
 

@@ -7,11 +7,12 @@ import {
 } from '@ng-icons/heroicons/mini';
 
 import { Channel, ChannelsState, DataService } from '../data.service';
+import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-direct-channels',
   standalone: true,
-  imports: [NgIconComponent, NgClass],
+  imports: [NgIconComponent, NgClass, UserAvatarComponent],
   templateUrl: './directChannels.component.html',
   styleUrl: './directChannels.component.scss',
   viewProviders: [provideIcons({ heroChevronRightMini, heroChevronDownMini })],

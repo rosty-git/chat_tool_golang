@@ -14,6 +14,12 @@ ul {
     color:rgba(255, 255, 255, 0.64);
 }
 
+.channels-title {
+  height: 34px;
+  display: flex;
+  align-items: center;
+}
+
 .channel-name {
   font-weight: 400;
   font-size: 14px;
@@ -25,4 +31,9 @@ ul {
 
 .li-mouse-on {
   background-color: rgb(27, 63, 145);
+}
+
+.channel-item {
+  display: flex;
+  align-items: center;
 }

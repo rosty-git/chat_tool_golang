@@ -1,8 +1,69 @@
 <div class="header-container h-full flex">
-  <ng-icon
-    class="grid-icon px-4"
-    name="cssMenuGridR"></ng-icon>
-  <img
-    class="logo px-5"
-    src="assets/kokotree.svg" />
+  <div class="flex">
+    <ng-icon
+      class="grid-icon px-4"
+      name="cssMenuGridR"></ng-icon>
+    <img
+      class="logo px-5"
+      src="assets/kokotree.svg" />
+  </div>
+  <div class="w-full flex right mx-5">
+    <button>
+      <app-user-avatar
+        [userId]="userId"
+        [userName]="userName"
+        size="middle"
+        (click)="toggleDropdown()"></app-user-avatar>
+    </button>
+    <div class="dropdown">
+      <div
+        class="dropdown-menu"
+        [ngClass]="{ 'dropdown-show': isOpen }">
+        <div class="dropdown-item">
+          <div class="m-2">
+            <app-user-status
+              status="online"
+              color="white" />
+          </div>
+          <div>Online</div>
+          @if (status === "online") {
+            <div><span class="material-symbols-outlined"> check </span></div>
+          }
+        </div>
+        <div class="dropdown-item">
+          <div class="m-2">
+            <app-user-status
+              status="away"
+              color="white" />
+          </div>
+          <div>Away</div>
+          @if (status === "away") {
+            <div><span class="material-symbols-outlined"> check </span></div>
+          }
+        </div>
+        <div class="dropdown-item">
+          <div class="m-2">
+            <app-user-status
+              status="dnd"
+              color="white" />
+          </div>
+          <div>Do not disturb</div>
+          @if (status === "dnd") {
+            <div><span class="material-symbols-outlined"> check </span></div>
+          }
+        </div>
+        <div class="dropdown-item">
+          <div class="m-2">
+            <app-user-status
+              status="offline"
+              color="white" />
+          </div>
+          <div>Offline</div>
+          @if (status === "offline") {
+            <div><span class="material-symbols-outlined"> check </span></div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
