@@ -1,6 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/internal/Observable';
 
 import { GlobalVariable } from '../global';
 
@@ -10,22 +9,61 @@ import { GlobalVariable } from '../global';
 export class ApiService {
   constructor(private http: HttpClient) {}
 
-  post(path: string, data: unknown): Observable<unknown> {
-    return this.http.post(`${GlobalVariable.BASE_API_URL}${path}`, data, {
-      withCredentials: true,
+  post(path: string, data: unknown): Promise<unknown> {
+    return new Promise((resole, reject) => {
+      this.http
+        .post(`${GlobalVariable.BASE_API_URL}${path}`, data, {
+          withCredentials: true,
+        })
+        .subscribe({
+          next: (response) => {
+            resole(response);
+          },
+          error: (err: unknown) => {
+            console.error('error', err);
+
+            reject(err);
+          },
+        });
     });
   }
 
-  put(path: string, data: unknown): Observable<unknown> {
-    return this.http.put(`${GlobalVariable.BASE_API_URL}${path}`, data, {
-      withCredentials: true,
+  put(path: string, data: unknown): Promise<unknown> {
+    return new Promise((resole, reject) => {
+      this.http
+        .put(`${GlobalVariable.BASE_API_URL}${path}`, data, {
+          withCredentials: true,
+        })
+        .subscribe({
+          next: (response) => {
+            resole(response);
+          },
+          error: (err: unknown) => {
+            console.error('error', err);
+
+            reject(err);
+          },
+        });
     });
   }
 
-  get(path: string, params?: HttpParams): Observable<unknown> {
-    return this.http.get(`${GlobalVariable.BASE_API_URL}${path}`, {
-      withCredentials: true,
-      params,
+  get(path: string, params?: HttpParams): Promise<unknown> {
+    return new Promise((resole, reject) => {
+      this.http
+        .get(`${GlobalVariable.BASE_API_URL}${path}`, {
+          withCredentials: true,
+          params,
+        })
+        .subscribe({
+          next: (response) => {
+            resole(response);
+          },
+          error: (err: unknown) => {
+            console.error('error', err);
+
+            reject(err);
+          },
+        });
     });
   }
 }

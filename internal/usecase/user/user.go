@@ -12,6 +12,7 @@ type userService interface {
 	Login(email, password string) (string, error)
 	GetById(userID string) (*models.User, error)
 	UpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
+	GetStatus(userID string) (*models.Status, error)
 }
 
 type channelService interface {

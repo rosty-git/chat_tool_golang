@@ -1,13 +1,12 @@
 import { NgClass } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroChevronDownMini,
   heroChevronRightMini,
 } from '@ng-icons/heroicons/mini';
 
-import { type Channel } from '../sidebar/sidebar.component';
-import { ChannelsStore } from '../store/channels.store';
+import { Channel, ChannelsState, DataService } from '../data.service';
 
 @Component({
   selector: 'app-direct-channels',
@@ -18,15 +17,29 @@ import { ChannelsStore } from '../store/channels.store';
   viewProviders: [provideIcons({ heroChevronRightMini, heroChevronDownMini })],
 })
 export class DirectChannelsComponent {
-  readonly store = inject(ChannelsStore);
-
-  @Input() channels: Channel[] = [];
+  channels$: Channel[] = [];
 
   collapsed = true;
 
   active = '';
 
   mouseOn = '';
+
+  channelsState$: ChannelsState = {
+    isOpenActive: false,
+    isDirectActive: false,
+    active: '',
+  };
+
+  constructor(private dataService: DataService) {
+    this.dataService.directChannels$.subscribe((value) => {
+      this.channels$ = value;
+    });
+
+    this.dataService.channelsActive$.subscribe((value) => {
+      this.channelsState$ = value;
+    });
+  }
 
   onClick(): void {
     this.collapsed = !this.collapsed;
@@ -35,8 +48,7 @@ export class DirectChannelsComponent {
   setActive(id: string) {
     this.active = id;
 
-    this.store.setIsContactsActive();
-    this.store.setActiveChannel(id);
+    this.dataService.setDirectActive(id);
   }
 
   mouseover(channelId: string) {

@@ -1,18 +1,9 @@
-import {
-  AfterViewInit,
-  Component,
-  effect,
-  ElementRef,
-  inject,
-  ViewChild,
-} from '@angular/core';
-import { getState } from '@ngrx/signals';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 import { GlobalVariable } from '../../global';
 import { DataService, type PostItem } from '../data.service';
 import { MessageItemComponent } from '../message-item/message-item.component';
-import { ChannelsStore } from '../store/channels.store';
 
 @Component({
   selector: 'app-message-box',
@@ -28,13 +19,9 @@ export class MessageBoxComponent implements AfterViewInit {
 
   private isNearBottom = true;
 
-  readonly channelsStore = inject(ChannelsStore);
-
-  posts$ = this.dataService.posts$;
-
   postsLoading$ = false;
 
-  postItems: PostItem[] = [];
+  posts: PostItem[] = [];
 
   throttle = 50;
 
@@ -44,31 +31,28 @@ export class MessageBoxComponent implements AfterViewInit {
 
   firstTime = true;
 
+  activeChannel$: string = '';
+
   constructor(private dataService: DataService) {
     this.scrollFrame = new ElementRef('');
     this.scrollContainer = this.scrollFrame as unknown as HTMLElement;
 
-    effect(() => {
-      const channelsState = getState(this.channelsStore);
-
-      this.dataService.getPosts({
-        channelId: channelsState.active,
-        limit: GlobalVariable.POSTS_PAGE_SIZE,
-      });
-
-      this.posts$.subscribe((posts) => {
-        this.postItems = posts;
-      });
+    this.dataService.posts$.subscribe((value) => {
+      this.posts = value;
     });
 
     this.dataService.postsLoading$.subscribe((value) => {
       this.postsLoading$ = value;
     });
+
+    this.dataService.channelsActive$.subscribe((value) => {
+      this.activeChannel$ = value.active;
+    });
   }
 
   ngAfterViewInit() {
     this.scrollContainer = this.scrollFrame.nativeElement;
-    this.posts$.subscribe(() => this.onItemElementsChanged());
+    this.dataService.posts$.subscribe(() => this.onItemElementsChanged());
   }
 
   private onItemElementsChanged() {
@@ -102,10 +86,8 @@ export class MessageBoxComponent implements AfterViewInit {
   }
 
   onUp() {
-    const channelsState = getState(this.channelsStore);
-
     this.dataService.getPostsBefore({
-      channelId: channelsState.active,
+      channelId: this.activeChannel$,
       limit: GlobalVariable.POSTS_PAGE_SIZE,
     });
   }

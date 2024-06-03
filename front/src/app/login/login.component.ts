@@ -28,16 +28,9 @@ export class LoginComponent {
         email: this.loginForm.value.login,
         password: this.loginForm.value.password,
       })
-      .subscribe({
-        next: (response: unknown) => {
-          console.log('auth ok', response);
-          this.loginForm.reset();
-          this.router.navigate(['messenger']);
-        },
-
-        error: (err) => {
-          console.error('auth error', err);
-        },
+      .then(() => {
+        this.loginForm.reset();
+        this.router.navigate(['messenger']);
       });
   }
 }

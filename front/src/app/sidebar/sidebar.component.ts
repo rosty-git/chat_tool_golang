@@ -1,18 +1,16 @@
-import { HttpParams } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
-import { ApiService } from '../api.service';
 import { DirectChannelsComponent } from '../directChannels/directChannels.component';
 import { OpenChannelsComponent } from '../openChannels/openChannels.component';
 
-export type Channel = {
-  id: string;
-  name: string;
-};
+// export type Channel = {
+//   id: string;
+//   name: string;
+// };
 
-export type ChannelsResp = {
-  channels: Channel[];
-};
+// export type ChannelsResp = {
+//   channels: Channel[];
+// };
 
 @Component({
   selector: 'app-sidebar',
@@ -21,40 +19,40 @@ export type ChannelsResp = {
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
 })
-export class SidebarComponent implements OnInit {
-  constructor(private api: ApiService) {}
+export class SidebarComponent {
+  // constructor(private api: ApiService) {}
 
-  directChannels: Channel[] = [];
+  // directChannels: Channel[] = [];
 
-  openChannels: Channel[] = [];
+  // openChannels: Channel[] = [];
 
-  ngOnInit(): void {
-    const directParams = new HttpParams().append('channelType', 'D');
+  // ngOnInit(): void {
+  //   const directParams = new HttpParams().append('channelType', 'D');
 
-    this.api.get('/v1/api/channels', directParams).subscribe({
-      next: (response) => {
-        console.log('Get Channels', response);
+  //   this.api.get('/v1/api/channels', directParams).subscribe({
+  //     next: (response) => {
+  //       console.log('Get Channels', response);
 
-        this.directChannels = (response as ChannelsResp).channels;
-      },
+  //       this.directChannels = (response as ChannelsResp).channels;
+  //     },
 
-      error: (err: unknown) => {
-        console.error('error', err);
-      },
-    });
+  //     error: (err: unknown) => {
+  //       console.error('error', err);
+  //     },
+  //   });
 
-    const openParams = new HttpParams().append('channelType', 'O');
+  //   const openParams = new HttpParams().append('channelType', 'O');
 
-    this.api.get('/v1/api/channels', openParams).subscribe({
-      next: (response) => {
-        console.log('Get Contacts', response);
+  //   this.api.get('/v1/api/channels', openParams).subscribe({
+  //     next: (response) => {
+  //       console.log('Get Contacts', response);
 
-        this.openChannels = (response as ChannelsResp).channels;
-      },
+  //       this.openChannels = (response as ChannelsResp).channels;
+  //     },
 
-      error: (err) => {
-        console.error('error', err);
-      },
-    });
-  }
+  //     error: (err) => {
+  //       console.error('error', err);
+  //     },
+  //   });
+  // }
 }

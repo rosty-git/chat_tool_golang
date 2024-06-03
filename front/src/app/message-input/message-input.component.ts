@@ -1,9 +1,8 @@
 import { NgClass } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
-import { DataService } from '../data.service';
-import { ChannelsStore } from '../store/channels.store';
+import { ChannelsState, DataService } from '../data.service';
 
 @Component({
   selector: 'app-message-input',
@@ -13,11 +12,17 @@ import { ChannelsStore } from '../store/channels.store';
   styleUrl: './message-input.component.scss',
 })
 export class MessageInputComponent {
-  readonly store = inject(ChannelsStore);
+  channelsState$: ChannelsState = {
+    isOpenActive: false,
+    isDirectActive: false,
+    active: '',
+  };
 
-  constructor(
-    private dataService: DataService,
-  ) {}
+  constructor(private dataService: DataService) {
+    this.dataService.channelsActive$.subscribe((value) => {
+      this.channelsState$ = value;
+    });
+  }
 
   messageForm = new FormGroup({
     message: new FormControl(''),
@@ -27,7 +32,7 @@ export class MessageInputComponent {
     if (this.messageForm.value.message) {
       this.dataService.sendPost({
         message: this.messageForm.value.message,
-        channelId: this.store.active(),
+        channelId: this.channelsState$.active,
       });
 
       this.messageForm.reset();

@@ -9,14 +9,14 @@
       DIRECT MESSAGES
     </div>
     <ul class="nested-list">
-      @for (channel of channels; track channel.id) {
+      @for (channel of channels$; track channel.id) {
         <li
           (mouseover)="mouseover(channel.id)"
           (mouseout)="mouseout()"
           [style.display]="collapsed ? 'none' : 'block'"
           (click)="setActive(channel.id)"
           [ngClass]="{
-            'li-active': store.active() === channel.id && store.isDirectActive(),
+            'li-active': channelsState$.active === channel.id && channelsState$.isDirectActive,
             'li-mouse-on': this.mouseOn === channel.id
           }">
           <div class="channel-item">

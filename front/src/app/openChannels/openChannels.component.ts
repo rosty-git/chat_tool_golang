@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroChevronDownMini,
@@ -7,8 +7,7 @@ import {
 } from '@ng-icons/heroicons/mini';
 import { heroGlobeAlt } from '@ng-icons/heroicons/outline';
 
-import { type Channel } from '../sidebar/sidebar.component';
-import { ChannelsStore } from '../store/channels.store';
+import { Channel, ChannelsState, DataService } from '../data.service';
 
 @Component({
   selector: 'app-open-channels',
@@ -21,15 +20,29 @@ import { ChannelsStore } from '../store/channels.store';
   ],
 })
 export class OpenChannelsComponent {
-  readonly store = inject(ChannelsStore);
-
   collapsed = true;
 
   active = '';
 
   mouseOn = '';
 
-  @Input() channels: Channel[] = [];
+  channels$: Channel[] = [];
+
+  channelsState$: ChannelsState = {
+    isOpenActive: false,
+    isDirectActive: false,
+    active: '',
+  };
+
+  constructor(private dataService: DataService) {
+    this.dataService.openChannels$.subscribe((value) => {
+      this.channels$ = value;
+    });
+
+    this.dataService.channelsActive$.subscribe((value) => {
+      this.channelsState$ = value;
+    });
+  }
 
   onClick(): void {
     this.collapsed = !this.collapsed;
@@ -38,8 +51,7 @@ export class OpenChannelsComponent {
   setActive(id: string) {
     this.active = id;
 
-    this.store.setIsChannelsActive();
-    this.store.setActiveChannel(id);
+    this.dataService.setOpenActive(id);
   }
 
   mouseover(channelId: string) {
@@ -47,6 +59,6 @@ export class OpenChannelsComponent {
   }
 
   mouseout() {
-    this.mouseOn = ''
+    this.mouseOn = '';
   }
 }

@@ -1,8 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 
+import { ChannelsState, DataService } from '../data.service';
 import { MessageBoxComponent } from '../message-box/message-box.component';
 import { MessageInputComponent } from '../message-input/message-input.component';
-import { ChannelsStore } from '../store/channels.store';
 
 @Component({
   selector: 'app-message-list',
@@ -12,5 +12,15 @@ import { ChannelsStore } from '../store/channels.store';
   imports: [MessageBoxComponent, MessageInputComponent],
 })
 export class MessageListComponent {
-  readonly store = inject(ChannelsStore);
+  channelsState$: ChannelsState = {
+    isOpenActive: false,
+    isDirectActive: false,
+    active: '',
+  };
+
+  constructor(private dataService: DataService) {
+    this.dataService.channelsActive$.subscribe((value) => {
+      this.channelsState$ = value;
+    });
+  }
 }

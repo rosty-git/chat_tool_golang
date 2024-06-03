@@ -1,13 +1,12 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { retry } from 'rxjs';
 
 import { GlobalVariable } from '../../global';
-import { DataService } from '../data.service';
+import { ChannelsState, DataService } from '../data.service';
 import { HeaderComponent } from '../header/header.component';
 import { LoginComponent } from '../login/login.component';
 import { MessageListComponent } from '../message-list/message-list.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
-import { ChannelsStore } from '../store/channels.store';
 import { WebSocketService } from '../web-socket.service';
 
 type WebSocketMsg = {
@@ -42,19 +41,27 @@ const USER_UPDATE_AWAY_STATUS_INTERVAL = 300_000;
   styleUrl: './messenger.component.scss',
 })
 export class MessengerComponent implements OnInit, OnDestroy {
-  readonly channelsStore = inject(ChannelsStore);
-
   private awayTimeoutId: ReturnType<typeof setTimeout>;
 
   private userOnlineStatusLastUpdate = new Date().getTime() - 100_000;
+
+  channelsState$: ChannelsState = {
+    isOpenActive: false,
+    isDirectActive: false,
+    active: '',
+  };
 
   constructor(
     private webSocketService: WebSocketService,
     private dataService: DataService,
   ) {
-    this.awayTimeoutId = setTimeout(() => {
+    this.awayTimeoutId = setInterval(() => {
       this.dataService.setAwayStatus();
     }, USER_UPDATE_AWAY_STATUS_INTERVAL);
+
+    this.dataService.channelsActive$.subscribe((value) => {
+      this.channelsState$ = value;
+    });
   }
 
   ngOnInit(): void {
@@ -66,14 +73,12 @@ export class MessengerComponent implements OnInit, OnDestroy {
       .subscribe(async (msg) => {
         console.log(msg);
 
-        console.log(this.channelsStore.active());
-
         const webSocketMsg = msg as WebSocketMsg;
 
         if (webSocketMsg.Action === 'new-post') {
           const audio = new Audio('assets/new-message-notification.wav');
 
-          if (this.channelsStore.active() === webSocketMsg.Payload.channel_id) {
+          if (this.channelsState$.active === webSocketMsg.Payload.channel_id) {
             this.dataService
               .getPostsAfter({
                 channelId: webSocketMsg.Payload.channel_id,
@@ -87,6 +92,9 @@ export class MessengerComponent implements OnInit, OnDestroy {
           }
         }
       });
+
+    this.dataService.getOpenChannels();
+    this.dataService.getDirectChannels();
   }
 
   ngOnDestroy(): void {
@@ -98,12 +106,11 @@ export class MessengerComponent implements OnInit, OnDestroy {
       new Date().getTime() - this.userOnlineStatusLastUpdate >
       USER_UPDATE_ONLINE_STATUS_INTERVAL
     ) {
+      this.userOnlineStatusLastUpdate = new Date().getTime();
       this.dataService.updateOnlineStatus().finally(() => {
-        this.userOnlineStatusLastUpdate = new Date().getTime();
-
         clearTimeout(this.awayTimeoutId);
 
-        this.awayTimeoutId = setTimeout(() => {
+        this.awayTimeoutId = setInterval(() => {
           this.dataService.setAwayStatus();
         }, USER_UPDATE_AWAY_STATUS_INTERVAL);
       });

@@ -17,6 +17,21 @@ export type GetPostsResp = {
   posts: PostItem[];
 };
 
+export type ChannelsState = {
+  isOpenActive: boolean;
+  isDirectActive: boolean;
+  active: string;
+};
+
+export type Channel = {
+  id: string;
+  name: string;
+};
+
+export type ChannelsResp = {
+  channels: Channel[];
+};
+
 const getFirstAndLastCreatedAt = (
   posts: PostItem[],
 ): { last: string; first: string } => {
@@ -39,7 +54,11 @@ const getFirstAndLastCreatedAt = (
   providedIn: 'root',
 })
 export class DataService {
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) {
+    this.channelsActive$.subscribe((value) => {
+      this.getPosts({ channelId: value.active, limit: 20 });
+    });
+  }
 
   private posts = new BehaviorSubject<PostItem[]>([]);
 
@@ -62,6 +81,26 @@ export class DataService {
   private postsLoading = new BehaviorSubject<boolean>(false);
 
   postsLoading$ = this.postsLoading.asObservable();
+
+  private statuses = new BehaviorSubject<Record<string, string>>({});
+
+  statuses$ = this.statuses.asObservable();
+
+  private channelsActive = new BehaviorSubject<ChannelsState>({
+    isOpenActive: false,
+    isDirectActive: false,
+    active: '',
+  });
+
+  channelsActive$ = this.channelsActive.asObservable();
+
+  private openChannels = new BehaviorSubject<Channel[]>([]);
+
+  openChannels$ = this.openChannels.asObservable();
+
+  private directChannels = new BehaviorSubject<Channel[]>([]);
+
+  directChannels$ = this.directChannels.asObservable();
 
   private setPosts(newPosts: PostItem[]) {
     this.posts.next(newPosts);
@@ -100,28 +139,40 @@ export class DataService {
     this.firstCreatedAt.next(first);
   }
 
-  getPosts(options: { channelId: string; limit: number }) {
+  async getPosts(options: { channelId: string; limit: number }) {
     this.postsLoading.next(true);
 
     const params = new HttpParams().append('limit', options.limit);
 
-    this.api.get(`/v1/api/posts/${options.channelId}`, params).subscribe({
-      next: (response) => {
-        const posts = (response as GetPostsResp).posts.sort(
-          (a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-        );
+    const resp = await this.api.get(
+      `/v1/api/posts/${options.channelId}`,
+      params,
+    );
 
-        this.setPosts(posts);
+    const posts = (resp as GetPostsResp).posts.sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
 
-        this.postsLoading.next(false);
-      },
-      error: (err: unknown) => {
-        console.error('error', err);
+    this.setPosts(posts);
 
-        this.postsLoading.next(false);
-      },
-    });
+    this.postsLoading.next(false);
+
+    // const { members } = (await this.api.get(
+    //   `/v1/api/channels/${options.channelId}/members`,
+    // )) as { members: string[] };
+
+    // console.log({ members });
+
+    // eslint-disable-next-line no-restricted-syntax
+    // for (const member of members) {
+    //   console.log(member);
+
+    //   // eslint-disable-next-line no-await-in-loop
+    //   const status = await this.api.get(`/v1/api/statuses/${member}`);
+
+    //   console.log({ status });
+    // }
   }
 
   getPostsAfter(options: { channelId: string; limit: number }) {
@@ -138,24 +189,21 @@ export class DataService {
         params = new HttpParams().append('limit', options.limit);
       }
 
-      this.api.get(`/v1/api/posts/${options.channelId}`, params).subscribe({
-        next: (response) => {
-          const posts = (response as GetPostsResp).posts.sort(
+      this.api
+        .get(`/v1/api/posts/${options.channelId}`, params)
+        .then((resp) => {
+          const posts = (resp as GetPostsResp).posts.sort(
             (a, b) =>
               new Date(a.created_at).getTime() -
               new Date(b.created_at).getTime(),
           );
-
           this.addPostsAfter(posts);
-
           resolve(posts);
-        },
-        error: (err: unknown) => {
+        })
+        .catch((err) => {
           console.error('error', err);
-
           reject(err);
-        },
-      });
+        });
     });
   }
 
@@ -173,24 +221,21 @@ export class DataService {
         params = new HttpParams().append('limit', options.limit);
       }
 
-      this.api.get(`/v1/api/posts/${options.channelId}`, params).subscribe({
-        next: (response) => {
-          const posts = (response as GetPostsResp).posts.sort(
+      this.api
+        .get(`/v1/api/posts/${options.channelId}`, params)
+        .then((resp) => {
+          const posts = (resp as GetPostsResp).posts.sort(
             (a, b) =>
               new Date(a.created_at).getTime() -
               new Date(b.created_at).getTime(),
           );
-
           this.addPostsBefore(posts);
-
           resolve(posts);
-        },
-        error: (err: unknown) => {
-          console.error('error', err);
-
+        })
+        .catch((err) => {
+          console.error(err);
           reject(err);
-        },
-      });
+        });
     });
   }
 
@@ -200,15 +245,13 @@ export class DataService {
         message: options.message,
         channelId: options.channelId,
       })
-      .subscribe({
-        next: (response: unknown) => {
-          console.log('post created', response);
+      .then((resp) => {
+        console.log('post created', resp);
 
-          this.addPostAfter((response as { post: PostItem }).post);
-        },
-        error: (err) => {
-          console.error('auth error', err);
-        },
+        this.addPostAfter((resp as { post: PostItem }).post);
+      })
+      .catch((err) => {
+        console.error(err);
       });
   }
 
@@ -227,21 +270,16 @@ export class DataService {
         payload.dnd_end_time = options.dndEndTime;
       }
 
-      this.api.put('/v1/api/statuses', payload).subscribe({
-        next: (response: unknown) => {
-          console.log('status updated', response);
-
+      this.api
+        .put('/v1/api/statuses', payload)
+        .then((resp) => {
+          console.log('status updated', resp);
           this.userStatus.next(options.status);
-
-          resolve(response);
-        },
-
-        error: (err) => {
-          console.error('status updated error', err);
-
+          resolve(resp);
+        })
+        .catch((err) => {
           reject(err);
-        },
-      });
+        });
     });
   }
 
@@ -257,5 +295,76 @@ export class DataService {
       status: 'away',
       manual: false,
     });
+  }
+
+  setStatus(userId: string, status: string) {
+    const currentStatuses = this.statuses.value;
+    currentStatuses[userId] = status;
+    this.statuses.next(currentStatuses);
+  }
+
+  setOpenActive(channelId: string): void {
+    const newState = {
+      active: channelId,
+      isOpenActive: true,
+      isDirectActive: false,
+    };
+    this.channelsActive.next(newState);
+  }
+
+  setDirectActive(channelId: string): void {
+    const newState = {
+      active: channelId,
+      isDirectActive: true,
+      isOpenActive: false,
+    };
+    this.channelsActive.next(newState);
+  }
+
+  async getStatuses(channels: Channel[]) {
+    console.log(channels);
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const channel of channels) {
+      // eslint-disable-next-line no-await-in-loop
+      const { members } = (await this.api.get(
+        `/v1/api/channels/${channel.id}/members`,
+      )) as { members: string[] };
+      console.log({ members });
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const member of members) {
+        console.log(member);
+        // eslint-disable-next-line no-await-in-loop
+        const { status } = (await this.api.get(
+          `/v1/api/statuses/${member}`,
+        )) as { status: { user_id: string; status: string } };
+        console.log({ status });
+      }
+    }
+  }
+
+  async getOpenChannels() {
+    const openParams = new HttpParams().append('channelType', 'O');
+
+    const resp = await this.api.get('/v1/api/channels', openParams);
+
+    const openChannels = (resp as ChannelsResp).channels;
+
+    this.openChannels.next(openChannels);
+
+    this.getStatuses(openChannels);
+  }
+
+  async getDirectChannels() {
+    const openParams = new HttpParams().append('channelType', 'D');
+
+    const resp = await this.api.get('/v1/api/channels', openParams);
+
+    const directChannels = (resp as ChannelsResp).channels;
+
+    this.directChannels.next(directChannels);
+
+    this.getStatuses(directChannels);
   }
 }
