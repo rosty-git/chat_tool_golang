@@ -1,0 +1,23 @@
+@if (status === "online") {
+  <div
+    class="user-status user-status-online"
+    [ngStyle]="{ color: color }">
+    <span class="icon material-symbols-outlined"> check_circle </span>
+  </div>
+} @else if (status === "away") {
+  <div
+    class="user-status user-status-away"
+    [ngStyle]="{ color: color }">
+    <span class="icon material-symbols-outlined"> schedule </span>
+  </div>
+} @else if (status === "dnd") {
+  <div
+    class="user-status user-status-dnd"
+    [ngStyle]="{ color: color }">
+    <span class="material-symbols-outlined"> do_not_disturb_on </span>
+  </div>
+} @else {
+  <div
+    class="user-status user-status-offline"
+    [ngStyle]="{ color: color }"></div>
+}

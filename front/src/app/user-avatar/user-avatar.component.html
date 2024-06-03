@@ -1,0 +1,11 @@
+<div class="avatar-container">
+  <div
+    [ngClass]="size"
+    class="avatar"
+    [style.background-color]="userColor">
+    {{ userName.charAt(0) }}
+  </div>
+  <div class="status">
+    <app-user-status [status]="status$"></app-user-status>
+  </div>
+</div>
