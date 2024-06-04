@@ -268,10 +268,13 @@ export class DataService {
       }
 
       this.api
-        .put('/v1/api/statuses', payload)
+        .put<{ status: { status: string } }>('/v1/api/statuses', payload)
         .then((resp) => {
-          console.log('status updated', resp);
-          this.userStatus.next(options.status);
+          console.log(payload.status)
+          console.log(resp.status.status);
+
+          this.userStatus.next(resp.status.status);
+
           resolve(resp);
         })
         .catch((err) => {
@@ -281,6 +284,8 @@ export class DataService {
   }
 
   updateOnlineStatus() {
+    console.log('updateOnlineStatus');
+
     return this.updateStatus({
       status: 'online',
       manual: false,
@@ -288,6 +293,8 @@ export class DataService {
   }
 
   setAwayStatus() {
+    console.log('set away');
+
     return this.updateStatus({
       status: 'away',
       manual: false,

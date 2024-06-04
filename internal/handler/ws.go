@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"slices"
@@ -18,16 +19,18 @@ type WsMessage struct {
 }
 
 type WsV1Handler struct {
-	config  config
-	channel chan WsMessage
-	connMap map[string][]*websocket.Conn
+	config           config
+	channel          chan WsMessage
+	broadcastChannel chan WsMessage
+	connMap          map[string][]*websocket.Conn
 }
 
-func NewWsV1Handler(config config, channel chan WsMessage) *WsV1Handler {
+func NewWsV1Handler(config config, channel chan WsMessage, broadcastChannel chan WsMessage) *WsV1Handler {
 	return &WsV1Handler{
-		config:  config,
-		channel: channel,
-		connMap: make(map[string][]*websocket.Conn),
+		config:           config,
+		channel:          channel,
+		broadcastChannel: broadcastChannel,
+		connMap:          make(map[string][]*websocket.Conn),
 	}
 }
 
@@ -89,6 +92,8 @@ func (wh *WsV1Handler) NewWsConnection(c *gin.Context) {
 						if err != nil {
 							slog.Error("WriteMessage:", "err", err.Error())
 
+							userConn.Close()
+
 							wh.connMap[userId] = RemoveConnection(userConnections, i)
 						}
 					}
@@ -100,7 +105,32 @@ func (wh *WsV1Handler) NewWsConnection(c *gin.Context) {
 					slog.Info("userConn not found")
 				}
 			}
+		case bcMsg := <-wh.broadcastChannel:
+			slog.Info("broadcast msg", "bcMsg", bcMsg)
 
+			for userID, connections := range wh.connMap {
+				fmt.Println("userID:", userID, "connections:", connections)
+
+				bytes, err := json.Marshal(bcMsg)
+				if err != nil {
+					slog.Error("Marshal", "err", err)
+				}
+
+				for i, userConn := range connections {
+					err = userConn.WriteMessage(websocket.TextMessage, bytes)
+					if err != nil {
+						slog.Error("WriteMessage:", "err", err.Error())
+
+						userConn.Close()
+
+						wh.connMap[userID] = RemoveConnection(connections, i)
+					}
+				}
+
+				if len(wh.connMap[userID]) == 0 {
+					delete(wh.connMap, userID)
+				}
+			}
 		}
 	}
 }

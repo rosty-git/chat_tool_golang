@@ -57,7 +57,8 @@ func main() {
 		slog.Error("Failed to initialize database")
 	}
 
-	wsChannel := make(chan handler.WsMessage, 100)
+	wsChan := make(chan handler.WsMessage, 100)
+	wsBroadcastChan := make(chan handler.WsMessage, 100)
 
 	userRepo := userrepository.NewRepository(db)
 	channelRepo := channelrepository.NewRepository(db)
@@ -65,14 +66,14 @@ func main() {
 
 	userService := userservice.NewService(userRepo, c)
 	channelService := channelservice.NewService(channelRepo)
-	postService := postservice.NewService(postRepo, wsChannel)
+	postService := postservice.NewService(postRepo, wsChan)
 
-	userUseCase := userusecase.NewUseCase(userService, channelService)
+	userUseCase := userusecase.NewUseCase(userService, channelService, wsBroadcastChan)
 	postUseCase := postusecase.NewUseCase(postService, channelService)
 
 	userV1Handler := handler.NewUserV1Handler(c, userUseCase)
 	postV1Handler := handler.NewPostV1Handler(postUseCase)
-	wsV1Handler := handler.NewWsV1Handler(c, wsChannel)
+	wsV1Handler := handler.NewWsV1Handler(c, wsChan, wsBroadcastChan)
 
 	m := middleware.NewMiddleware(userRepo, c)
 	router := routers.InitRouter(c.Env, userV1Handler, wsV1Handler, postV1Handler, m, c)

@@ -104,6 +104,8 @@ func (s *Service) GetById(UserID string) (*models.User, error) {
 }
 
 func (s *Service) UpdateStatus(userID string, status string, manual bool, endTime string) (*models.Status, error) {
+	slog.Info("Service UpdateStatus", "userID", userID, "status", status, "manual", manual, "endTime", endTime)
+
 	return s.userRepository.CreateOrUpdateStatus(userID, status, manual, endTime)
 }
 

@@ -48,16 +48,16 @@ export class UserAvatarComponent implements OnChanges {
 
   @Input() size: string = 'small';
 
+  @Input() status: string = 'offline';
+
   colorNumber = 0;
 
   userColor: string = '';
 
-  status$ = 'offline';
-
   constructor(private dataService: DataService) {
     this.dataService.statuses$.subscribe((value) => {
       if (this.userId !== '' && Object.hasOwn(value, this.userId)) {
-        this.status$ = value[this.userId];
+        this.status = value[this.userId];
       }
     });
   }

@@ -39,4 +39,8 @@ export class HeaderComponent {
       this.status = value;
     });
   }
+
+  updateStatus(options: {status: string, manual: boolean}) {
+    this.dataService.updateStatus(options)
+  }
 }

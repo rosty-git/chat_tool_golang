@@ -13,13 +13,16 @@
         [userId]="userId"
         [userName]="userName"
         size="middle"
+        [status]="status"
         (click)="toggleDropdown()"></app-user-avatar>
     </button>
     <div class="dropdown">
       <div
         class="dropdown-menu"
         [ngClass]="{ 'dropdown-show': isOpen }">
-        <div class="dropdown-item">
+        <div
+          class="dropdown-item"
+          (click)="updateStatus({ status: 'online', manual: true })">
           <div class="m-2">
             <app-user-status
               status="online"
@@ -30,7 +33,9 @@
             <div><span class="material-symbols-outlined"> check </span></div>
           }
         </div>
-        <div class="dropdown-item">
+        <div
+          class="dropdown-item"
+          (click)="updateStatus({ status: 'away', manual: true })">
           <div class="m-2">
             <app-user-status
               status="away"
@@ -41,7 +46,9 @@
             <div><span class="material-symbols-outlined"> check </span></div>
           }
         </div>
-        <div class="dropdown-item">
+        <div
+          class="dropdown-item"
+          (click)="updateStatus({ status: 'dnd', manual: true })">
           <div class="m-2">
             <app-user-status
               status="dnd"
@@ -52,7 +59,9 @@
             <div><span class="material-symbols-outlined"> check </span></div>
           }
         </div>
-        <div class="dropdown-item">
+        <div
+          class="dropdown-item"
+          (click)="updateStatus({ status: 'offline', manual: true })">
           <div class="m-2">
             <app-user-status
               status="offline"

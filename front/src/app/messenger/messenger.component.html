@@ -1,6 +1,7 @@
 <div
   class="main flex flex-col h-screen max-h-screen"
-  (mousemove)="mouseMove()">
+  (mousemove)="mouseMove()"
+  (keypress)="mouseMove()">
   <app-header class="h-10 shrink-0"></app-header>
   <div class="flex flex-row grow overflow-hidden">
     <app-sidebar class="basis-2/12 overflow-y-auto"></app-sidebar>

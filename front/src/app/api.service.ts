@@ -28,7 +28,7 @@ export class ApiService {
     });
   }
 
-  put(path: string, data: unknown): Promise<unknown> {
+  put<T>(path: string, data: unknown): Promise<T> {
     return new Promise((resole, reject) => {
       this.http
         .put(`${GlobalVariable.BASE_API_URL}${path}`, data, {
@@ -36,7 +36,7 @@ export class ApiService {
         })
         .subscribe({
           next: (response) => {
-            resole(response);
+            resole(response as T);
           },
           error: (err: unknown) => {
             console.error('error', err);

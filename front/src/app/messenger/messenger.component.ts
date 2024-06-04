@@ -12,7 +12,7 @@ import { WebSocketService } from '../web-socket.service';
 type WebSocketMsg = {
   ToUsersIDs: string[];
   Action: 'new-post' | 'status-updated';
-  Payload: NewPostPayload;
+  Payload: NewPostPayload | NewStatusPayload;
 };
 
 type NewPostPayload = {
@@ -23,6 +23,11 @@ type NewPostPayload = {
   user_id: string;
   channel_id: string;
   message: string;
+};
+
+type NewStatusPayload = {
+  userId: string;
+  status: 'online' | 'away' | 'dnd' | 'offline';
 };
 
 const USER_UPDATE_ONLINE_STATUS_INTERVAL = 90_000;
@@ -78,6 +83,8 @@ export class MessengerComponent implements OnInit, OnDestroy {
         if (webSocketMsg.Action === 'new-post') {
           const audio = new Audio('assets/new-message-notification.wav');
 
+          webSocketMsg.Payload = webSocketMsg.Payload as NewPostPayload;
+
           if (this.channelsState$.active === webSocketMsg.Payload.channel_id) {
             this.dataService
               .getPostsAfter({
@@ -90,6 +97,13 @@ export class MessengerComponent implements OnInit, OnDestroy {
           } else {
             audio.play();
           }
+        } else if (webSocketMsg.Action === 'status-updated') {
+          webSocketMsg.Payload = webSocketMsg.Payload as NewStatusPayload;
+
+          this.dataService.setStatus(
+            webSocketMsg.Payload.userId,
+            webSocketMsg.Payload.status,
+          );
         }
       });
 

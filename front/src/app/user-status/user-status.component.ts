@@ -1,5 +1,5 @@
 import { NgStyle } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-user-status',
@@ -8,16 +8,10 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
   templateUrl: './user-status.component.html',
   styleUrl: './user-status.component.scss',
 })
-export class UserStatusComponent implements OnChanges {
+export class UserStatusComponent {
   @Input() userId: string = '';
 
   @Input() status: string = 'offline';
 
   @Input() color: string = '#1e325c';
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['userId']) {
-      console.log(this.userId);
-    }
-  }
 }

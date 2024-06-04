@@ -80,10 +80,9 @@ func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manua
 
 		return &status, result.Error
 	} else {
-		if manual {
+		if manual && newStatus == "dnd" {
 			statusUpdate.PrevStatus = oldStatus.Status
 		}
-		statusUpdate.PrevStatus = oldStatus.Status
 
 		result := r.db.Model(&status).Clauses(clause.Returning{}).Where("user_id = ?", userID).Updates(statusUpdate)
 
