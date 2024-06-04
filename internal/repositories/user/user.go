@@ -80,11 +80,18 @@ func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manua
 
 		return &status, result.Error
 	} else {
-		if manual && newStatus == "dnd" {
-			statusUpdate.PrevStatus = oldStatus.Status
+		statusUpdateMap := map[string]interface{}{
+			"user_id":          statusUpdate.UserID,
+			"status":           statusUpdate.Status,
+			"manual":           statusUpdate.Manual,
+			"last_activity_at": statusUpdate.LastActivityAt,
 		}
 
-		result := r.db.Model(&status).Clauses(clause.Returning{}).Where("user_id = ?", userID).Updates(statusUpdate)
+		if manual && newStatus == "dnd" {
+			statusUpdateMap["prev_status"] = oldStatus.Status
+		}
+
+		result := r.db.Model(&status).Where("user_id = ?", userID).Updates(statusUpdateMap)
 
 		slog.Info("Updated status: ", "status", status)
 
