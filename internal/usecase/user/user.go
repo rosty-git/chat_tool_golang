@@ -118,8 +118,6 @@ func (uc *UseCase) GetStatus(userID string) (*models.Status, error) {
 
 func (uc *UseCase) StatusesWatchdog() {
 	for {
-		slog.Info("StatusesWatchdog")
-
 		statuses, err := uc.userService.GetNotUpdatedStatuses()
 		if err != nil {
 			slog.Error("GetNotUpdatedStatuses", "err", err)
@@ -134,6 +132,6 @@ func (uc *UseCase) StatusesWatchdog() {
 			}
 		}
 
-		time.Sleep(1 * time.Minute)
+		time.Sleep(5 * time.Minute)
 	}
 }
