@@ -71,6 +71,8 @@ func main() {
 	userUseCase := userusecase.NewUseCase(userService, channelService, wsBroadcastChan)
 	postUseCase := postusecase.NewUseCase(postService, channelService)
 
+	go userUseCase.StatusesWatchdog()
+
 	userV1Handler := handler.NewUserV1Handler(c, userUseCase)
 	postV1Handler := handler.NewPostV1Handler(postUseCase)
 	wsV1Handler := handler.NewWsV1Handler(c, wsChan, wsBroadcastChan)

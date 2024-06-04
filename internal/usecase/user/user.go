@@ -3,6 +3,7 @@ package userusecase
 import (
 	"log/slog"
 	"strings"
+	"time"
 
 	"github.com/elef-git/chat_tool_golang/internal/handler"
 	"github.com/elef-git/chat_tool_golang/internal/models"
@@ -14,6 +15,7 @@ type userService interface {
 	GetById(userID string) (*models.User, error)
 	UpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
 	GetStatus(userID string) (*models.Status, error)
+	GetNotUpdatedStatuses() ([]*models.Status, error)
 }
 
 type channelService interface {
@@ -112,4 +114,26 @@ func (uc *UseCase) UpdateStatus(userID string, status string, manual bool, dndEn
 
 func (uc *UseCase) GetStatus(userID string) (*models.Status, error) {
 	return uc.userService.GetStatus(userID)
+}
+
+func (uc *UseCase) StatusesWatchdog() {
+	for {
+		slog.Info("StatusesWatchdog")
+
+		statuses, err := uc.userService.GetNotUpdatedStatuses()
+		if err != nil {
+			slog.Error("GetNotUpdatedStatuses", "err", err)
+		}
+
+		slog.Info("StatusesWatchdog", "statuses", statuses)
+
+		for _, status := range statuses {
+			_, err := uc.UpdateStatus(status.UserID, "offline", false, "")
+			if err != nil {
+				slog.Error("StatusesWatchdog", "err", err)
+			}
+		}
+
+		time.Sleep(1 * time.Minute)
+	}
 }

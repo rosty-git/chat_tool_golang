@@ -111,3 +111,16 @@ func (r *Repository) GetStatus(userID string) (*models.Status, error) {
 
 	return &status, err
 }
+
+func (r *Repository) GetNotUpdatedStatuses() ([]*models.Status, error) {
+	cutoffTime := time.Now().Add(-1 * time.Minute)
+
+	// Prepare the query
+	var statuses []*models.Status
+	err := r.db.Where("status IN ? AND manual = ? AND last_activity_at < ?", []string{"online", "away"}, false, cutoffTime).Find(&statuses).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return statuses, nil
+}
