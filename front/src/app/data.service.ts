@@ -2,13 +2,13 @@ import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-import { GlobalVariable } from '../global';
 import { ApiService } from './api.service';
 
 export type PostItem = {
   id: string;
   message: string;
   created_at: string;
+  channel_id: string;
   user: {
     name: string;
   };
@@ -22,6 +22,13 @@ export type ChannelsState = {
   isOpenActive: boolean;
   isDirectActive: boolean;
   active: string;
+  channels?: {
+    [key: string]: {
+      lastCreatedAt: string;
+      firstCreatedAt: string;
+      posts: PostItem[];
+    };
+  };
 };
 
 export type Channel = {
@@ -56,26 +63,7 @@ const getFirstAndLastCreatedAt = (
   providedIn: 'root',
 })
 export class DataService {
-  constructor(private api: ApiService) {
-    this.channelsActive$.subscribe((value) => {
-      this.getPosts({
-        channelId: value.active,
-        limit: GlobalVariable.POSTS_PAGE_SIZE,
-      });
-    });
-  }
-
-  private posts = new BehaviorSubject<PostItem[]>([]);
-
-  posts$ = this.posts.asObservable();
-
-  private lastCreatedAt = new BehaviorSubject<string>('');
-
-  lastCreatedAt$ = this.lastCreatedAt.asObservable();
-
-  private firstCreatedAt = new BehaviorSubject<string>('');
-
-  firstCreatedAt$ = this.firstCreatedAt.asObservable();
+  constructor(private api: ApiService) {}
 
   private userStatus = new BehaviorSubject<string>('online');
 
@@ -95,6 +83,7 @@ export class DataService {
     isOpenActive: false,
     isDirectActive: false,
     active: '',
+    channels: {},
   });
 
   channelsActive$ = this.channelsActive.asObservable();
@@ -115,41 +104,99 @@ export class DataService {
 
   userName$ = this.userName.asObservable();
 
-  private setPosts(newPosts: PostItem[]) {
-    this.posts.next(newPosts);
+  private setPosts(channelId: string, newPosts: PostItem[]) {
+    const currentChannelsState = this.channelsActive.getValue();
 
     const { last, first } = getFirstAndLastCreatedAt(newPosts);
 
-    this.lastCreatedAt.next(last);
-    this.firstCreatedAt.next(first);
+    if (!currentChannelsState.channels) {
+      currentChannelsState.channels = {};
+    }
+
+    currentChannelsState.channels[channelId] = {
+      posts: newPosts,
+      firstCreatedAt: first,
+      lastCreatedAt: last,
+    };
+
+    this.channelsActive.next(currentChannelsState);
   }
 
-  private addPostAfter(newPost: PostItem) {
-    const currentPosts = this.posts.getValue();
-    const updatedPosts = [...currentPosts, newPost];
-    this.posts.next(updatedPosts);
+  private addPostAfter(options: { channelId: string; post: PostItem }) {
+    console.log('addPostAfter', this, options);
 
-    this.lastCreatedAt.next(newPost.created_at);
+    const currentChannelsState = this.channelsActive.getValue();
+
+    if (currentChannelsState.channels?.[options.channelId]) {
+      const existingPosts =
+        currentChannelsState.channels[options.channelId].posts;
+
+      const updatedPosts = [...existingPosts, options.post];
+
+      const updatedChannel = {
+        ...currentChannelsState.channels[options.channelId],
+        posts: updatedPosts,
+        lastCreatedAt: options.post.created_at,
+      };
+
+      currentChannelsState.channels[options.channelId] = updatedChannel;
+
+      this.channelsActive.next(currentChannelsState);
+    }
   }
 
-  private addPostsAfter(newPosts: PostItem[]) {
-    const currentPosts = this.posts.getValue();
-    const updatedPosts = [...currentPosts, ...newPosts];
-    this.posts.next(updatedPosts);
+  private addPostsAfter(options: { channelId: string; posts: PostItem[] }) {
+    console.log('addPostsAfter', options);
 
-    const { last } = getFirstAndLastCreatedAt(newPosts);
+    const { last } = getFirstAndLastCreatedAt(options.posts);
 
-    this.lastCreatedAt.next(last);
+    const currentChannelsState = this.channelsActive.getValue();
+
+    if (
+      options.posts.length &&
+      currentChannelsState.channels?.[options.channelId]
+    ) {
+      const existingPosts =
+        currentChannelsState.channels[options.channelId].posts;
+
+      const updatedPosts = [...existingPosts, ...options.posts];
+
+      const updatedChannel = {
+        ...currentChannelsState.channels[options.channelId],
+        posts: updatedPosts,
+        lastCreatedAt: last,
+      };
+
+      currentChannelsState.channels[options.channelId] = updatedChannel;
+
+      this.channelsActive.next(currentChannelsState);
+    }
   }
 
-  private addPostsBefore(newPosts: PostItem[]) {
-    const currentPosts = this.posts.getValue();
-    const updatedPosts = [...newPosts, ...currentPosts];
-    this.posts.next(updatedPosts);
+  private addPostsBefore(channelId: string, newPosts: PostItem[]): void {
+    console.log('addPostsBefore', { channelId, newPosts });
 
-    const { first } = getFirstAndLastCreatedAt(newPosts);
+    if (newPosts.length) {
+      const currentChannelsState = this.channelsActive.getValue();
 
-    this.firstCreatedAt.next(first);
+      const { first } = getFirstAndLastCreatedAt(newPosts);
+
+      if (currentChannelsState.channels?.[channelId]) {
+        const existingPosts = currentChannelsState.channels[channelId].posts;
+
+        const updatedPosts = [...newPosts, ...existingPosts];
+
+        const updatedChannel = {
+          ...currentChannelsState.channels[channelId],
+          posts: updatedPosts,
+          firstCreatedAt: first,
+        };
+
+        currentChannelsState.channels[channelId] = updatedChannel;
+
+        this.channelsActive.next(currentChannelsState);
+      }
+    }
   }
 
   async getPosts(options: { channelId: string; limit: number }) {
@@ -167,72 +214,97 @@ export class DataService {
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
 
-    this.setPosts(posts);
+    this.setPosts(options.channelId, posts);
 
     this.postsLoading.next(false);
   }
 
   getPostsAfter(options: { channelId: string; limit: number }) {
+    console.log('getPostsAfter', { options });
+
     return new Promise((resolve, reject) => {
-      const last = this.lastCreatedAt.getValue();
+      const channelsState = this.channelsActive.getValue();
 
-      let params: HttpParams;
+      if (channelsState.channels?.[options.channelId].lastCreatedAt) {
+        const last = channelsState.channels[options.channelId].lastCreatedAt;
 
-      if (last !== '') {
-        params = new HttpParams()
-          .append('limit', options.limit)
-          .append('after', last);
+        let params: HttpParams;
+
+        if (last !== '') {
+          params = new HttpParams()
+            .append('limit', options.limit)
+            .append('after', last);
+        } else {
+          params = new HttpParams().append('limit', options.limit);
+        }
+
+        this.api
+          .get(`/v1/api/posts/${options.channelId}`, params)
+          .then((resp) => {
+            const posts = (resp as GetPostsResp).posts.sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime(),
+            );
+            this.addPostsAfter({ channelId: options.channelId, posts: posts });
+            resolve(posts);
+          })
+          .catch((err) => {
+            console.error('error', err);
+            reject(err);
+          });
       } else {
-        params = new HttpParams().append('limit', options.limit);
+        reject(new Error('getPostsAfter'));
       }
-
-      this.api
-        .get(`/v1/api/posts/${options.channelId}`, params)
-        .then((resp) => {
-          const posts = (resp as GetPostsResp).posts.sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
-          this.addPostsAfter(posts);
-          resolve(posts);
-        })
-        .catch((err) => {
-          console.error('error', err);
-          reject(err);
-        });
     });
   }
 
   getPostsBefore(options: { channelId: string; limit: number }) {
+    console.log('Get posts before', options);
+
     return new Promise((resolve, reject) => {
-      const first = this.firstCreatedAt.getValue();
+      const channelsState = this.channelsActive.getValue();
 
-      let params: HttpParams;
+      if (
+        channelsState.channels &&
+        channelsState.channels[options.channelId]?.firstCreatedAt
+      ) {
+        const first = channelsState.channels[options.channelId].firstCreatedAt;
 
-      if (first !== '') {
-        params = new HttpParams()
-          .append('limit', options.limit)
-          .append('before', first);
+        let params: HttpParams;
+
+        if (first !== '') {
+          params = new HttpParams()
+            .append('limit', options.limit)
+            .append('before', first);
+        } else {
+          params = new HttpParams().append('limit', options.limit);
+        }
+
+        this.api
+          .get(`/v1/api/posts/${options.channelId}`, params)
+          .then((resp) => {
+            const posts = (resp as GetPostsResp).posts.sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime(),
+            );
+
+            this.addPostsBefore(options.channelId, posts);
+
+            resolve(posts);
+          })
+          .catch((err) => {
+            console.error(err);
+            reject(err);
+          });
       } else {
-        params = new HttpParams().append('limit', options.limit);
+        reject(
+          new Error(
+            'channelsState.channels?.[options.channelId].firstCreatedAt is undefined',
+          ),
+        );
       }
-
-      this.api
-        .get(`/v1/api/posts/${options.channelId}`, params)
-        .then((resp) => {
-          const posts = (resp as GetPostsResp).posts.sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
-          this.addPostsBefore(posts);
-          resolve(posts);
-        })
-        .catch((err) => {
-          console.error(err);
-          reject(err);
-        });
     });
   }
 
@@ -245,7 +317,10 @@ export class DataService {
       .then((resp) => {
         console.log('post created', resp);
 
-        this.addPostAfter((resp as { post: PostItem }).post);
+        this.addPostAfter({
+          channelId: options.channelId,
+          post: (resp as { post: PostItem }).post,
+        });
       })
       .catch((err) => {
         console.error(err);
@@ -270,9 +345,6 @@ export class DataService {
       this.api
         .put<{ status: { status: string } }>('/v1/api/statuses', payload)
         .then((resp) => {
-          console.log(payload.status)
-          console.log(resp.status.status);
-
           this.userStatus.next(resp.status.status);
 
           resolve(resp);
@@ -308,7 +380,10 @@ export class DataService {
   }
 
   setOpenActive(channelId: string): void {
+    const currentChannelsState = this.channelsActive.getValue();
+
     const newState = {
+      ...currentChannelsState,
       active: channelId,
       isOpenActive: true,
       isDirectActive: false,
@@ -317,7 +392,10 @@ export class DataService {
   }
 
   setDirectActive(channelId: string): void {
+    const currentChannelsState = this.channelsActive.getValue();
+
     const newState = {
+      ...currentChannelsState,
       active: channelId,
       isDirectActive: true,
       isOpenActive: false,
