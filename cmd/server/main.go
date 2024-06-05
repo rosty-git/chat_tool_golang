@@ -60,16 +60,16 @@ func main() {
 	wsChan := make(chan handler.WsMessage, 100)
 	wsBroadcastChan := make(chan handler.WsMessage, 100)
 
-	userRepo := userrepository.NewRepository(db)
-	channelRepo := channelrepository.NewRepository(db)
-	postRepo := postrepository.NewRepository(db)
+	userRepo := userrepository.NewRepository()
+	channelRepo := channelrepository.NewRepository()
+	postRepo := postrepository.NewRepository()
 
 	userService := userservice.NewService(userRepo, c)
 	channelService := channelservice.NewService(channelRepo)
 	postService := postservice.NewService(postRepo, wsChan)
 
-	userUseCase := userusecase.NewUseCase(userService, channelService, wsBroadcastChan)
-	postUseCase := postusecase.NewUseCase(postService, channelService)
+	userUseCase := userusecase.NewUseCase(db, userService, channelService, wsBroadcastChan)
+	postUseCase := postusecase.NewUseCase(db, postService, channelService)
 
 	go userUseCase.StatusesWatchdog()
 
@@ -77,7 +77,7 @@ func main() {
 	postV1Handler := handler.NewPostV1Handler(postUseCase)
 	wsV1Handler := handler.NewWsV1Handler(c, wsChan, wsBroadcastChan)
 
-	m := middleware.NewMiddleware(userRepo, c)
+	m := middleware.NewMiddleware(userRepo, c, db)
 	router := routers.InitRouter(c.Env, userV1Handler, wsV1Handler, postV1Handler, m, c)
 
 	s := &http.Server{

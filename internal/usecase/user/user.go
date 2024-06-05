@@ -7,30 +7,33 @@ import (
 
 	"github.com/elef-git/chat_tool_golang/internal/handler"
 	"github.com/elef-git/chat_tool_golang/internal/models"
+	"gorm.io/gorm"
 )
 
 type userService interface {
-	Registration(userName, email, password string) error
-	Login(email, password string) (string, error)
-	GetById(userID string) (*models.User, error)
-	UpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
-	GetStatus(userID string) (*models.Status, error)
-	GetNotUpdatedStatuses() ([]*models.Status, error)
+	Registration(db *gorm.DB, userName, email, password string) error
+	Login(db *gorm.DB, email, password string) (string, error)
+	GetById(db *gorm.DB, userID string) (*models.User, error)
+	UpdateStatus(db *gorm.DB, userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
+	GetStatus(db *gorm.DB, userID string) (*models.Status, error)
+	GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error)
 }
 
 type channelService interface {
-	GetByUserId(userID string, channelType models.ChannelType) ([]*models.Channel, error)
-	GetUsers(channelID string) ([]*models.User, error)
+	GetByUserId(db *gorm.DB, userID string, channelType models.ChannelType) ([]*models.Channel, error)
+	GetUsers(db *gorm.DB, channelID string) ([]*models.User, error)
 }
 
 type UseCase struct {
 	userService      userService
 	channelService   channelService
 	broadcastChannel chan handler.WsMessage
+	db               *gorm.DB
 }
 
-func NewUseCase(userService userService, channelService channelService, broadcastChannel chan handler.WsMessage) *UseCase {
+func NewUseCase(db *gorm.DB, userService userService, channelService channelService, broadcastChannel chan handler.WsMessage) *UseCase {
 	return &UseCase{
+		db:               db,
 		userService:      userService,
 		channelService:   channelService,
 		broadcastChannel: broadcastChannel,
@@ -38,15 +41,15 @@ func NewUseCase(userService userService, channelService channelService, broadcas
 }
 
 func (uc *UseCase) Registration(userName, email, password string) error {
-	return uc.userService.Registration(userName, email, password)
+	return uc.userService.Registration(uc.db, userName, email, password)
 }
 
 func (uc *UseCase) Login(email, password string) (string, error) {
-	return uc.userService.Login(email, password)
+	return uc.userService.Login(uc.db, email, password)
 }
 
 func (uc *UseCase) GetChannelsByUserId(userID string, channelType models.ChannelType) ([]*models.Channel, error) {
-	channels, err := uc.channelService.GetByUserId(userID, channelType)
+	channels, err := uc.channelService.GetByUserId(uc.db, userID, channelType)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +61,7 @@ func (uc *UseCase) GetChannelsByUserId(userID string, channelType models.Channel
 
 			slog.Info("GetChannelsByUserId", "contactID", contactID)
 
-			user, err := uc.userService.GetById(contactID)
+			user, err := uc.userService.GetById(uc.db, contactID)
 			if err != nil {
 				return nil, err
 			}
@@ -73,33 +76,27 @@ func (uc *UseCase) GetChannelsByUserId(userID string, channelType models.Channel
 }
 
 func (uc *UseCase) GetUsersByChannelId(channelID string) ([]*models.User, error) {
-	return uc.channelService.GetUsers(channelID)
+	return uc.channelService.GetUsers(uc.db, channelID)
 }
 
 func (uc *UseCase) UpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error) {
-	slog.Info("UseCase UpdateStatus", "userID", userID, "status", status, "manual", manual, "dndEndTime", dndEndTime)
-
 	if status == "online" && manual {
 		manual = false
 	}
 
-	currentStatus, err := uc.userService.GetStatus(userID)
+	currentStatus, err := uc.userService.GetStatus(uc.db, userID)
 	if err != nil {
 		return nil, err
 	}
-
-	slog.Info("UseCase UpdateStatus", "currentStatus", currentStatus)
 
 	if currentStatus.Manual && !manual && status != "online" {
 		return currentStatus, nil
 	}
 
-	newStatus, err := uc.userService.UpdateStatus(userID, status, manual, dndEndTime)
+	newStatus, err := uc.userService.UpdateStatus(uc.db, userID, status, manual, dndEndTime)
 	if err != nil {
 		return nil, err
 	}
-
-	slog.Info("UseCase UpdateStatus", "newStatus", newStatus)
 
 	if newStatus.Status != currentStatus.Status {
 		message := map[string]string{"userId": userID, "status": newStatus.Status}
@@ -113,12 +110,12 @@ func (uc *UseCase) UpdateStatus(userID string, status string, manual bool, dndEn
 }
 
 func (uc *UseCase) GetStatus(userID string) (*models.Status, error) {
-	return uc.userService.GetStatus(userID)
+	return uc.userService.GetStatus(uc.db, userID)
 }
 
 func (uc *UseCase) StatusesWatchdog() {
 	for {
-		statuses, err := uc.userService.GetNotUpdatedStatuses()
+		statuses, err := uc.userService.GetNotUpdatedStatuses(uc.db)
 		if err != nil {
 			slog.Error("GetNotUpdatedStatuses", "err", err)
 		}

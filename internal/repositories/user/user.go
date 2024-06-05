@@ -9,50 +9,42 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type GormDb interface {
-	Create(value interface{}) (tx *gorm.DB)
-	Where(query interface{}, args ...interface{}) (tx *gorm.DB)
-	First(dest interface{}, conds ...interface{}) (tx *gorm.DB)
-	Model(value interface{}) (tx *gorm.DB)
-}
-
 type Repository struct {
-	db GormDb
 }
 
-func NewRepository(db *gorm.DB) *Repository {
-	return &Repository{db}
+func NewRepository() *Repository {
+	return &Repository{}
 }
 
-func (r *Repository) Create(user *models.User) (*models.User, error) {
-	result := r.db.Create(user)
+func (r *Repository) Create(db *gorm.DB, user *models.User) (*models.User, error) {
+	result := db.Create(user)
 
 	slog.Info("Created user: ", "user", user)
 
 	return user, result.Error
 }
 
-func (r *Repository) GetByEmail(email string) (*models.User, error) {
+func (r *Repository) GetByEmail(db *gorm.DB, email string) (*models.User, error) {
 	var user models.User
-	result := r.db.Where("email = ?", email).First(&user)
+	result := db.Where("email = ?", email).First(&user)
 
 	return &user, result.Error
 }
 
-func (r *Repository) GetById(id string) (*models.User, error) {
+func (r *Repository) GetById(db *gorm.DB, id string) (*models.User, error) {
 	slog.Info("GetById", "id", id)
 
 	var user models.User
-	result := r.db.First(&user, "id = ?", id)
+	result := db.First(&user, "id = ?", id)
 
 	return &user, result.Error
 }
 
-func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manual bool, dndEndTime string) (*models.Status, error) {
+func (r *Repository) CreateOrUpdateStatus(db *gorm.DB, userID string, newStatus string, manual bool, dndEndTime string) (*models.Status, error) {
 	slog.Info("CreateOrUpdateStatus", "user_id", userID, "newStatus", newStatus, "manual", manual, "dndEndTime", dndEndTime)
 
 	var oldStatus models.Status
-	err := r.db.Model(&models.Status{}).
+	err := db.Model(&models.Status{}).
 		Where("user_id = ?", userID).
 		Find(&oldStatus).
 		Error
@@ -74,7 +66,7 @@ func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manua
 			statusUpdate.DNDEndTime = time.Now()
 		}
 
-		result := r.db.Model(&status).Clauses(clause.Returning{}).Create(statusUpdate)
+		result := db.Model(&status).Clauses(clause.Returning{}).Create(statusUpdate)
 
 		slog.Info("Created status: ", "status", status)
 
@@ -91,7 +83,7 @@ func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manua
 			statusUpdateMap["prev_status"] = oldStatus.Status
 		}
 
-		result := r.db.Model(&status).Where("user_id = ?", userID).Updates(statusUpdateMap)
+		result := db.Model(&status).Where("user_id = ?", userID).Updates(statusUpdateMap)
 
 		slog.Info("Updated status: ", "status", status)
 
@@ -99,9 +91,9 @@ func (r *Repository) CreateOrUpdateStatus(userID string, newStatus string, manua
 	}
 }
 
-func (r *Repository) GetStatus(userID string) (*models.Status, error) {
+func (r *Repository) GetStatus(db *gorm.DB, userID string) (*models.Status, error) {
 	var status models.Status
-	err := r.db.Model(&models.Status{}).
+	err := db.Model(&models.Status{}).
 		Where("user_id = ?", userID).
 		Find(&status).
 		Error
@@ -112,12 +104,12 @@ func (r *Repository) GetStatus(userID string) (*models.Status, error) {
 	return &status, err
 }
 
-func (r *Repository) GetNotUpdatedStatuses() ([]*models.Status, error) {
+func (r *Repository) GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error) {
 	cutoffTime := time.Now().Add(-1 * time.Minute)
 
 	// Prepare the query
 	var statuses []*models.Status
-	err := r.db.Where("status IN ? AND manual = ? AND last_activity_at < ?", []string{"online", "away"}, false, cutoffTime).Find(&statuses).Error
+	err := db.Where("status IN ? AND manual = ? AND last_activity_at < ?", []string{"online", "away"}, false, cutoffTime).Find(&statuses).Error
 	if err != nil {
 		return nil, err
 	}

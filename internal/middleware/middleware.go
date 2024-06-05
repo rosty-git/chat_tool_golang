@@ -9,6 +9,7 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm"
 )
 
 type config interface {
@@ -24,18 +25,20 @@ type config interface {
 }
 
 type userRepository interface {
-	GetById(string2 string) (*models.User, error)
+	GetById(db *gorm.DB, string string) (*models.User, error)
 }
 
 type Middleware struct {
 	userRepository userRepository
 	config         config
+	db             *gorm.DB
 }
 
-func NewMiddleware(userRepository userRepository, config config) *Middleware {
+func NewMiddleware(userRepository userRepository, config config, db *gorm.DB) *Middleware {
 	return &Middleware{
 		userRepository: userRepository,
 		config:         config,
+		db:             db,
 	}
 }
 
@@ -96,7 +99,7 @@ func (m *Middleware) RequireAuth() gin.HandlerFunc {
 			}
 
 			// Find the user with token Subject
-			user, err := m.userRepository.GetById(sub.(string))
+			user, err := m.userRepository.GetById(m.db, sub.(string))
 			if err != nil {
 				c.AbortWithStatus(http.StatusUnauthorized)
 			}

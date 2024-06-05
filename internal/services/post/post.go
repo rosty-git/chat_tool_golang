@@ -3,11 +3,12 @@ package postservice
 import (
 	"github.com/elef-git/chat_tool_golang/internal/handler"
 	"github.com/elef-git/chat_tool_golang/internal/models"
+	"gorm.io/gorm"
 )
 
 type postRepository interface {
-	GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error)
-	Create(userID string, channelID string, message string) (*models.Post, error)
+	GetByChannelId(db *gorm.DB, channelID string, limit int, before string, after string) ([]*models.Post, error)
+	Create(db *gorm.DB, userID string, channelID string, message string) (*models.Post, error)
 }
 
 type Service struct {
@@ -22,12 +23,12 @@ func NewService(channelRepository postRepository, wsChannel chan handler.WsMessa
 	}
 }
 
-func (s *Service) GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error) {
-	return s.postRepository.GetByChannelId(channelID, limit, before, after)
+func (s *Service) GetByChannelId(db *gorm.DB, channelID string, limit int, before string, after string) ([]*models.Post, error) {
+	return s.postRepository.GetByChannelId(db, channelID, limit, before, after)
 }
 
-func (s *Service) Create(userID string, channelID string, message string) (*models.Post, error) {
-	return s.postRepository.Create(userID, channelID, message)
+func (s *Service) Create(db *gorm.DB, userID string, channelID string, message string) (*models.Post, error) {
+	return s.postRepository.Create(db, userID, channelID, message)
 }
 
 func (s *Service) NotifyReceivers(IDs []string, message interface{}) {

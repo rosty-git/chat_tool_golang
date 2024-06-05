@@ -4,12 +4,13 @@ import (
 	"log/slog"
 
 	"github.com/elef-git/chat_tool_golang/internal/models"
+	"gorm.io/gorm"
 )
 
 type channelRepository interface {
-	GetByUserId(userId string, channelType models.ChannelType) ([]*models.Channel, error)
-	GetMembers(channelID string) ([]*models.ChannelMembers, error)
-	GetUsers(channelID string) ([]*models.User, error)
+	GetByUserId(db *gorm.DB, userId string, channelType models.ChannelType) ([]*models.Channel, error)
+	GetMembers(db *gorm.DB, channelID string) ([]*models.ChannelMembers, error)
+	GetUsers(db *gorm.DB, channelID string) ([]*models.User, error)
 }
 
 type Service struct {
@@ -22,12 +23,12 @@ func NewService(channelRepository channelRepository) *Service {
 	}
 }
 
-func (s *Service) GetByUserId(userID string, channelType models.ChannelType) ([]*models.Channel, error) {
+func (s *Service) GetByUserId(db *gorm.DB, userID string, channelType models.ChannelType) ([]*models.Channel, error) {
 	slog.Info("Channel service GetByUserId", "userID", userID, "channelType", channelType)
 
-	return s.channelRepository.GetByUserId(userID, channelType)
+	return s.channelRepository.GetByUserId(db, userID, channelType)
 }
 
-func (s *Service) GetUsers(channelID string) ([]*models.User, error) {
-	return s.channelRepository.GetUsers(channelID)
+func (s *Service) GetUsers(db *gorm.DB, channelID string) ([]*models.User, error) {
+	return s.channelRepository.GetUsers(db, channelID)
 }

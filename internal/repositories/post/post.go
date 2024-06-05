@@ -8,25 +8,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type Repository struct {
-	db *gorm.DB
+type Repository struct{}
+
+func NewRepository() *Repository {
+	return &Repository{}
 }
 
-func NewRepository(db *gorm.DB) *Repository {
-	return &Repository{db}
-}
-
-func (r *Repository) Get(id string) (*models.Post, error) {
+func (r *Repository) Get(db *gorm.DB, id string) (*models.Post, error) {
 	slog.Info("postRepo Get", "id", id)
 
 	var post models.Post
 
-	result := r.db.Preload("User").First(&post, "id = ?", id)
+	result := db.Preload("User").First(&post, "id = ?", id)
 
 	return &post, result.Error
 }
 
-func (r *Repository) GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error) {
+func (r *Repository) GetByChannelId(db *gorm.DB, channelID string, limit int, before string, after string) ([]*models.Post, error) {
 	slog.Info("postRepo GetByChannelId", "channelID", channelID, "limit", limit, "before", before, "after", after)
 
 	var posts []*models.Post
@@ -40,7 +38,7 @@ func (r *Repository) GetByChannelId(channelID string, limit int, before string, 
 			return nil, err
 		}
 
-		result = r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+		result = db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
 			"channel_id = ? AND created_at < ?", channelID, beforeCreatedAt,
 		).Order("created_at desc").Find(&posts)
 	} else if after != "" {
@@ -51,11 +49,11 @@ func (r *Repository) GetByChannelId(channelID string, limit int, before string, 
 			return nil, err
 		}
 
-		result = r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+		result = db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
 			"channel_id = ? AND created_at > ?", channelID, afterCreatedAt,
 		).Order("created_at desc").Find(&posts)
 	} else {
-		result = r.db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+		result = db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
 			"channel_id = ?", channelID,
 		).Order("created_at desc").Find(&posts)
 	}
@@ -65,7 +63,7 @@ func (r *Repository) GetByChannelId(channelID string, limit int, before string, 
 	return posts, result.Error
 }
 
-func (r *Repository) Create(userID string, channelID string, message string) (*models.Post, error) {
+func (r *Repository) Create(db *gorm.DB, userID string, channelID string, message string) (*models.Post, error) {
 	slog.Info("postRepo Create", "userID", userID, "channelID", channelID, "message", message)
 
 	post := &models.Post{
@@ -73,10 +71,10 @@ func (r *Repository) Create(userID string, channelID string, message string) (*m
 		ChannelID: channelID,
 		Message:   message,
 	}
-	result := r.db.Create(post)
+	result := db.Create(post)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return r.Get(post.ID)
+	return r.Get(db, post.ID)
 }

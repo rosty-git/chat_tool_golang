@@ -9,15 +9,16 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type userRepository interface {
-	Create(user *models.User) (*models.User, error)
-	GetByEmail(email string) (*models.User, error)
-	GetById(Id string) (*models.User, error)
-	CreateOrUpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
-	GetStatus(userID string) (*models.Status, error)
-	GetNotUpdatedStatuses() ([]*models.Status, error)
+	Create(db *gorm.DB, user *models.User) (*models.User, error)
+	GetByEmail(db *gorm.DB, email string) (*models.User, error)
+	GetById(db *gorm.DB, Id string) (*models.User, error)
+	CreateOrUpdateStatus(db *gorm.DB, userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
+	GetStatus(db *gorm.DB, userID string) (*models.Status, error)
+	GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error)
 }
 
 type config interface {
@@ -37,7 +38,7 @@ func NewService(userRepository userRepository, config config) *Service {
 	}
 }
 
-func (s *Service) Registration(userName, email, password string) error {
+func (s *Service) Registration(db *gorm.DB, userName, email, password string) error {
 	user := &models.User{
 		Name:  userName,
 		Email: email,
@@ -62,7 +63,7 @@ func (s *Service) Registration(userName, email, password string) error {
 
 	slog.Info("Registering user", "user.Password", user.Password)
 
-	createdUser, err := s.userRepository.Create(user)
+	createdUser, err := s.userRepository.Create(db, user)
 	if err != nil {
 		return err
 	}
@@ -72,8 +73,8 @@ func (s *Service) Registration(userName, email, password string) error {
 	return nil
 }
 
-func (s *Service) Login(email, password string) (string, error) {
-	user, err := s.userRepository.GetByEmail(email)
+func (s *Service) Login(db *gorm.DB, email, password string) (string, error) {
+	user, err := s.userRepository.GetByEmail(db, email)
 	if err != nil {
 		return "", err
 	}
@@ -100,20 +101,20 @@ func (s *Service) Login(email, password string) (string, error) {
 	return tokenString, nil
 }
 
-func (s *Service) GetById(UserID string) (*models.User, error) {
-	return s.userRepository.GetById(UserID)
+func (s *Service) GetById(db *gorm.DB, UserID string) (*models.User, error) {
+	return s.userRepository.GetById(db, UserID)
 }
 
-func (s *Service) UpdateStatus(userID string, status string, manual bool, endTime string) (*models.Status, error) {
+func (s *Service) UpdateStatus(db *gorm.DB, userID string, status string, manual bool, endTime string) (*models.Status, error) {
 	slog.Info("Service UpdateStatus", "userID", userID, "status", status, "manual", manual, "endTime", endTime)
 
-	return s.userRepository.CreateOrUpdateStatus(userID, status, manual, endTime)
+	return s.userRepository.CreateOrUpdateStatus(db, userID, status, manual, endTime)
 }
 
-func (s *Service) GetStatus(userID string) (*models.Status, error) {
-	return s.userRepository.GetStatus(userID)
+func (s *Service) GetStatus(db *gorm.DB, userID string) (*models.Status, error) {
+	return s.userRepository.GetStatus(db, userID)
 }
 
-func (s *Service) GetNotUpdatedStatuses() ([]*models.Status, error) {
-	return s.userRepository.GetNotUpdatedStatuses()
+func (s *Service) GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error) {
+	return s.userRepository.GetNotUpdatedStatuses(db)
 }
