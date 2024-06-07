@@ -94,6 +94,12 @@ export class MessengerComponent implements OnInit, OnDestroy {
               .then(() => {
                 audio.play();
               });
+          } else if (
+            this.channelsState$.active !== webSocketMsg.Payload.channel_id
+          ) {
+            this.dataService.incUnread(webSocketMsg.Payload.channel_id);
+
+            audio.play();
           } else {
             audio.play();
           }

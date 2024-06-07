@@ -532,4 +532,25 @@ export class DataService {
       })
       .catch((err) => console.error(err));
   }
+
+  incUnread(channelId: string) {
+    const currentChannelsState = this.channelsActive.getValue();
+
+    if (currentChannelsState.channels) {
+      const updatedChannels = {
+        ...currentChannelsState.channels,
+        [channelId]: {
+          ...currentChannelsState.channels[channelId],
+          unread: currentChannelsState.channels[channelId].unread + 1,
+        },
+      };
+
+      const updatedChannelsState = {
+        ...currentChannelsState,
+        channels: updatedChannels,
+      };
+
+      this.channelsActive.next(updatedChannelsState);
+    }
+  }
 }
