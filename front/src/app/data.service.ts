@@ -23,11 +23,7 @@ export type ChannelsState = {
   isDirectActive: boolean;
   active: string;
   channels?: {
-    [key: string]: {
-      lastCreatedAt: string;
-      firstCreatedAt: string;
-      posts: PostItem[];
-    };
+    [key: string]: Channel;
   };
 };
 
@@ -35,6 +31,11 @@ export type Channel = {
   id: string;
   name: string;
   membersIds: string[];
+  unread: number;
+  type?: 'O' | 'D';
+  lastCreatedAt?: string;
+  firstCreatedAt?: string;
+  posts?: PostItem[];
 };
 
 export type ChannelsResp = {
@@ -114,6 +115,7 @@ export class DataService {
     }
 
     currentChannelsState.channels[channelId] = {
+      ...currentChannelsState.channels[channelId],
       posts: newPosts,
       firstCreatedAt: first,
       lastCreatedAt: last,
@@ -131,7 +133,7 @@ export class DataService {
       const existingPosts =
         currentChannelsState.channels[options.channelId].posts;
 
-      const updatedPosts = [...existingPosts, options.post];
+      const updatedPosts = [...existingPosts!, options.post];
 
       const updatedChannel = {
         ...currentChannelsState.channels[options.channelId],
@@ -159,7 +161,7 @@ export class DataService {
       const existingPosts =
         currentChannelsState.channels[options.channelId].posts;
 
-      const updatedPosts = [...existingPosts, ...options.posts];
+      const updatedPosts = [...existingPosts!, ...options.posts];
 
       const updatedChannel = {
         ...currentChannelsState.channels[options.channelId],
@@ -184,7 +186,7 @@ export class DataService {
       if (currentChannelsState.channels?.[channelId]) {
         const existingPosts = currentChannelsState.channels[channelId].posts;
 
-        const updatedPosts = [...newPosts, ...existingPosts];
+        const updatedPosts = [...newPosts, ...existingPosts!];
 
         const updatedChannel = {
           ...currentChannelsState.channels[channelId],
@@ -230,7 +232,7 @@ export class DataService {
 
         let params: HttpParams;
 
-        if (last !== '') {
+        if (last && last !== '') {
           params = new HttpParams()
             .append('limit', options.limit)
             .append('after', last);
@@ -246,7 +248,7 @@ export class DataService {
                 new Date(a.created_at).getTime() -
                 new Date(b.created_at).getTime(),
             );
-            this.addPostsAfter({ channelId: options.channelId, posts: posts });
+            this.addPostsAfter({ channelId: options.channelId, posts });
             resolve(posts);
           })
           .catch((err) => {
@@ -273,7 +275,7 @@ export class DataService {
 
         let params: HttpParams;
 
-        if (first !== '') {
+        if (first && first !== '') {
           params = new HttpParams()
             .append('limit', options.limit)
             .append('before', first);
@@ -429,6 +431,8 @@ export class DataService {
 
     const openChannels = (resp as ChannelsResp).channels;
 
+    const currentChannelsState = this.channelsActive.getValue();
+
     // eslint-disable-next-line no-restricted-syntax
     for (const channel of openChannels) {
       // eslint-disable-next-line no-await-in-loop
@@ -437,9 +441,22 @@ export class DataService {
       )) as { members: string[] };
 
       channel.membersIds = members;
+
+      // eslint-disable-next-line no-await-in-loop
+      const { unread } = (await this.api.get(
+        `/v1/api/channels/${channel.id}/unread`,
+      )) as { unread: number };
+
+      channel.unread = unread;
+
+      if (!currentChannelsState.channels) {
+        currentChannelsState.channels = {};
+      }
+
+      currentChannelsState.channels[channel.id] = channel;
     }
 
-    this.openChannels.next(openChannels);
+    this.channelsActive.next(currentChannelsState);
 
     this.getStatusesForChannelMembers(openChannels);
   }
@@ -451,6 +468,8 @@ export class DataService {
 
     const directChannels = (resp as ChannelsResp).channels;
 
+    const currentChannelsState = this.channelsActive.getValue();
+
     // eslint-disable-next-line no-restricted-syntax
     for (const channel of directChannels) {
       // eslint-disable-next-line no-await-in-loop
@@ -459,9 +478,22 @@ export class DataService {
       )) as { members: string[] };
 
       channel.membersIds = members;
+
+      // eslint-disable-next-line no-await-in-loop
+      const { unread } = (await this.api.get(
+        `/v1/api/channels/${channel.id}/unread`,
+      )) as { unread: number };
+
+      channel.unread = unread;
+
+      if (!currentChannelsState.channels) {
+        currentChannelsState.channels = {};
+      }
+
+      currentChannelsState.channels[channel.id] = channel;
     }
 
-    this.directChannels.next(directChannels);
+    this.channelsActive.next(currentChannelsState);
 
     this.getStatusesForChannelMembers(directChannels);
   }
@@ -477,6 +509,26 @@ export class DataService {
         this.userName.next(user.name);
 
         this.getAndSetStatus(user.id);
+      })
+      .catch((err) => console.error(err));
+  }
+
+  markChannelAsRead(channelId: string) {
+    this.api
+      .put(`/v1/api/channels/${channelId}/markasread`, {})
+      .then(() => {
+        const currentChannelsState = this.channelsActive.getValue();
+
+        if (currentChannelsState.channels?.[channelId]) {
+          const updatedChannel = {
+            ...currentChannelsState.channels[channelId],
+            unread: 0,
+          };
+
+          currentChannelsState.channels[channelId] = updatedChannel;
+
+          this.channelsActive.next(currentChannelsState);
+        }
       })
       .catch((err) => console.error(err));
   }

@@ -24,6 +24,11 @@ type userUseCase interface {
 	GetUsersByChannelId(channelID string) ([]*models.User, error)
 }
 
+type channelUseCase interface {
+	MarkAsRead(channelID string, userID string) error
+	GetUnreadCount(channelID string, userID string) (uint64, error)
+}
+
 type postUseCase interface {
 	GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error)
 	Create(userID string, channelID string, message string) (*models.Post, error)

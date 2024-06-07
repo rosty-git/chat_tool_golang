@@ -11,6 +11,9 @@ type channelRepository interface {
 	GetByUserId(db *gorm.DB, userId string, channelType models.ChannelType) ([]*models.Channel, error)
 	GetMembers(db *gorm.DB, channelID string) ([]*models.ChannelMembers, error)
 	GetUsers(db *gorm.DB, channelID string) ([]*models.User, error)
+	IncrementTotalMsgCount(db *gorm.DB, channelID string) error
+	MarkAsRead(db *gorm.DB, channelID string, userID string) error
+	GetUnreadCount(db *gorm.DB, channelID string, userID string) (uint64, error)
 }
 
 type Service struct {
@@ -31,4 +34,16 @@ func (s *Service) GetByUserId(db *gorm.DB, userID string, channelType models.Cha
 
 func (s *Service) GetUsers(db *gorm.DB, channelID string) ([]*models.User, error) {
 	return s.channelRepository.GetUsers(db, channelID)
+}
+
+func (s *Service) IncrementTotalMsgCount(db *gorm.DB, channelID string) error {
+	return s.channelRepository.IncrementTotalMsgCount(db, channelID)
+}
+
+func (s *Service) MarkAsRead(db *gorm.DB, channelID string, userID string) error {
+	return s.channelRepository.MarkAsRead(db, channelID, userID)
+}
+
+func (s *Service) GetUnreadCount(db *gorm.DB, channelID string, userID string) (uint64, error) {
+	return s.channelRepository.GetUnreadCount(db, channelID, userID)
 }

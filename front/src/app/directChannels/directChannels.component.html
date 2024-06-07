@@ -28,6 +28,11 @@
               [userId]="channel.membersIds[0]"
               [userName]="channel.name"></app-user-avatar>
             <div class="pl-1 channel-name">{{ channel.name }}</div>
+            @if (channel.unread > 0) {
+              <div class="w-full flex right mx-5">
+                <div class="unread-badge">{{ channel.unread }}</div>
+              </div>
+            }
           </div>
         </li>
       }

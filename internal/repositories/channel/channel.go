@@ -51,3 +51,49 @@ func (r *Repository) GetUsers(db *gorm.DB, channelID string) ([]*models.User, er
 
 	return users, nil
 }
+
+func (r *Repository) IncrementTotalMsgCount(db *gorm.DB, channelID string) error {
+	return db.Model(&models.Channel{}).Where("id = ?", channelID).Update("total_msg_count", gorm.Expr("total_msg_count + ?", 1)).Error
+}
+
+func (r *Repository) MarkAsRead(db *gorm.DB, channelID string, userID string) error {
+	err := db.Transaction(func(tx *gorm.DB) error {
+		var channel models.Channel
+
+		if err := db.First(&channel, "id = ?", channelID).Error; err != nil {
+			return err
+		}
+
+		slog.Debug("Channel repo", "channel", channel)
+
+		if err := db.Model(&models.ChannelMembers{}).Where("user_id = ? AND channel_id = ?", userID, channelID).Update("msg_count", channel.TotalMsgCount).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+	return err
+}
+
+func (r *Repository) GetUnreadCount(db *gorm.DB, channelID string, userID string) (uint64, error) {
+	var count uint64
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		var channel models.Channel
+
+		if err := db.First(&channel, "id = ?", channelID).Error; err != nil {
+			return err
+		}
+
+		var channelMember models.ChannelMembers
+
+		if err := db.First(&channelMember, "user_id = ? AND channel_id = ?", userID, channelID).Error; err != nil {
+			return err
+		}
+
+		count = channel.TotalMsgCount - channelMember.MsgCount
+
+		return nil
+	})
+	return count, err
+}

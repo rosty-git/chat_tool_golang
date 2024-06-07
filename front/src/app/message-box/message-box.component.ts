@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilKeyChanged } from 'rxjs';
 
 import { GlobalVariable } from '../../global';
 import { DataService, type PostItem } from '../data.service';
@@ -42,19 +42,28 @@ export class MessageBoxComponent implements AfterViewInit {
     this.scrollContainer = this.scrollFrame as unknown as HTMLElement;
 
     this.dataService.channelsActive$.subscribe((value) => {
-      this.activeChannel.next(value.active);
-
-      if (!value.channels?.[value.active]) {
-        this.dataService.getPosts({
-          channelId: value.active,
-          limit: GlobalVariable.POSTS_PAGE_SIZE,
-        });
-      }
-
-      if (value?.channels?.[value.active]?.posts) {
-        this.posts.next(value.channels[value.active].posts);
+      const posts = value.channels?.[value.active]?.posts ?? [];
+      if (posts.length) {
+        this.posts.next(posts);
+      } else {
+        this.posts.next([]);
       }
     });
+
+    this.dataService.channelsActive$
+      .pipe(distinctUntilKeyChanged('active'))
+      .subscribe((value) => {
+        this.activeChannel.next(value.active);
+
+        if (!value.channels?.[value.active].posts?.length) {
+          this.dataService.getPosts({
+            channelId: value.active,
+            limit: GlobalVariable.POSTS_PAGE_SIZE,
+          });
+        }
+
+        this.dataService.markChannelAsRead(value.active);
+      });
 
     this.dataService.postsLoading$.subscribe((value) => {
       this.postsLoading$ = value;

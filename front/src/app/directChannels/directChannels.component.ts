@@ -33,11 +33,21 @@ export class DirectChannelsComponent {
   };
 
   constructor(private dataService: DataService) {
-    this.dataService.directChannels$.subscribe((value) => {
-      this.channels$ = value;
-    });
-
     this.dataService.channelsActive$.subscribe((value) => {
+      const directChannels: Channel[] = [];
+      // eslint-disable-next-line no-restricted-syntax, guard-for-in
+      for (const channelId in value.channels) {
+        if (value.channels[channelId].type === 'D') {
+          directChannels.push({
+            id: value.channels[channelId].id,
+            name: value.channels[channelId].name,
+            unread: value.channels[channelId].unread,
+            membersIds: value.channels[channelId].membersIds,
+          });
+        }
+      }
+      this.channels$ = directChannels;
+
       this.channelsState$ = value;
     });
   }

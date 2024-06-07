@@ -1,17 +1,16 @@
 ul {
-    list-style: none;
-  }
-  
+  list-style: none;
+}
 
 .contacts-main {
-    color: gainsboro;
-    cursor: pointer;
-    user-select: none;
+  color: gainsboro;
+  cursor: pointer;
+  user-select: none;
 
-    font-family: "Open Sans", sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    color:rgba(255, 255, 255, 0.64);
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.64);
 }
 
 .channels-title {
@@ -26,7 +25,7 @@ ul {
 }
 
 .li-active {
-  background-color: rgba(255, 255, 255, 0.08)
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .li-mouse-on {
@@ -36,4 +35,19 @@ ul {
 .channel-item {
   display: flex;
   align-items: center;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+.unread-badge {
+  background: white;
+  color: rgb(27, 63, 145);
+
+  min-width: 20px;
+  height: auto;
+  border-radius: 8px;
+  font-size: 11px;
+  text-align: center;
 }

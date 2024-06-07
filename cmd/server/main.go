@@ -17,6 +17,7 @@ import (
 	channelservice "github.com/elef-git/chat_tool_golang/internal/services/channel"
 	postservice "github.com/elef-git/chat_tool_golang/internal/services/post"
 	"github.com/elef-git/chat_tool_golang/internal/services/user"
+	channelusecase "github.com/elef-git/chat_tool_golang/internal/usecase/channel"
 	postusecase "github.com/elef-git/chat_tool_golang/internal/usecase/post"
 	userusecase "github.com/elef-git/chat_tool_golang/internal/usecase/user"
 	"github.com/elef-git/chat_tool_golang/pkg/logger"
@@ -70,10 +71,11 @@ func main() {
 
 	userUseCase := userusecase.NewUseCase(db, userService, channelService, wsBroadcastChan)
 	postUseCase := postusecase.NewUseCase(db, postService, channelService)
+	channelUseCase := channelusecase.NewUseCase(db, channelService)
 
 	go userUseCase.StatusesWatchdog()
 
-	userV1Handler := handler.NewUserV1Handler(c, userUseCase)
+	userV1Handler := handler.NewUserV1Handler(c, userUseCase, channelUseCase)
 	postV1Handler := handler.NewPostV1Handler(postUseCase)
 	wsV1Handler := handler.NewWsV1Handler(c, wsChan, wsBroadcastChan)
 

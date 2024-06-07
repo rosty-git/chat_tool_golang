@@ -15,6 +15,8 @@ type postService interface {
 
 type channelService interface {
 	GetUsers(db *gorm.DB, channelID string) ([]*models.User, error)
+	IncrementTotalMsgCount(db *gorm.DB, channelID string) error
+	MarkAsRead(db *gorm.DB, channelID string, userID string) error
 }
 
 type UseCase struct {
@@ -36,10 +38,28 @@ func (uc *UseCase) GetByChannelId(channelID string, limit int, before string, af
 }
 
 func (uc *UseCase) Create(userID string, channelID string, message string) (*models.Post, error) {
-	createdPost, err := uc.postService.Create(uc.db, userID, channelID, message)
-	if err != nil {
-		slog.Error("CreatePost", "err", err)
+	var createdPost *models.Post
 
+	err := uc.db.Transaction(func(tx *gorm.DB) error {
+		cp, err := uc.postService.Create(tx, userID, channelID, message)
+		if err != nil {
+			slog.Error("CreatePost", "err", err)
+
+			return nil
+		}
+		createdPost = cp
+
+		if err = uc.channelService.IncrementTotalMsgCount(tx, channelID); err != nil {
+			return err
+		}
+
+		if err = uc.channelService.MarkAsRead(tx, channelID, userID); err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
 

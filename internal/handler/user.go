@@ -10,14 +10,16 @@ import (
 )
 
 type UserV1Handler struct {
-	config      config
-	userUseCase userUseCase
+	config         config
+	userUseCase    userUseCase
+	channelUseCase channelUseCase
 }
 
-func NewUserV1Handler(config config, userUseCase userUseCase) *UserV1Handler {
+func NewUserV1Handler(config config, userUseCase userUseCase, channelUseCase channelUseCase) *UserV1Handler {
 	return &UserV1Handler{
-		config:      config,
-		userUseCase: userUseCase,
+		config:         config,
+		userUseCase:    userUseCase,
+		channelUseCase: channelUseCase,
 	}
 }
 
@@ -205,4 +207,40 @@ func (uh *UserV1Handler) GetUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+func (uh *UserV1Handler) MarkChannelAsRead(c *gin.Context) {
+	user, err := getUserFromRequest(c)
+	if err != nil {
+		slog.Error("user not found")
+
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	err = uh.channelUseCase.MarkAsRead(c.Param("channelID"), user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get channels"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (uh *UserV1Handler) GetUnreadCount(c *gin.Context) {
+	user, err := getUserFromRequest(c)
+	if err != nil {
+		slog.Error("user not found")
+
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	unreadCount, err := uh.channelUseCase.GetUnreadCount(c.Param("channelID"), user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get channels"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"unread": unreadCount})
 }
