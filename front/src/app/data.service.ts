@@ -1,7 +1,8 @@
-import { HttpParams } from '@angular/common/http';
+import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
+import { GlobalVariable } from '../global';
 import { ApiService } from './api.service';
 
 export type PostItem = {
@@ -88,14 +89,6 @@ export class DataService {
   });
 
   channelsActive$ = this.channelsActive.asObservable();
-
-  private openChannels = new BehaviorSubject<Channel[]>([]);
-
-  openChannels$ = this.openChannels.asObservable();
-
-  private directChannels = new BehaviorSubject<Channel[]>([]);
-
-  directChannels$ = this.directChannels.asObservable();
 
   private userId = new BehaviorSubject<string>('');
 
@@ -310,23 +303,33 @@ export class DataService {
     });
   }
 
-  sendPost(options: { message: string; channelId: string }) {
-    this.api
-      .post('/v1/api/posts', {
-        message: options.message,
-        channelId: options.channelId,
-      })
-      .then((resp) => {
-        console.log('post created', resp);
-
-        this.addPostAfter({
+  sendPost(options: {
+    message: string;
+    channelId: string;
+    withoutAdd?: boolean;
+  }) {
+    return new Promise((resolve, reject) => {
+      this.api
+        .post('/v1/api/posts', {
+          message: options.message,
           channelId: options.channelId,
-          post: (resp as { post: PostItem }).post,
+        })
+        .then((resp) => {
+          const { post } = resp as { post: PostItem };
+
+          if (!options.withoutAdd) {
+            this.addPostAfter({
+              channelId: options.channelId,
+              post,
+            });
+          }
+
+          resolve(post);
+        })
+        .catch((err: HttpErrorResponse) => {
+          reject(err);
         });
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    });
   }
 
   updateStatus(options: {
@@ -551,6 +554,35 @@ export class DataService {
       };
 
       this.channelsActive.next(updatedChannelsState);
+    }
+  }
+
+  addOfflineMessage(options: { channelId: string; message: string }) {
+    const currentChannelsState = this.channelsActive.getValue();
+
+    const userName = this.userName.getValue();
+
+    if (currentChannelsState.channels?.[options.channelId]) {
+      currentChannelsState.channels[options.channelId].posts?.push({
+        id: crypto.randomUUID().toString(),
+        message: options.message,
+        channel_id: options.channelId,
+        created_at: new Date().toUTCString(),
+        user: { name: userName },
+      });
+
+      this.channelsActive.next(currentChannelsState);
+
+      const timeoutID = setInterval(() => {
+        this.sendPost({ ...options, withoutAdd: true }).then(() => {
+          clearInterval(timeoutID);
+
+          this.getPosts({
+            channelId: options.channelId,
+            limit: GlobalVariable.POSTS_PAGE_SIZE,
+          });
+        });
+      }, 1000);
     }
   }
 }

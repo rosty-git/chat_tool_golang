@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { GlobalVariable } from '../global';
@@ -19,7 +19,7 @@ export class ApiService {
           next: (response) => {
             resole(response);
           },
-          error: (err: unknown) => {
+          error: (err: HttpErrorResponse) => {
             console.error('error', err);
 
             reject(err);
