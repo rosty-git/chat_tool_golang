@@ -41,6 +41,10 @@ type AuthCookieConfig struct {
 	HttpOnly      bool
 }
 
+type GormConfig struct {
+	Debug bool
+}
+
 type Config struct {
 	Env        string
 	Gin        GinConfig
@@ -48,6 +52,7 @@ type Config struct {
 	Jwt        JwtConfig
 	Cors       CorsConfig
 	AuthCookie AuthCookieConfig
+	Gorm       GormConfig
 }
 
 func NewConfig() *Config {
@@ -150,6 +155,15 @@ func NewConfig() *Config {
 		panic("AUTH_COOKIE_HTTPONLY env variable not valid")
 	}
 
+	GormDebugBool := false
+	GormDebug := os.Getenv("GORM_DEBUG")
+	if GormDebug != "" {
+		GormDebugBool, err = strconv.ParseBool(GormDebug)
+		if err != nil {
+			panic("GORM_DEBUG env variable not valid")
+		}
+	}
+
 	return &Config{
 		Env: env,
 		Gin: GinConfig{
@@ -176,6 +190,9 @@ func NewConfig() *Config {
 			Domain:        AuthCookieDomain,
 			Secure:        AuthCookieSecureBool,
 			HttpOnly:      AuthCookieHttpOnlyBool,
+		},
+		Gorm: GormConfig{
+			Debug: GormDebugBool,
 		},
 	}
 }
@@ -226,4 +243,8 @@ func (c *Config) GetAuthCookieHttpOnly() bool {
 
 func (c *Config) GetDsn() string {
 	return c.MySql.ToDsnString()
+}
+
+func (c *Config) GetGormDebug() bool {
+	return c.Gorm.Debug
 }
