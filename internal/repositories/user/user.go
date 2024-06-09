@@ -105,7 +105,7 @@ func (r *Repository) GetStatus(db *gorm.DB, userID string) (*models.Status, erro
 }
 
 func (r *Repository) GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error) {
-	cutoffTime := time.Now().Add(-1 * time.Minute)
+	cutoffTime := time.Now().Add(-5 * time.Minute)
 
 	// Prepare the query
 	var statuses []*models.Status
