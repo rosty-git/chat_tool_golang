@@ -109,7 +109,7 @@ func (r *Repository) GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error
 
 	// Prepare the query
 	var statuses []*models.Status
-	err := db.Where("status IN ? AND manual = ? AND last_activity_at < ?", []string{"online", "away"}, false, cutoffTime).Find(&statuses).Error
+	err := db.Where("status IN ? AND `manual` = ? AND last_activity_at < ?", []string{"online", "away"}, false, cutoffTime).Find(&statuses).Error
 	if err != nil {
 		return nil, err
 	}
