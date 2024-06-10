@@ -43,10 +43,17 @@ export class MessageInputComponent {
               channelId: this.channelsState$.active,
             });
           }
-        })
-        .finally(() => {
-          this.messageForm.reset();
         });
+
+      this.messageForm.reset();
+    }
+  }
+
+  handleEnterKey(event: Event) {
+    const keyboardEvent = event as KeyboardEvent;
+
+    if (keyboardEvent.key === 'Enter' && !keyboardEvent.shiftKey) {
+      event.preventDefault();
     }
   }
 }
