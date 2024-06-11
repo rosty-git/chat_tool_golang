@@ -2,8 +2,8 @@ import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-import { GlobalVariable } from '../global';
 import { ApiService } from './api.service';
+import { GlobalVariable } from '../global';
 
 export type PostItem = {
   id: string;
@@ -97,6 +97,12 @@ export class DataService {
   private userName = new BehaviorSubject<string>('');
 
   userName$ = this.userName.asObservable();
+
+  offlineMessages: PostItem[] = [];
+
+  // offlineMessagesIntervalId = 0;
+
+  offlineMessagesSending = false;
 
   private setPosts(channelId: string, newPosts: PostItem[]) {
     const currentChannelsState = this.channelsActive.getValue();
@@ -557,6 +563,32 @@ export class DataService {
     }
   }
 
+  sendOfflineMessages(
+    channelsIds: Set<string> = new Set<string>([]),
+  ): Promise<string[]> {
+    return new Promise((resolve) => {
+      const post = this.offlineMessages.shift();
+
+      if (post) {
+        let setIntervalId = 0;
+
+        setIntervalId = setInterval(() => {
+          this.sendPost({
+            channelId: post.channel_id,
+            message: post.message,
+            withoutAdd: true,
+          }).then(() => {
+            clearInterval(setIntervalId);
+
+            this.sendOfflineMessages(channelsIds).then(resolve);
+          });
+        }, 1000) as unknown as number;
+      } else {
+        resolve(Array.from(channelsIds));
+      }
+    });
+  }
+
   addOfflineMessage(options: { channelId: string; message: string }) {
     const currentChannelsState = this.channelsActive.getValue();
 
@@ -573,16 +605,30 @@ export class DataService {
 
       this.channelsActive.next(currentChannelsState);
 
-      const timeoutID = setInterval(() => {
-        this.sendPost({ ...options, withoutAdd: true }).then(() => {
-          clearInterval(timeoutID);
+      this.offlineMessages.push({
+        id: crypto.randomUUID().toString(),
+        message: options.message,
+        channel_id: options.channelId,
+        created_at: new Date().toUTCString(),
+        user: { name: userName },
+      });
 
-          this.getPosts({
-            channelId: options.channelId,
-            limit: GlobalVariable.POSTS_PAGE_SIZE,
-          });
+      if (!this.offlineMessagesSending) {
+        this.offlineMessagesSending = true;
+
+        this.sendOfflineMessages().then(async (channelsIds) => {
+          this.offlineMessagesSending = false;
+
+          // eslint-disable-next-line no-restricted-syntax
+          for (const channelId of channelsIds) {
+            // eslint-disable-next-line no-await-in-loop
+            await this.getPosts({
+              channelId,
+              limit: GlobalVariable.POSTS_PAGE_SIZE,
+            });
+          }
         });
-      }, 1000);
+      }
     }
   }
 }

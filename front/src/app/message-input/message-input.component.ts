@@ -31,15 +31,17 @@ export class MessageInputComponent {
 
   sendMessage() {
     if (this.messageForm.value.message) {
+      const message = this.messageForm.value.message as string;
+
       this.dataService
         .sendPost({
-          message: this.messageForm.value.message,
+          message,
           channelId: this.channelsState$.active,
         })
         .catch((err: HttpErrorResponse) => {
           if (err.status === 0) {
             this.dataService.addOfflineMessage({
-              message: this.messageForm.value.message as string,
+              message,
               channelId: this.channelsState$.active,
             });
           }
@@ -49,6 +51,7 @@ export class MessageInputComponent {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   handleEnterKey(event: Event) {
     const keyboardEvent = event as KeyboardEvent;
 
