@@ -11,7 +11,7 @@ import { WebSocketService } from '../web-socket.service';
 
 type WebSocketMsg = {
   ToUsersIDs: string[];
-  Action: 'new-post' | 'status-updated';
+  Action: 'new-post' | 'status-updated' | 'new-own-post';
   Payload: NewPostPayload | NewStatusPayload;
 };
 
@@ -110,6 +110,13 @@ export class MessengerComponent implements OnInit, OnDestroy {
             webSocketMsg.Payload.userId,
             webSocketMsg.Payload.status,
           );
+        } else if (webSocketMsg.Action === 'new-own-post') {
+          const payload = webSocketMsg.Payload as NewPostPayload;
+
+          this.dataService.getPostsAfter({
+            channelId: payload.channel_id,
+            limit: GlobalVariable.POSTS_PAGE_SIZE,
+          });
         }
       });
 

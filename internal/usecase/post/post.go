@@ -10,7 +10,8 @@ import (
 type postService interface {
 	GetByChannelId(db *gorm.DB, channelID string, limit int, before string, after string) ([]*models.Post, error)
 	Create(db *gorm.DB, userID string, channelID string, message string) (*models.Post, error)
-	NotifyReceivers(userID []string, message interface{})
+	NotifyReceivers(usersIDs []string, message interface{})
+	NotifySender(userID string, message interface{})
 }
 
 type channelService interface {
@@ -77,6 +78,8 @@ func (uc *UseCase) Create(userID string, channelID string, message string) (*mod
 	}
 
 	uc.postService.NotifyReceivers(usersIDs, createdPost)
+
+	uc.postService.NotifySender(userID, createdPost)
 
 	return createdPost, nil
 }

@@ -37,6 +37,7 @@ export class MessageInputComponent {
         .sendPost({
           message,
           channelId: this.channelsState$.active,
+          withoutAdd: true,
         })
         .catch((err: HttpErrorResponse) => {
           if (err.status === 0) {

@@ -36,3 +36,9 @@ func (s *Service) NotifyReceivers(IDs []string, message interface{}) {
 
 	s.wsChannel <- wsMessage
 }
+
+func (s *Service) NotifySender(userID string, message interface{}) {
+	wsMessage := handler.WsMessage{ToUsersIDs: []string{userID}, Action: "new-own-post", Payload: message}
+
+	s.wsChannel <- wsMessage
+}
