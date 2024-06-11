@@ -5,7 +5,9 @@
     <span class="user-name">{{ userName }}</span>
     <span class="created-at">{{ created_at | date: "short" }}</span>
   </div>
-  <div class="message-body">
+  <div
+    class="message-body"
+    [ngClass]="{ 'message-body-offline': offline }">
     <p>{{ message }}</p>
   </div>
 </div>

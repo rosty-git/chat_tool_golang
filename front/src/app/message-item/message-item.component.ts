@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component, Input,
-} from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-message-item',
@@ -18,4 +16,6 @@ export class MessageItemComponent {
   @Input() id: string = '';
 
   @Input() created_at: string = '';
+
+  @Input() offline: boolean = false;
 }

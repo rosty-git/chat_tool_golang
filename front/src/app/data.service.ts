@@ -2,8 +2,8 @@ import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-import { ApiService } from './api.service';
 import { GlobalVariable } from '../global';
+import { ApiService } from './api.service';
 
 export type PostItem = {
   id: string;
@@ -13,6 +13,7 @@ export type PostItem = {
   user: {
     name: string;
   };
+  offline?: boolean;
 };
 
 export type GetPostsResp = {
@@ -580,6 +581,8 @@ export class DataService {
           }).then(() => {
             clearInterval(setIntervalId);
 
+            channelsIds.add(post.channel_id);
+
             this.sendOfflineMessages(channelsIds).then(resolve);
           });
         }, 1000) as unknown as number;
@@ -601,6 +604,7 @@ export class DataService {
         channel_id: options.channelId,
         created_at: new Date().toUTCString(),
         user: { name: userName },
+        offline: true,
       });
 
       this.channelsActive.next(currentChannelsState);

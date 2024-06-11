@@ -98,7 +98,8 @@ export class MessageBoxComponent implements AfterViewInit {
     }, 1);
   }
 
-  scrolled(event: Event): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  scrolled(_event: Event): void {
     this.isNearBottom = this.isUserNearBottom();
   }
 

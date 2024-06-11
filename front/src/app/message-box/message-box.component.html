@@ -21,7 +21,8 @@
           [message]="post.message"
           [userName]="post.user.name"
           [id]="post.id"
-          [created_at]="post.created_at"></app-message-item>
+          [created_at]="post.created_at"
+          [offline]="post.offline ? post.offline : false"></app-message-item>
       </div>
     }
   }
