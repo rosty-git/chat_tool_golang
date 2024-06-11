@@ -63,6 +63,7 @@ func (uh *PostV1Handler) AddPost(c *gin.Context) {
 	type MessageForm struct {
 		ChannelId string `json:"channelId"`
 		Message   string `json:"message"`
+		FrontId   string `json:"frontId"`
 	}
 
 	var mf MessageForm
@@ -85,7 +86,7 @@ func (uh *PostV1Handler) AddPost(c *gin.Context) {
 
 	slog.Info("AddPost", "user", user)
 
-	post, err := uh.postUseCase.Create(user.ID, mf.ChannelId, mf.Message)
+	post, err := uh.postUseCase.Create(user.ID, mf.ChannelId, mf.Message, mf.FrontId)
 	if err != nil {
 		slog.Error("Create post", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})

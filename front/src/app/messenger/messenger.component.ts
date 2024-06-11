@@ -12,7 +12,7 @@ import { WebSocketService } from '../web-socket.service';
 type WebSocketMsg = {
   ToUsersIDs: string[];
   Action: 'new-post' | 'status-updated' | 'new-own-post';
-  Payload: NewPostPayload | NewStatusPayload;
+  Payload: NewPostPayload | NewStatusPayload | NewOwnPostPayload;
 };
 
 type NewPostPayload = {
@@ -28,6 +28,11 @@ type NewPostPayload = {
 type NewStatusPayload = {
   userId: string;
   status: 'online' | 'away' | 'dnd' | 'offline';
+};
+
+type NewOwnPostPayload = {
+  createdPost: NewPostPayload;
+  frontId: string;
 };
 
 const USER_UPDATE_ONLINE_STATUS_INTERVAL = 90_000;
@@ -111,12 +116,20 @@ export class MessengerComponent implements OnInit, OnDestroy {
             webSocketMsg.Payload.status,
           );
         } else if (webSocketMsg.Action === 'new-own-post') {
-          const payload = webSocketMsg.Payload as NewPostPayload;
+          const payload = webSocketMsg.Payload as NewOwnPostPayload;
 
-          this.dataService.getPostsAfter({
-            channelId: payload.channel_id,
-            limit: GlobalVariable.POSTS_PAGE_SIZE,
-          });
+          if (
+            this.channelsState$.channels?.[
+              payload.createdPost.channel_id
+            ].posts?.some((post) => post.frontId === payload.frontId)
+          ) {
+            // console.log();
+          } else {
+            this.dataService.getPostsAfter({
+              channelId: payload.createdPost.channel_id,
+              limit: GlobalVariable.POSTS_PAGE_SIZE,
+            });
+          }
         }
       });
 

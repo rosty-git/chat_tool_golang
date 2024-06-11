@@ -33,17 +33,20 @@ export class MessageInputComponent {
     if (this.messageForm.value.message) {
       const message = this.messageForm.value.message as string;
 
+      const frontId = crypto.randomUUID().toString();
+
       this.dataService
         .sendPost({
           message,
           channelId: this.channelsState$.active,
-          withoutAdd: true,
+          frontId,
         })
         .catch((err: HttpErrorResponse) => {
           if (err.status === 0) {
             this.dataService.addOfflineMessage({
               message,
               channelId: this.channelsState$.active,
+              frontId,
             });
           }
         });

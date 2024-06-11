@@ -14,6 +14,7 @@ export type PostItem = {
     name: string;
   };
   offline?: boolean;
+  frontId?: string;
 };
 
 export type GetPostsResp = {
@@ -101,8 +102,6 @@ export class DataService {
 
   offlineMessages: PostItem[] = [];
 
-  // offlineMessagesIntervalId = 0;
-
   offlineMessagesSending = false;
 
   private setPosts(channelId: string, newPosts: PostItem[]) {
@@ -125,8 +124,6 @@ export class DataService {
   }
 
   private addPostAfter(options: { channelId: string; post: PostItem }) {
-    console.log('addPostAfter', this, options);
-
     const currentChannelsState = this.channelsActive.getValue();
 
     if (currentChannelsState.channels?.[options.channelId]) {
@@ -313,23 +310,34 @@ export class DataService {
   sendPost(options: {
     message: string;
     channelId: string;
+    frontId: string;
     withoutAdd?: boolean;
   }) {
     return new Promise((resolve, reject) => {
+      if (!options.withoutAdd) {
+        this.addPostAfter({
+          channelId: options.channelId,
+          post: {
+            id: options.frontId,
+            frontId: options.frontId,
+            message: options.message,
+            created_at: new Date().toISOString(),
+            channel_id: options.channelId,
+            user: {
+              name: this.userName.getValue(),
+            },
+          },
+        });
+      }
+
       this.api
         .post('/v1/api/posts', {
           message: options.message,
           channelId: options.channelId,
+          frontId: options.frontId,
         })
         .then((resp) => {
           const { post } = resp as { post: PostItem };
-
-          if (!options.withoutAdd) {
-            this.addPostAfter({
-              channelId: options.channelId,
-              post,
-            });
-          }
 
           resolve(post);
         })
@@ -578,6 +586,7 @@ export class DataService {
             channelId: post.channel_id,
             message: post.message,
             withoutAdd: true,
+            frontId: post.frontId ? post.frontId : '',
           }).then(() => {
             clearInterval(setIntervalId);
 
@@ -592,7 +601,11 @@ export class DataService {
     });
   }
 
-  addOfflineMessage(options: { channelId: string; message: string }) {
+  addOfflineMessage(options: {
+    channelId: string;
+    message: string;
+    frontId: string;
+  }) {
     const currentChannelsState = this.channelsActive.getValue();
 
     const userName = this.userName.getValue();
@@ -605,6 +618,7 @@ export class DataService {
         created_at: new Date().toUTCString(),
         user: { name: userName },
         offline: true,
+        frontId: options.frontId,
       });
 
       this.channelsActive.next(currentChannelsState);
@@ -615,6 +629,7 @@ export class DataService {
         channel_id: options.channelId,
         created_at: new Date().toUTCString(),
         user: { name: userName },
+        frontId: options.frontId,
       });
 
       if (!this.offlineMessagesSending) {

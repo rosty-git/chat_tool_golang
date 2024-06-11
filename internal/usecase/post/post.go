@@ -38,7 +38,7 @@ func (uc *UseCase) GetByChannelId(channelID string, limit int, before string, af
 	return uc.postService.GetByChannelId(uc.db, channelID, limit, before, after)
 }
 
-func (uc *UseCase) Create(userID string, channelID string, message string) (*models.Post, error) {
+func (uc *UseCase) Create(userID string, channelID string, message string, frontId string) (*models.Post, error) {
 	var createdPost *models.Post
 
 	err := uc.db.Transaction(func(tx *gorm.DB) error {
@@ -79,7 +79,12 @@ func (uc *UseCase) Create(userID string, channelID string, message string) (*mod
 
 	uc.postService.NotifyReceivers(usersIDs, createdPost)
 
-	uc.postService.NotifySender(userID, createdPost)
+	createdPostMap := map[string]interface{}{
+		"createdPost": createdPost,
+		"frontId":     frontId,
+	}
+
+	uc.postService.NotifySender(userID, createdPostMap)
 
 	return createdPost, nil
 }
