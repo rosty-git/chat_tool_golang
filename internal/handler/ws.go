@@ -2,10 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"slices"
+	"time"
 
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"github.com/gin-gonic/gin"
@@ -22,7 +22,7 @@ type WsV1Handler struct {
 	config           config
 	channel          chan WsMessage
 	broadcastChannel chan WsMessage
-	connMap          map[string][]*websocket.Conn
+	connMap          map[string]map[*websocket.Conn]bool
 }
 
 func NewWsV1Handler(config config, channel chan WsMessage, broadcastChannel chan WsMessage) *WsV1Handler {
@@ -30,14 +30,8 @@ func NewWsV1Handler(config config, channel chan WsMessage, broadcastChannel chan
 		config:           config,
 		channel:          channel,
 		broadcastChannel: broadcastChannel,
-		connMap:          make(map[string][]*websocket.Conn),
+		connMap:          make(map[string]map[*websocket.Conn]bool),
 	}
-}
-
-func RemoveConnection(s []*websocket.Conn, index int) []*websocket.Conn {
-	ret := make([]*websocket.Conn, 0)
-	ret = append(ret, s[:index]...)
-	return append(ret, s[index+1:]...)
 }
 
 func (wh *WsV1Handler) NewWsConnection(c *gin.Context) {
@@ -68,11 +62,18 @@ func (wh *WsV1Handler) NewWsConnection(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	connectionsSlice := wh.connMap[user.ID]
+	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	conn.SetPongHandler(func(string) error {
+		slog.Info("pong")
+		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		return nil
+	})
 
-	connectionsSlice = append(connectionsSlice, conn)
+	if _, ok := wh.connMap[user.ID]; !ok {
+		wh.connMap[user.ID] = make(map[*websocket.Conn]bool)
+	}
 
-	wh.connMap[user.ID] = connectionsSlice
+	wh.connMap[user.ID][conn] = true
 
 	for {
 		select {
@@ -87,19 +88,15 @@ func (wh *WsV1Handler) NewWsConnection(c *gin.Context) {
 						slog.Error("Marshal", "err", err)
 					}
 
-					for i, userConn := range userConnections {
+					for userConn, _ := range userConnections {
 						err = userConn.WriteMessage(websocket.TextMessage, bytes)
 						if err != nil {
 							slog.Error("WriteMessage:", "err", err.Error())
 
 							userConn.Close()
 
-							wh.connMap[userId] = RemoveConnection(userConnections, i)
+							delete(userConnections, userConn)
 						}
-					}
-
-					if len(wh.connMap[userId]) == 0 {
-						delete(wh.connMap, userId)
 					}
 				} else {
 					slog.Info("userConn not found")
@@ -109,26 +106,22 @@ func (wh *WsV1Handler) NewWsConnection(c *gin.Context) {
 			slog.Info("broadcast msg", "bcMsg", bcMsg)
 
 			for userID, connections := range wh.connMap {
-				fmt.Println("userID:", userID, "connections:", connections)
+				slog.Info("WS Handler", "userID:", userID, "connections:", connections)
 
 				bytes, err := json.Marshal(bcMsg)
 				if err != nil {
 					slog.Error("Marshal", "err", err)
 				}
 
-				for i, userConn := range connections {
+				for userConn, _ := range connections {
 					err = userConn.WriteMessage(websocket.TextMessage, bytes)
 					if err != nil {
 						slog.Error("WriteMessage:", "err", err.Error())
 
 						userConn.Close()
 
-						wh.connMap[userID] = RemoveConnection(connections, i)
+						delete(connections, userConn)
 					}
-				}
-
-				if len(wh.connMap[userID]) == 0 {
-					delete(wh.connMap, userID)
 				}
 			}
 		}
