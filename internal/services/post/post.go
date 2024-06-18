@@ -8,6 +8,7 @@ import (
 
 type postRepository interface {
 	GetByChannelId(db *gorm.DB, channelID string, limit int, before string, after string) ([]*models.Post, error)
+	Get(db *gorm.DB, id string) (*models.Post, error)
 	Create(db *gorm.DB, userID string, channelID string, message string) (*models.Post, error)
 }
 
@@ -25,6 +26,10 @@ func NewService(channelRepository postRepository, wsChannel chan handler.WsMessa
 
 func (s *Service) GetByChannelId(db *gorm.DB, channelID string, limit int, before string, after string) ([]*models.Post, error) {
 	return s.postRepository.GetByChannelId(db, channelID, limit, before, after)
+}
+
+func (s *Service) GetById(db *gorm.DB, id string) (*models.Post, error) {
+	return s.postRepository.Get(db, id)
 }
 
 func (s *Service) Create(db *gorm.DB, userID string, channelID string, message string) (*models.Post, error) {

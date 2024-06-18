@@ -11,13 +11,17 @@ import (
 	"github.com/elef-git/chat_tool_golang/internal/handler"
 	"github.com/elef-git/chat_tool_golang/internal/middleware"
 	channelrepository "github.com/elef-git/chat_tool_golang/internal/repositories/channel"
+	filerepository "github.com/elef-git/chat_tool_golang/internal/repositories/file"
 	postrepository "github.com/elef-git/chat_tool_golang/internal/repositories/post"
 	"github.com/elef-git/chat_tool_golang/internal/repositories/user"
 	"github.com/elef-git/chat_tool_golang/internal/routers"
 	channelservice "github.com/elef-git/chat_tool_golang/internal/services/channel"
+	fileservice "github.com/elef-git/chat_tool_golang/internal/services/file"
 	postservice "github.com/elef-git/chat_tool_golang/internal/services/post"
 	"github.com/elef-git/chat_tool_golang/internal/services/user"
+	"github.com/elef-git/chat_tool_golang/internal/storages/s3"
 	channelusecase "github.com/elef-git/chat_tool_golang/internal/usecase/channel"
+	fileusecase "github.com/elef-git/chat_tool_golang/internal/usecase/file"
 	postusecase "github.com/elef-git/chat_tool_golang/internal/usecase/post"
 	userusecase "github.com/elef-git/chat_tool_golang/internal/usecase/user"
 	"github.com/elef-git/chat_tool_golang/pkg/logger"
@@ -64,23 +68,29 @@ func main() {
 	userRepo := userrepository.NewRepository()
 	channelRepo := channelrepository.NewRepository()
 	postRepo := postrepository.NewRepository()
+	fileRepo := filerepository.NewRepository()
 
 	userService := userservice.NewService(userRepo, c)
 	channelService := channelservice.NewService(channelRepo)
 	postService := postservice.NewService(postRepo, wsChan)
+	fileService := fileservice.NewService(fileRepo)
+
+	s3Storage := s3.NewStorage(c.GetAwsS3Bucket())
 
 	userUseCase := userusecase.NewUseCase(db, userService, channelService, wsBroadcastChan)
-	postUseCase := postusecase.NewUseCase(db, postService, channelService)
+	postUseCase := postusecase.NewUseCase(db, postService, channelService, fileService)
 	channelUseCase := channelusecase.NewUseCase(db, channelService)
+	fileUseCase := fileusecase.NewUseCase(db, fileService, s3Storage)
 
 	go userUseCase.StatusesWatchdog()
 
 	userV1Handler := handler.NewUserV1Handler(c, userUseCase, channelUseCase)
 	postV1Handler := handler.NewPostV1Handler(postUseCase)
 	wsV1Handler := handler.NewWsV1Handler(c, wsChan, wsBroadcastChan)
+	fileV1Handler := handler.NewFileV1Handler(fileUseCase)
 
 	m := middleware.NewMiddleware(userRepo, c, db)
-	router := routers.InitRouter(c.Env, userV1Handler, wsV1Handler, postV1Handler, m, c)
+	router := routers.InitRouter(c.Env, userV1Handler, wsV1Handler, postV1Handler, fileV1Handler, m, c)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", c.Gin.Port),

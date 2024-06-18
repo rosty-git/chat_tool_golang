@@ -8,4 +8,5 @@ type Post struct {
 	ChannelID string  `json:"channel_id" gorm:"size:191"`
 	Channel   Channel `json:"-"`
 	Message   string  `json:"message"`
+	Files     []File  `json:"files"`
 }

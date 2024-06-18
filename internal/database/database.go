@@ -48,7 +48,7 @@ func New(c Config) (*gorm.DB, func() error, error) {
 }
 
 func Initialize(db *gorm.DB) error {
-	err := db.AutoMigrate(&models.User{}, &models.Channel{}, &models.ChannelMembers{}, &models.Post{}, &models.Status{})
+	err := db.AutoMigrate(&models.User{}, &models.Channel{}, &models.ChannelMembers{}, &models.Post{}, &models.Status{}, &models.File{}, &models.TmpFile{})
 
 	if db.Migrator().HasTable(&models.User{}) && db.Migrator().HasTable(&models.Channel{}) {
 		var usersCount int64

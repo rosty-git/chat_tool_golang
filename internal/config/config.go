@@ -45,6 +45,11 @@ type GormConfig struct {
 	Debug bool
 }
 
+type AwsConfig struct {
+	Region   string
+	S3Bucket string
+}
+
 type Config struct {
 	Env        string
 	Gin        GinConfig
@@ -53,6 +58,7 @@ type Config struct {
 	Cors       CorsConfig
 	AuthCookie AuthCookieConfig
 	Gorm       GormConfig
+	Aws        AwsConfig
 }
 
 func NewConfig() *Config {
@@ -164,6 +170,16 @@ func NewConfig() *Config {
 		}
 	}
 
+	awsRegion := os.Getenv("AWS_REGION")
+	if awsRegion == "" {
+		panic("AWS_REGION env variable not set")
+	}
+
+	awsS3Bucket := os.Getenv("AWS_S3_BUCKET")
+	if awsS3Bucket == "" {
+		panic("AWS_S3_BUCKET env variable not set")
+	}
+
 	return &Config{
 		Env: env,
 		Gin: GinConfig{
@@ -193,6 +209,10 @@ func NewConfig() *Config {
 		},
 		Gorm: GormConfig{
 			Debug: GormDebugBool,
+		},
+		Aws: AwsConfig{
+			Region:   awsRegion,
+			S3Bucket: awsS3Bucket,
 		},
 	}
 }
@@ -247,4 +267,12 @@ func (c *Config) GetDsn() string {
 
 func (c *Config) GetGormDebug() bool {
 	return c.Gorm.Debug
+}
+
+func (c *Config) GetAwsRegion() string {
+	return c.Aws.Region
+}
+
+func (c *Config) GetAwsS3Bucket() string {
+	return c.Aws.S3Bucket
 }

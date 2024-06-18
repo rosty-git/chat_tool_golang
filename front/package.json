@@ -24,6 +24,7 @@
     "@ng-icons/heroicons": "^27.5.0",
     "@ngrx/signals": "^17.2.0",
     "@ngrx/store": "^17.2.0",
+    "axios": "^1.7.2",
     "crc-32": "^1.2.2",
     "ngx-infinite-scroll": "^17.0.0",
     "ngx-socket-io": "^4.6.1",

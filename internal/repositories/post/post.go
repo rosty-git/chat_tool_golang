@@ -19,7 +19,7 @@ func (r *Repository) Get(db *gorm.DB, id string) (*models.Post, error) {
 
 	var post models.Post
 
-	result := db.Preload("User").First(&post, "id = ?", id)
+	result := db.Preload("User").Preload("Files").First(&post, "id = ?", id)
 
 	return &post, result.Error
 }
@@ -38,7 +38,7 @@ func (r *Repository) GetByChannelId(db *gorm.DB, channelID string, limit int, be
 			return nil, err
 		}
 
-		result = db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+		result = db.Limit(limit).Model(&models.Post{}).Preload("User").Preload("Files").Where(
 			"channel_id = ? AND created_at < ?", channelID, beforeCreatedAt,
 		).Order("created_at desc").Find(&posts)
 	} else if after != "" {
@@ -49,11 +49,11 @@ func (r *Repository) GetByChannelId(db *gorm.DB, channelID string, limit int, be
 			return nil, err
 		}
 
-		result = db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+		result = db.Limit(limit).Model(&models.Post{}).Preload("User").Preload("Files").Where(
 			"channel_id = ? AND created_at > ?", channelID, afterCreatedAt,
 		).Order("created_at desc").Find(&posts)
 	} else {
-		result = db.Limit(limit).Model(&models.Post{}).Preload("User").Where(
+		result = db.Limit(limit).Model(&models.Post{}).Preload("User").Preload("Files").Where(
 			"channel_id = ?", channelID,
 		).Order("created_at desc").Find(&posts)
 	}

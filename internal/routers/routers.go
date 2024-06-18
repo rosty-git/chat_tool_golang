@@ -18,7 +18,7 @@ type config interface {
 	GetCorsAllowOrigins() []string
 }
 
-func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *handler.WsV1Handler, postV1Handler *handler.PostV1Handler, m middleware, c config) *gin.Engine {
+func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *handler.WsV1Handler, postV1Handler *handler.PostV1Handler, fileV1Handler *handler.FileV1Handler, m middleware, c config) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
@@ -54,6 +54,10 @@ func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *h
 		apiV1.PUT("/statuses", userV1Handler.UpdateStatus)
 		apiV1.GET("/statuses/:userID", userV1Handler.GetStatus)
 		apiV1.GET("/users/iam", userV1Handler.GetUser)
+		apiV1.POST("/files", fileV1Handler.Create)
+		apiV1.PUT("/files/:fileID/:s3Key", fileV1Handler.SetS3Key)
+		apiV1.DELETE("/files/:fileID", fileV1Handler.Delete)
+		apiV1.POST("/files/get-presigned-url/:key", fileV1Handler.GetPresignUrl)
 	}
 	rootV1.GET("/ws/", m.RequireAuth(), wsV1Handler.NewWsConnection)
 

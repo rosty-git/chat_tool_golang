@@ -1,5 +1,143 @@
+.message-container {
+  border-radius: 4px;
+}
+
 .custom-textarea {
-    resize: none;
-    outline: none;
-    height: 46px;
-  }
+  resize: none;
+  outline: none;
+  height: 46px;
+}
+
+.send-button {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor:default;
+}
+
+.send-button-active {
+  background-color: #1c58d9;
+  cursor: pointer;
+}
+
+.send-button-disabled {
+  background-color: rgba(63, 67, 80, 0.08);
+}
+
+.material-symbols-outlined-disabled {
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 300,
+    "GRAD" 0,
+    "opsz" 24;
+  color: rgba(63, 67, 80, 0.32);
+}
+
+.material-symbols-outlined-active {
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 300,
+    "GRAD" 0,
+    "opsz" 24;
+  color: white;
+}
+
+.attach-button {
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.attach-button:hover {
+  background-color: rgba(63, 67, 80, 0.08);
+}
+
+.attach-icon {
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 200,
+  'GRAD' -25,
+  'opsz' 24;
+  font-size: large;
+}
+
+.file-input {
+  display: none;
+}
+
+
+.file-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.file-item {
+  position: relative;
+  // text-align: center;
+  display: flex;
+    align-items: center;
+
+  border: 1px solid;
+  border-radius: 4px;
+  border-color: rgba(63, 67, 80, 0.2);
+}
+
+.file-item img {
+  width: 100%;
+  height: auto;
+}
+
+.file-item .delete-icon {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+}
+
+.file-name {
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.file-meta {
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.img-plasholder {
+  width: 62px;
+  height: 62px;
+}
+
+.img-container {
+  display: flex;
+  width: 62px;
+  height: 62px;
+}
+
+.file-delete {
+  display: flex;
+  align-items: center;
+
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: gray;
+}
+
+.file-delete:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+}

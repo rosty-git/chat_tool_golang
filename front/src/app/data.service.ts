@@ -45,6 +45,15 @@ export type ChannelsResp = {
   channels: Channel[];
 };
 
+export type FrontFile = {
+  id?: string;
+  name: string;
+  size: number;
+  type: string;
+  ext: string;
+  blobUrl?: string;
+};
+
 const getFirstAndLastCreatedAt = (
   posts: PostItem[],
 ): { last: string; first: string } => {
@@ -312,6 +321,7 @@ export class DataService {
     channelId: string;
     frontId: string;
     withoutAdd?: boolean;
+    files?: FrontFile[];
   }) {
     return new Promise((resolve, reject) => {
       if (!options.withoutAdd) {
@@ -335,6 +345,7 @@ export class DataService {
           message: options.message,
           channelId: options.channelId,
           frontId: options.frontId,
+          files: options.files?.map((file) => file.id),
         })
         .then((resp) => {
           const { post } = resp as { post: PostItem };

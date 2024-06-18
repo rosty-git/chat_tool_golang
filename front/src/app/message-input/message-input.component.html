@@ -1,7 +1,6 @@
-<div class="basis-1/5 border-2">
+<div class="basis-1/5 border-2 message-container">
   <form
     [formGroup]="messageForm"
-    (ngSubmit)="sendMessage()"
     (keydown.enter)="sendMessage()">
     <div class="-space-y-px">
       <textarea
@@ -11,18 +10,70 @@
         required
         (keydown.enter)="handleEnterKey($event)"></textarea>
     </div>
+    <div class="file-container px-1">
+      @for (file of files; track file) {
+        <div class="file-item p-2">
+          @if (file.type.startsWith("image") && file.blobUrl) {
+            <div class="img-container">
+              <img
+                src="{{ file.blobUrl }}"
+                alt="{{ file.name }}" />
+            </div>
+          } @else if (file.type === "application/pdf") {
+            <span class="material-symbols-outlined"> picture_as_pdf </span>
+          } @else {
+            <div class="img-plasholder"></div>
+          }
+          <div class="file-info px-1">
+            <div class="file-name">{{ file.name }}</div>
+            <div class="file-meta">
+              <div>{{ file.type.split("/")[1].toUpperCase() }} {{ (file.size / 1024).toFixed(0) }} KB</div>
+            </div>
+          </div>
+          <div class="w-8"></div>
+          <div>
+            <a
+              class="file-delete"
+              (click)="deleteFile(file.name, file.size, file.type)">
+              <span class="material-symbols-outlined"> close </span>
+            </a>
+          </div>
+        </div>
+      }
+    </div>
 
-    <div class="flex justify-end items-center">
+    <div class="flex justify-end items-center space-x-1">
+      <input
+        type="file"
+        class="file-input"
+        multiple
+        (change)="onFileSelected($event)"
+        #fileUpload />
+      <button
+        class="attach-button"
+        (click)="fileUpload.value = ''; fileUpload.click()">
+        <span class="material-symbols-outlined attach-icon"> attach_file </span>
+      </button>
       <div class="p-1">
         <button
-          type="submit"
-          class="text-sm font-normal rounded-md text-white"
+          (click)="sendMessage()"
+          class="text-sm font-normal rounded-md text-white send-button"
           [ngClass]="{
-            'bg-indigo-600': !!this.messageForm.value.message,
-            disabled: !!this.messageForm.value.message,
-            'bg-gray-300': !this.messageForm.value.message
+            'send-button-active': (this.messageForm.value.message || this.files.length) && !this.filesUploading,
+            'send-button-disabled': !((this.messageForm.value.message || this.files.length) && !this.filesUploading)
           }">
-          Send
+          <span
+            class="px-4 material-symbols-outlined"
+            [ngClass]="{
+              'material-symbols-outlined-active':
+                (this.messageForm.value.message || this.files.length) && !this.filesUploading,
+              'material-symbols-outlined-disabled': !(
+                (this.messageForm.value.message || this.files.length) &&
+                !this.filesUploading
+              )
+            }">
+            send
+          </span>
         </button>
       </div>
     </div>

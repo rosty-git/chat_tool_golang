@@ -1,4 +1,8 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpParams,
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { GlobalVariable } from '../global';
@@ -28,10 +32,34 @@ export class ApiService {
     });
   }
 
-  put<T>(path: string, data: unknown): Promise<T> {
+  delete(path: string): Promise<unknown> {
+    return new Promise((resole, reject) => {
+      this.http
+        .delete(`${GlobalVariable.BASE_API_URL}${path}`, {
+          withCredentials: true,
+        })
+        .subscribe({
+          next: (response) => {
+            resole(response);
+          },
+          error: (err: HttpErrorResponse) => {
+            console.error('error', err);
+
+            reject(err);
+          },
+        });
+    });
+  }
+
+  put<T>(
+    path: string,
+    data: unknown,
+    options?: Record<string, unknown>,
+  ): Promise<T> {
     return new Promise((resole, reject) => {
       this.http
         .put(`${GlobalVariable.BASE_API_URL}${path}`, data, {
+          ...options,
           withCredentials: true,
         })
         .subscribe({

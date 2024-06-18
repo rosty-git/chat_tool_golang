@@ -13,6 +13,8 @@ type config interface {
 	GetAuthCookieSecure() bool
 	GetAuthCookieHttpOnly() bool
 	GetCorsAllowOrigins() []string
+	GetAwsRegion() string
+	GetAwsS3Bucket() string
 }
 
 type userUseCase interface {
@@ -31,5 +33,12 @@ type channelUseCase interface {
 
 type postUseCase interface {
 	GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error)
-	Create(userID string, channelID string, message string, frontId string) (*models.Post, error)
+	Create(userID string, channelID string, message string, frontId string, files []string) (*models.Post, error)
+}
+
+type fileUseCase interface {
+	CreateTmp(name, fileType string, size uint64) (*models.TmpFile, error)
+	SetS3Key(id, s3Key string) (*models.TmpFile, error)
+	DeleteTmp(id string) error
+	GetPresignUrl(key string) (string, error)
 }
