@@ -3,7 +3,7 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { BehaviorSubject, distinctUntilKeyChanged } from 'rxjs';
 
-import { GlobalVariable } from '../../global';
+import { environment } from '../../environments/environment';
 import { DataService, type PostItem } from '../data.service';
 import { MessageItemComponent } from '../message-item/message-item.component';
 
@@ -58,7 +58,7 @@ export class MessageBoxComponent implements AfterViewInit {
         if (!value.channels?.[value.active].posts?.length) {
           this.dataService.getPosts({
             channelId: value.active,
-            limit: GlobalVariable.POSTS_PAGE_SIZE,
+            limit: environment.POSTS_PAGE_SIZE,
           });
         }
 
@@ -106,7 +106,7 @@ export class MessageBoxComponent implements AfterViewInit {
   onUp() {
     this.dataService.getPostsBefore({
       channelId: this.activeChannel.getValue(),
-      limit: GlobalVariable.POSTS_PAGE_SIZE,
+      limit: environment.POSTS_PAGE_SIZE,
     });
   }
 }

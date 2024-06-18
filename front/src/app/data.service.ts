@@ -2,7 +2,7 @@ import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-import { GlobalVariable } from '../global';
+import { environment } from '../environments/environment';
 import { ApiService } from './api.service';
 
 export type PostItem = {
@@ -659,7 +659,7 @@ export class DataService {
             // eslint-disable-next-line no-await-in-loop
             await this.getPosts({
               channelId,
-              limit: GlobalVariable.POSTS_PAGE_SIZE,
+              limit: environment.POSTS_PAGE_SIZE,
             });
           }
         });

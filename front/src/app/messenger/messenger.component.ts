@@ -1,7 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { interval, retry, tap } from 'rxjs';
 
-import { GlobalVariable } from '../../global';
+import { environment } from '../../environments/environment';
 import { ChannelsState, DataService } from '../data.service';
 import { HeaderComponent } from '../header/header.component';
 import { LoginComponent } from '../login/login.component';
@@ -46,6 +47,7 @@ const USER_UPDATE_AWAY_STATUS_INTERVAL = 300_000;
     HeaderComponent,
     MessageListComponent,
     SidebarComponent,
+    CommonModule
   ],
   templateUrl: './messenger.component.html',
   styleUrl: './messenger.component.scss',
@@ -75,7 +77,7 @@ export class MessengerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.webSocketService.connect(`${GlobalVariable.BASE_WS_URL}/v1/ws/`);
+    this.webSocketService.connect(`${environment.BASE_WS_URL}/v1/ws/`);
 
     const ping$ = interval(30000).pipe(
       tap(() => {
@@ -105,7 +107,7 @@ export class MessengerComponent implements OnInit, OnDestroy {
               this.dataService
                 .getPostsAfter({
                   channelId: webSocketMsg.Payload.channel_id,
-                  limit: GlobalVariable.POSTS_PAGE_SIZE,
+                  limit: environment.POSTS_PAGE_SIZE,
                 })
                 .then(() => {
                   audio.play();
@@ -138,7 +140,7 @@ export class MessengerComponent implements OnInit, OnDestroy {
             } else {
               this.dataService.getPostsAfter({
                 channelId: payload.createdPost.channel_id,
-                limit: GlobalVariable.POSTS_PAGE_SIZE,
+                limit: environment.POSTS_PAGE_SIZE,
               });
             }
           }

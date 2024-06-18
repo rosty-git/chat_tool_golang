@@ -5,7 +5,7 @@ import {
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { GlobalVariable } from '../global';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +16,7 @@ export class ApiService {
   post(path: string, data: unknown): Promise<unknown> {
     return new Promise((resole, reject) => {
       this.http
-        .post(`${GlobalVariable.BASE_API_URL}${path}`, data, {
+        .post(`${environment.BASE_API_URL}${path}`, data, {
           withCredentials: true,
         })
         .subscribe({
@@ -35,7 +35,7 @@ export class ApiService {
   delete(path: string): Promise<unknown> {
     return new Promise((resole, reject) => {
       this.http
-        .delete(`${GlobalVariable.BASE_API_URL}${path}`, {
+        .delete(`${environment.BASE_API_URL}${path}`, {
           withCredentials: true,
         })
         .subscribe({
@@ -58,7 +58,7 @@ export class ApiService {
   ): Promise<T> {
     return new Promise((resole, reject) => {
       this.http
-        .put(`${GlobalVariable.BASE_API_URL}${path}`, data, {
+        .put(`${environment.BASE_API_URL}${path}`, data, {
           ...options,
           withCredentials: true,
         })
@@ -78,7 +78,7 @@ export class ApiService {
   get(path: string, params?: HttpParams): Promise<unknown> {
     return new Promise((resole, reject) => {
       this.http
-        .get(`${GlobalVariable.BASE_API_URL}${path}`, {
+        .get(`${environment.BASE_API_URL}${path}`, {
           withCredentials: true,
           params,
         })

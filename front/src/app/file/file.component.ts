@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
-import { GlobalVariable } from '../../global';
+import { environment } from '../../environments/environment';
 import { FrontFile } from '../data.service';
 
 @Component({
@@ -14,5 +14,5 @@ import { FrontFile } from '../data.service';
 export class FileComponent {
   @Input() file: FrontFile = { name: '', size: 0, type: '', ext: '' };
 
-  s3Prefix = GlobalVariable.S3_PREFIX;
+  s3Prefix = environment.S3_PREFIX;
 }
