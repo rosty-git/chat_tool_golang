@@ -15,6 +15,7 @@ export type PostItem = {
   };
   offline?: boolean;
   frontId?: string;
+  files: FrontFile[];
 };
 
 export type GetPostsResp = {
@@ -52,6 +53,7 @@ export type FrontFile = {
   type: string;
   ext: string;
   blobUrl?: string;
+  s3_key?: string;
 };
 
 const getFirstAndLastCreatedAt = (
@@ -336,6 +338,7 @@ export class DataService {
             user: {
               name: this.userName.getValue(),
             },
+            files: options.files?.length ? options.files : [],
           },
         });
       }
@@ -630,6 +633,7 @@ export class DataService {
         user: { name: userName },
         offline: true,
         frontId: options.frontId,
+        files: [],
       });
 
       this.channelsActive.next(currentChannelsState);
@@ -641,6 +645,7 @@ export class DataService {
         created_at: new Date().toUTCString(),
         user: { name: userName },
         frontId: options.frontId,
+        files: [],
       });
 
       if (!this.offlineMessagesSending) {

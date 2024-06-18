@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor:default;
+  cursor: default;
 }
 
 .send-button-active {
@@ -61,10 +61,10 @@
 
 .attach-icon {
   font-variation-settings:
-  'FILL' 1,
-  'wght' 200,
-  'GRAD' -25,
-  'opsz' 24;
+    "FILL" 1,
+    "wght" 200,
+    "GRAD" -25,
+    "opsz" 24;
   font-size: large;
 }
 
@@ -72,8 +72,7 @@
   display: none;
 }
 
-
-.file-container {
+.files-container {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -81,9 +80,8 @@
 
 .file-item {
   position: relative;
-  // text-align: center;
   display: flex;
-    align-items: center;
+  align-items: center;
 
   border: 1px solid;
   border-radius: 4px;

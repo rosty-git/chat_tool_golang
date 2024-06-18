@@ -1,0 +1,31 @@
+<div class="file-item p-2">
+  @if (file.type.startsWith("image") && file.blobUrl) {
+    <div class="img-container">
+      <img
+        src="{{ file.blobUrl }}"
+        alt="{{ file.name }}" />
+    </div>
+  } @else if (file.type.startsWith("image") && file.s3_key) {
+    <div class="img-container">
+      <img
+        src="{{ this.s3Prefix + file.s3_key }}"
+        alt="{{ file.name }}" />
+    </div>
+  } @else if (file.type === "application/pdf") {
+    <span class="material-symbols-outlined pdf-icon"> picture_as_pdf </span>
+  } @else {
+    <div class="img-plasholder"></div>
+  }
+  <div class="file-info px-1">
+    <div class="file-name">{{ file.name }}</div>
+    <div class="file-meta">
+      <div>{{ file.type.split("/")[1].toUpperCase() }} {{ (file.size / 1024).toFixed(0) }} KB</div>
+    </div>
+  </div>
+  <a
+    class="download-button"
+    href="{{ this.s3Prefix + file.s3_key }}"
+    download>
+    <span class="material-symbols-outlined px-4"> download </span>
+  </a>
+</div>

@@ -12,9 +12,9 @@ import { ChannelsState, DataService, FrontFile } from '../data.service';
 @Component({
   selector: 'app-message-input',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass],
   templateUrl: './message-input.component.html',
   styleUrl: './message-input.component.scss',
+  imports: [ReactiveFormsModule, NgClass]
 })
 export class MessageInputComponent {
   channelsState$: ChannelsState = {

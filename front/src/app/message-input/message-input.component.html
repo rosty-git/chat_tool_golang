@@ -10,7 +10,7 @@
         required
         (keydown.enter)="handleEnterKey($event)"></textarea>
     </div>
-    <div class="file-container px-1">
+    <div class="files-container px-1">
       @for (file of files; track file) {
         <div class="file-item p-2">
           @if (file.type.startsWith("image") && file.blobUrl) {

@@ -1,0 +1,61 @@
+.file-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  border: 1px solid;
+  border-radius: 4px;
+  border-color: rgba(63, 67, 80, 0.2);
+
+  height: 100%;
+}
+
+.img-container {
+  display: flex;
+  width: 62px;
+  height: 62px;
+}
+
+.file-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.file-name {
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.file-meta {
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.img-plasholder {
+  width: 62px;
+  height: 62px;
+}
+
+.img-container {
+  display: flex;
+  width: 62px;
+  height: 62px;
+}
+
+.pdf-icon {
+  font-size: 40px;
+  color: crimson;
+}
+
+.file-item:hover .download-button {
+  opacity: 1;
+}
+
+.download-button {
+  opacity: 0;
+}
