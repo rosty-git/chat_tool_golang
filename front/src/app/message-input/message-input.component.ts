@@ -4,6 +4,7 @@ import { NgClass } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import axios from 'axios';
 
 import { ApiService } from '../api.service';
@@ -14,7 +15,7 @@ import { ChannelsState, DataService, FrontFile } from '../data.service';
   standalone: true,
   templateUrl: './message-input.component.html',
   styleUrl: './message-input.component.scss',
-  imports: [ReactiveFormsModule, NgClass]
+  imports: [ReactiveFormsModule, NgClass, PickerComponent],
 })
 export class MessageInputComponent {
   channelsState$: ChannelsState = {
@@ -39,6 +40,8 @@ export class MessageInputComponent {
   messageForm = new FormGroup({
     message: new FormControl(''),
   });
+
+  isOpen = false;
 
   sendMessage() {
     if (this.messageForm.value.message) {
@@ -160,5 +163,19 @@ export class MessageInputComponent {
     if (fileForDelete?.id) {
       await this.api.delete(`/v1/api/files/${fileForDelete.id}`);
     }
+  }
+
+  toggleDropdown() {
+    this.isOpen = !this.isOpen;
+  }
+
+  addEmoji(event: { emoji: { native: string } }) {
+    const message = this.messageForm.value.message!;
+
+    this.messageForm.setValue({
+      message: `${message}${event.emoji.native}`,
+    });
+
+    this.isOpen = !this.isOpen;
   }
 }

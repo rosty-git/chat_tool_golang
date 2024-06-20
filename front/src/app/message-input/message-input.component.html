@@ -54,6 +54,19 @@
         (click)="fileUpload.value = ''; fileUpload.click()">
         <span class="material-symbols-outlined attach-icon"> attach_file </span>
       </button>
+      <button
+        class="emoji-button"
+        (click)="toggleDropdown()">
+        <span class="material-symbols-outlined emoji-icon"> mood </span>
+      </button>
+      <div class="emoji-dropdown">
+        <emoji-mart
+          class="emoji-dropdown-content"
+          [ngClass]="{ 'emoji-dropdown-show': isOpen }"
+          title="Pick your emoji…"
+          emoji="point_up"
+          (emojiClick)="addEmoji($event)"></emoji-mart>
+      </div>
       <div class="p-1">
         <button
           (click)="sendMessage()"

@@ -59,12 +59,37 @@
   background-color: rgba(63, 67, 80, 0.08);
 }
 
+.emoji-button {
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.emoji-button:hover {
+  background-color: rgba(63, 67, 80, 0.08);
+}
+
 .attach-icon {
   font-variation-settings:
     "FILL" 1,
     "wght" 200,
     "GRAD" -25,
     "opsz" 24;
+  font-size: large;
+}
+
+.emoji-icon {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 300,
+  'GRAD' 0,
+  'opsz' 24;
   font-size: large;
 }
 
@@ -138,4 +163,25 @@
 .file-delete:hover {
   background-color: #f0f0f0;
   cursor: pointer;
+}
+
+.emoji-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.emoji-dropdown-content {
+  display: none;
+  position: absolute;
+  bottom: 20px;
+  left: -300px;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+
+.emoji-dropdown-show {
+  display: block;
 }

@@ -19,6 +19,7 @@
     "@angular/platform-browser": "^17.3.0",
     "@angular/platform-browser-dynamic": "^17.3.0",
     "@angular/router": "^17.3.0",
+    "@ctrl/ngx-emoji-mart": "^9.2.0",
     "@ng-icons/core": "^27.5.0",
     "@ng-icons/css.gg": "^27.5.0",
     "@ng-icons/heroicons": "^27.5.0",
