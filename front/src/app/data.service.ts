@@ -123,6 +123,14 @@ export class DataService {
 
   directChannelCollapse$ = this.directChannelCollapse.asObservable();
 
+  private searchedPosts = new BehaviorSubject<PostItem[]>([]);
+
+  searchedPosts$ = this.searchedPosts.asObservable();
+
+  private showSearchedPosts = new BehaviorSubject<boolean>(false);
+
+  showSearchedPosts$ = this.showSearchedPosts.asObservable();
+
   private setPosts(channelId: string, newPosts: PostItem[]) {
     const currentChannelsState = this.channelsActive.getValue();
 
@@ -679,13 +687,21 @@ export class DataService {
     }
   }
 
-  searchMessages(text: string) {
+  searchPosts(text: string) {
     this.api
       .get(`/v1/api/posts/search/${text}`)
       .then((resp) => {
         console.log(resp);
+
+        this.searchedPosts.next((resp as { posts: PostItem[] }).posts);
+        this.showSearchedPosts.next(true);
       })
       .catch((err) => console.error(err));
+  }
+
+  clearSearchedPosts() {
+    this.searchedPosts.next([]);
+    this.showSearchedPosts.next(false);
   }
 
   changeDirectChannelCollapse() {

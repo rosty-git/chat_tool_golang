@@ -7,6 +7,7 @@ import { ChannelsState, DataService } from '../data.service';
 import { HeaderComponent } from '../header/header.component';
 import { LoginComponent } from '../login/login.component';
 import { MessageListComponent } from '../message-list/message-list.component';
+import { SearchedPostsComponent } from '../searched-posts/searched-posts.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { WebSocketService } from '../web-socket.service';
 
@@ -48,6 +49,7 @@ const USER_UPDATE_AWAY_STATUS_INTERVAL = 300_000;
     MessageListComponent,
     SidebarComponent,
     CommonModule,
+    SearchedPostsComponent
   ],
   templateUrl: './messenger.component.html',
   styleUrl: './messenger.component.scss',
@@ -63,6 +65,8 @@ export class MessengerComponent implements OnInit, OnDestroy {
     active: '',
   };
 
+  showSearchedPosts = false;
+
   constructor(
     private webSocketService: WebSocketService,
     private dataService: DataService,
@@ -73,6 +77,10 @@ export class MessengerComponent implements OnInit, OnDestroy {
 
     this.dataService.channelsActive$.subscribe((value) => {
       this.channelsState$ = value;
+    });
+
+    this.dataService.showSearchedPosts$.subscribe((value) => {
+      this.showSearchedPosts = value;
     });
   }
 

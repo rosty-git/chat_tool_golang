@@ -37,6 +37,8 @@ export class MessageBoxComponent implements AfterViewInit {
 
   activeChannel$ = this.activeChannel.asObservable();
 
+  searchedPosts: PostItem[] = [];
+
   constructor(private dataService: DataService) {
     this.scrollFrame = new ElementRef('');
     this.scrollContainer = this.scrollFrame as unknown as HTMLElement;
@@ -56,7 +58,8 @@ export class MessageBoxComponent implements AfterViewInit {
         this.activeChannel.next(value.active);
 
         if (
-          value.channels && value.channels[value.active] &&
+          value.channels &&
+          value.channels[value.active] &&
           (value.channels?.[value.active].posts?.length === 0 ||
             !value.channels?.[value.active].posts)
         ) {
@@ -71,6 +74,10 @@ export class MessageBoxComponent implements AfterViewInit {
 
     this.dataService.postsLoading$.subscribe((value) => {
       this.postsLoading$ = value;
+    });
+
+    this.dataService.searchedPosts$.subscribe((value) => {
+      this.searchedPosts = value;
     });
   }
 

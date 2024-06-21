@@ -97,7 +97,5 @@ func (r *Repository) Search(db *gorm.DB, userID string, text string) ([]*models.
 		return nil, err
 	}
 
-	slog.Info("Result", "posts", posts[0].User)
-
 	return posts, nil
 }

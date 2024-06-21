@@ -87,7 +87,7 @@ export class HeaderComponent {
     if (this.searchForm.value.text) {
       console.log(this.searchForm.value.text);
 
-      this.dataService.searchMessages(this.searchForm.value.text);
+      this.dataService.searchPosts(this.searchForm.value.text);
     }
   }
 }
