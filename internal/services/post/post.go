@@ -10,6 +10,7 @@ type postRepository interface {
 	GetByChannelId(db *gorm.DB, channelID string, limit int, before string, after string) ([]*models.Post, error)
 	Get(db *gorm.DB, id string) (*models.Post, error)
 	Create(db *gorm.DB, userID string, channelID string, message string) (*models.Post, error)
+	Search(db *gorm.DB, userID, text string) ([]*models.Post, error)
 }
 
 type Service struct {
@@ -50,4 +51,8 @@ func (s *Service) NotifySender(userID string, message interface{}) {
 	}
 
 	s.wsChannel <- wsMessage
+}
+
+func (s *Service) Search(db *gorm.DB, userID, text string) ([]*models.Post, error) {
+	return s.postRepository.Search(db, userID, text)
 }

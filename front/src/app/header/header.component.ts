@@ -1,5 +1,6 @@
 import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 
 import { DataService } from '../data.service';
@@ -11,7 +12,13 @@ import { UserStatusComponent } from '../user-status/user-status.component';
   standalone: true,
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
-  imports: [NgIconComponent, UserAvatarComponent, NgClass, UserStatusComponent],
+  imports: [
+    NgIconComponent,
+    UserAvatarComponent,
+    NgClass,
+    UserStatusComponent,
+    ReactiveFormsModule,
+  ],
 })
 export class HeaderComponent {
   userId: string = '';
@@ -21,6 +28,14 @@ export class HeaderComponent {
   isOpen = false;
 
   status = 'online';
+
+  isSearchFocused = false;
+
+  isSearchHovered = false;
+
+  searchForm = new FormGroup({
+    text: new FormControl(''),
+  });
 
   toggleDropdown() {
     this.isOpen = !this.isOpen;
@@ -40,7 +55,39 @@ export class HeaderComponent {
     });
   }
 
-  updateStatus(options: {status: string, manual: boolean}) {
-    this.dataService.updateStatus(options)
+  updateStatus(options: { status: string; manual: boolean }) {
+    this.dataService.updateStatus(options);
+  }
+
+  onFocus() {
+    if (!this.searchForm.value.text) {
+      this.isSearchFocused = true;
+    }
+  }
+
+  onBlur() {
+    if (!this.searchForm.value.text) {
+      this.isSearchFocused = false;
+    }
+  }
+
+  onMouseEnter() {
+    if (!this.searchForm.value.text) {
+      this.isSearchHovered = true;
+    }
+  }
+
+  onMouseLeave() {
+    if (!this.searchForm.value.text) {
+      this.isSearchHovered = false;
+    }
+  }
+
+  searchKeyDown() {
+    if (this.searchForm.value.text) {
+      console.log(this.searchForm.value.text);
+
+      this.dataService.searchMessages(this.searchForm.value.text);
+    }
   }
 }

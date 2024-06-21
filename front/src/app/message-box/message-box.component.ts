@@ -55,7 +55,11 @@ export class MessageBoxComponent implements AfterViewInit {
       .subscribe((value) => {
         this.activeChannel.next(value.active);
 
-        if (!value.channels?.[value.active].posts?.length) {
+        if (
+          value.channels && value.channels[value.active] &&
+          (value.channels?.[value.active].posts?.length === 0 ||
+            !value.channels?.[value.active].posts)
+        ) {
           this.dataService.getPosts({
             channelId: value.active,
             limit: environment.POSTS_PAGE_SIZE,

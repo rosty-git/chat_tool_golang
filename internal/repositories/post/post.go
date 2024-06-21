@@ -1,6 +1,7 @@
 package postrepository
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -77,4 +78,26 @@ func (r *Repository) Create(db *gorm.DB, userID string, channelID string, messag
 	}
 
 	return r.Get(db, post.ID)
+}
+
+func (r *Repository) Search(db *gorm.DB, userID string, text string) ([]*models.Post, error) {
+	slog.Info("postRepo Search", "userID", userID, "text", text)
+
+	var posts []*models.Post
+	err := db.Joins("JOIN channel_members cm ON cm.channel_id = posts.channel_id").
+		Joins("JOIN channels c ON c.id = posts.channel_id").
+		Where("cm.user_id = ?", userID).
+		Where("MATCH(posts.message) AGAINST(? IN NATURAL LANGUAGE MODE)", text).
+		Where("posts.deleted_at IS NULL").
+		Preload("User").
+		Find(&posts).Error
+
+	if err != nil {
+		fmt.Println("Error executing query:", err)
+		return nil, err
+	}
+
+	slog.Info("Result", "posts", posts[0].User)
+
+	return posts, nil
 }

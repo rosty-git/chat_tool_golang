@@ -115,6 +115,14 @@ export class DataService {
 
   offlineMessagesSending = false;
 
+  private openChannelCollapse = new BehaviorSubject<boolean>(true);
+
+  openChannelCollapse$ = this.openChannelCollapse.asObservable();
+
+  private directChannelCollapse = new BehaviorSubject<boolean>(true);
+
+  directChannelCollapse$ = this.directChannelCollapse.asObservable();
+
   private setPosts(channelId: string, newPosts: PostItem[]) {
     const currentChannelsState = this.channelsActive.getValue();
 
@@ -416,6 +424,8 @@ export class DataService {
   setOpenActive(channelId: string): void {
     const currentChannelsState = this.channelsActive.getValue();
 
+    localStorage.setItem('activeChannel', `open_${channelId}`);
+
     const newState = {
       ...currentChannelsState,
       active: channelId,
@@ -427,6 +437,8 @@ export class DataService {
 
   setDirectActive(channelId: string): void {
     const currentChannelsState = this.channelsActive.getValue();
+
+    localStorage.setItem('activeChannel', `direct_${channelId}`);
 
     const newState = {
       ...currentChannelsState,
@@ -665,5 +677,26 @@ export class DataService {
         });
       }
     }
+  }
+
+  searchMessages(text: string) {
+    this.api
+      .get(`/v1/api/posts/search/${text}`)
+      .then((resp) => {
+        console.log(resp);
+      })
+      .catch((err) => console.error(err));
+  }
+
+  changeDirectChannelCollapse() {
+    const value = this.directChannelCollapse.getValue();
+
+    this.directChannelCollapse.next(!value);
+  }
+
+  changeOpenChannelCollapse() {
+    const value = this.openChannelCollapse.getValue();
+
+    this.openChannelCollapse.next(!value);
   }
 }

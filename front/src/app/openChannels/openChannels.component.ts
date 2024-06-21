@@ -52,10 +52,14 @@ export class OpenChannelsComponent {
 
       this.channelsState$ = value;
     });
+
+    this.dataService.openChannelCollapse$.subscribe((value) => {
+      this.collapsed = value;
+    });
   }
 
   onClick(): void {
-    this.collapsed = !this.collapsed;
+    this.dataService.changeOpenChannelCollapse();
   }
 
   setActive(id: string) {

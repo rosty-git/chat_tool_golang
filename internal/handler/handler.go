@@ -34,6 +34,7 @@ type channelUseCase interface {
 type postUseCase interface {
 	GetByChannelId(channelID string, limit int, before string, after string) ([]*models.Post, error)
 	Create(userID string, channelID string, message string, frontId string, files []string) (*models.Post, error)
+	Search(userID string, text string) ([]*models.Post, error)
 }
 
 type fileUseCase interface {

@@ -7,7 +7,23 @@
       class="logo px-5"
       src="assets/kokotree.svg" />
   </div>
-  <div class="w-full flex right mx-5">
+  <div>
+    <form
+      [formGroup]="searchForm"
+      (keydown.enter)="searchKeyDown()">
+      <input
+        formControlName="text"
+        type="text"
+        class="search-input"
+        placeholder="search"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+        (mouseenter)="onMouseEnter()"
+        (mouseleave)="onMouseLeave()"
+        [ngClass]="{ focused: isSearchFocused, hovered: isSearchHovered }" />
+    </form>
+  </div>
+  <div class="flex right mx-5">
     <button>
       <app-user-avatar
         [userId]="userId"

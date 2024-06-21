@@ -1,6 +1,7 @@
 .header-container {
   align-items: center;
   flex-direction: row;
+  justify-content: space-between;
   background-color: rgb(22, 37, 69);
   color: rgba(255, 255, 255, 0.56);
   overflow: visible;
@@ -61,4 +62,24 @@
 
 .dropdown-item:hover {
   background-color: #ddd;
+}
+
+.search-input {
+  height: 28px;
+  width: 432px;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s, border-color 0.3s;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.search-input.hovered {
+  background-color: #666; 
+}
+
+.search-input.focused {
+  background-color: white; 
+  color: black;
+  // border-color: #666;
 }

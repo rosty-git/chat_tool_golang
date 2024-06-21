@@ -13,6 +13,7 @@ type postService interface {
 	NotifyReceivers(usersIDs []string, message interface{})
 	NotifySender(userID string, message interface{})
 	GetById(db *gorm.DB, id string) (*models.Post, error)
+	Search(db *gorm.DB, userID string, text string) ([]*models.Post, error)
 }
 
 type channelService interface {
@@ -114,4 +115,8 @@ func (uc *UseCase) Create(userID string, channelID string, message string, front
 	uc.postService.NotifySender(userID, createdPostMap)
 
 	return createdPost, nil
+}
+
+func (uc *UseCase) Search(userID string, text string) ([]*models.Post, error) {
+	return uc.postService.Search(uc.db, userID, text)
 }

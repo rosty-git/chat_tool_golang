@@ -47,7 +47,7 @@ const USER_UPDATE_AWAY_STATUS_INTERVAL = 300_000;
     HeaderComponent,
     MessageListComponent,
     SidebarComponent,
-    CommonModule
+    CommonModule,
   ],
   templateUrl: './messenger.component.html',
   styleUrl: './messenger.component.scss',
@@ -151,8 +151,26 @@ export class MessengerComponent implements OnInit, OnDestroy {
 
     this.dataService.getUser();
 
-    this.dataService.getOpenChannels();
-    this.dataService.getDirectChannels();
+    Promise.all([
+      this.dataService.getOpenChannels(),
+      this.dataService.getDirectChannels(),
+    ]).then(() => {
+      const activeChannel = localStorage.getItem('activeChannel');
+
+      if (activeChannel) {
+        const [channelType, channelId] = activeChannel.split('_');
+
+        if (channelType === 'open') {
+          this.dataService.setOpenActive(channelId);
+
+          this.dataService.changeOpenChannelCollapse();
+        } else if (channelType === 'direct') {
+          this.dataService.setDirectActive(channelId);
+
+          this.dataService.changeDirectChannelCollapse();
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {

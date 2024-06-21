@@ -50,10 +50,14 @@ export class DirectChannelsComponent {
 
       this.channelsState$ = value;
     });
+
+    this.dataService.directChannelCollapse$.subscribe((value) => {
+      this.collapsed = value;
+    })
   }
 
   onClick(): void {
-    this.collapsed = !this.collapsed;
+    this.dataService.changeDirectChannelCollapse();
   }
 
   setActive(id: string) {

@@ -83,3 +83,24 @@ func (uh *PostV1Handler) AddPost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"post": post})
 }
+
+func (uh *PostV1Handler) SearchPosts(c *gin.Context) {
+	slog.Info("PostV1Handler SearchPosts")
+
+	authUser, ok := c.Get("user")
+	if !ok {
+		slog.Error("user not found")
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+	user := authUser.(*models.User)
+
+	posts, err := uh.postUseCase.Search(user.ID, c.Param("text"))
+	if err != nil {
+		slog.Error("Create post", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"posts": posts})
+}
