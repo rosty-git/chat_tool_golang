@@ -1,0 +1,21 @@
+<div class="searched-posts-container">
+  <div class="searched-posts-header">
+    <div class="searched-posts-header-text px-3">Search Results</div>
+    <div
+      class="searched-posts-close-icon mr-3"
+      (click)="close()">
+      <span class="material-symbols-outlined close-icon"> close </span>
+    </div>
+  </div>
+  @for (post of posts; track post.id) {
+    <div>
+      <app-message-item
+        [message]="post.message"
+        [userName]="post.user.name"
+        [id]="post.id"
+        [created_at]="post.created_at"
+        [offline]="post.offline ? post.offline : false"
+        [files]="post.files"></app-message-item>
+    </div>
+  }
+</div>

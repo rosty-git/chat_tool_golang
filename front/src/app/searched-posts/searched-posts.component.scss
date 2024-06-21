@@ -1,0 +1,33 @@
+.searched-posts-header {
+    display: flex;
+    height: 56px;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(63, 63, 80, 0.04);
+    border-bottom: 1px solid rgba(63, 63, 80, 0.08);
+}
+
+.searched-posts-close-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: darkgray;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.searched-posts-close-icon:hover {
+    background-color: rgba(63, 63, 80, 0.1);
+}
+
+.close-icon {
+    font-size: 20px;
+}
+
+.searched-posts-header-text {
+    font-family: "Metropolis", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+}
