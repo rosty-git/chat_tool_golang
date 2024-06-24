@@ -15,8 +15,6 @@ export class SidebarComponent {
   constructor(private dataService: DataService) {}
 
   clickSearch() {
-    console.log('clickSearch');
-
     this.dataService.openChannelSearchModal();
   }
 }

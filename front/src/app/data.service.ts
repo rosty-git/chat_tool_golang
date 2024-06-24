@@ -720,6 +720,14 @@ export class DataService {
     this.openChannelCollapse.next(!value);
   }
 
+  setDirectChannelCollapse(value: boolean) {
+    this.directChannelCollapse.next(value);
+  }
+
+  setOpenChannelCollapse(value: boolean) {
+    this.openChannelCollapse.next(value);
+  }
+
   openChannelSearchModal() {
     this.showChannelSearchModal.next(true);
   }

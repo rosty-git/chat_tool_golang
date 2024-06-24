@@ -65,8 +65,10 @@ export class SearchChannelsComponent {
 
     if (channel.channelType === 'O') {
       this.dataService.setOpenActive(channel.id);
+      this.dataService.setOpenChannelCollapse(false);
     } else {
       this.dataService.setDirectActive(channel.id);
+      this.dataService.setDirectChannelCollapse(false);
     }
 
     this.searchForm.reset();

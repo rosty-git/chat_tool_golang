@@ -21,7 +21,9 @@
       </div>
       <div class="border-solid"></div>
       @for (channel of channels; track channel.id) {
-        <div class="channel-item" (click)="setActive(channel)">
+        <div
+          class="channel-item"
+          (click)="setActive(channel)">
           @if (channel.channelType === "D") {
             <div class="px-4">
               <app-direct-channel
