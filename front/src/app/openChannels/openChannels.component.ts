@@ -8,11 +8,12 @@ import {
 import { heroGlobeAlt } from '@ng-icons/heroicons/outline';
 
 import { Channel, ChannelsState, DataService } from '../data.service';
+import { OpenChannelComponent } from '../open-channel/open-channel.component';
 
 @Component({
   selector: 'app-open-channels',
   standalone: true,
-  imports: [NgIconComponent, NgClass],
+  imports: [NgIconComponent, NgClass, OpenChannelComponent],
   templateUrl: './openChannels.component.html',
   styleUrl: './openChannels.component.scss',
   viewProviders: [

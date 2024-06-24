@@ -49,6 +49,7 @@ func InitRouter(env string, userV1Handler *handler.UserV1Handler, wsV1Handler *h
 		apiV1.GET("/channels/:channelID/members", userV1Handler.GetChannelMembers)
 		apiV1.PUT("/channels/:channelID/markasread", userV1Handler.MarkChannelAsRead)
 		apiV1.GET("/channels/:channelID/unread", userV1Handler.GetUnreadCount)
+		apiV1.GET("/channels/search/:text", userV1Handler.SearchChannels)
 		apiV1.GET("/posts/:channelID", postV1Handler.GetPosts)
 		apiV1.GET("/posts/search/:text", postV1Handler.SearchPosts)
 		apiV1.POST("/posts", postV1Handler.AddPost)

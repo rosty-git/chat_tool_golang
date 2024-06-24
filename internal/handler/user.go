@@ -244,3 +244,21 @@ func (uh *UserV1Handler) GetUnreadCount(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"unread": unreadCount})
 }
+
+func (uh *UserV1Handler) SearchChannels(c *gin.Context) {
+	user, err := getUserFromRequest(c)
+	if err != nil {
+		slog.Error("user not found")
+
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	searchResults, err := uh.userUseCase.SearchChannels(user.ID, c.Param("text"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search channels"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"results": searchResults})
+}

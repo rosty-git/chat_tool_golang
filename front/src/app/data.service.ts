@@ -131,6 +131,10 @@ export class DataService {
 
   showSearchedPosts$ = this.showSearchedPosts.asObservable();
 
+  private showChannelSearchModal = new BehaviorSubject<boolean>(false);
+
+  showChannelSearchModal$ = this.showChannelSearchModal.asObservable();
+
   private setPosts(channelId: string, newPosts: PostItem[]) {
     const currentChannelsState = this.channelsActive.getValue();
 
@@ -714,5 +718,14 @@ export class DataService {
     const value = this.openChannelCollapse.getValue();
 
     this.openChannelCollapse.next(!value);
+  }
+
+  openChannelSearchModal() {
+    console.log('openChannelSearchModal');
+    this.showChannelSearchModal.next(true);
+  }
+
+  closeChannelSearchModal() {
+    this.showChannelSearchModal.next(false);
   }
 }

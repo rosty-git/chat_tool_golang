@@ -19,20 +19,20 @@ type Config interface {
 
 func New(c Config) (*gorm.DB, func() error, error) {
 	var gormConfig *gorm.Config
-	//if c.GetGormDebug() {
-	gormConfig = &gorm.Config{
-		Logger: logger.New(
-			log.New(os.Stdout, "\r\n", log.LstdFlags), // You can customize the logger output
-			logger.Config{
-				SlowThreshold: time.Second, // SQL queries that take longer than this threshold will be logged as slow queries
-				LogLevel:      logger.Info, // Set log level to Log mode to log all queries
-				Colorful:      true,        // Enable colorful output
-			},
-		),
+	if c.GetGormDebug() {
+		gormConfig = &gorm.Config{
+			Logger: logger.New(
+				log.New(os.Stdout, "\r\n", log.LstdFlags), // You can customize the logger output
+				logger.Config{
+					SlowThreshold: time.Second, // SQL queries that take longer than this threshold will be logged as slow queries
+					LogLevel:      logger.Info, // Set log level to Log mode to log all queries
+					Colorful:      true,        // Enable colorful output
+				},
+			),
+		}
+	} else {
+		gormConfig = &gorm.Config{}
 	}
-	//} else {
-	//	gormConfig = &gorm.Config{}
-	//}
 
 	db, err := gorm.Open(mysql.Open(c.GetDsn()), gormConfig)
 	if err != nil {

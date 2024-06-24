@@ -21,19 +21,10 @@
             'li-active': channelsState$.active === channel.id && channelsState$.isDirectActive,
             'li-mouse-on': this.mouseOn === channel.id
           }">
-          <div class="channel-item">
-            <app-user-avatar
-              class="pl-3 my-2"
-              size="small"
-              [userId]="channel.membersIds[0]"
-              [userName]="channel.name"></app-user-avatar>
-            <div class="pl-1 channel-name">{{ channel.name }}</div>
-            @if (channel.unread > 0) {
-              <div class="w-full flex right mx-5">
-                <div class="unread-badge">{{ channel.unread }}</div>
-              </div>
-            }
-          </div>
+          <app-direct-channel
+            [userId]="channel.membersIds[0]"
+            [userName]="channel.name"
+            [unread]="channel.unread"></app-direct-channel>
         </li>
       }
     </ul>

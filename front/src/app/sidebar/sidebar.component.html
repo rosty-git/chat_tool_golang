@@ -1,4 +1,14 @@
 <aside class="side-bar h-full">
+  <div class="search py-2 px-4">
+    <div
+      class="search-button"
+      (click)="clickSearch()">
+      <div class="flex justify-center align-middle px-2">
+        <span class="material-symbols-outlined search-icon"> search </span>
+      </div>
+      <div>Find channel</div>
+    </div>
+  </div>
   <app-open-channels></app-open-channels>
   <app-direct-channels></app-direct-channels>
 </aside>

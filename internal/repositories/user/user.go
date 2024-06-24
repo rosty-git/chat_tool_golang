@@ -1,6 +1,7 @@
 package userrepository
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -115,4 +116,18 @@ func (r *Repository) GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error
 	}
 
 	return statuses, nil
+}
+
+func (r *Repository) Search(db *gorm.DB, userID string, text string) ([]*models.User, error) {
+	var users []*models.User
+	err := db.Where("id != ?", userID).
+		Where("MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE)", text).
+		Find(&users).Error
+
+	if err != nil {
+		fmt.Println("Error executing query:", err)
+		return nil, err
+	}
+
+	return users, nil
 }

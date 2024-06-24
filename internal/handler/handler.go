@@ -24,6 +24,7 @@ type userUseCase interface {
 	UpdateStatus(userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
 	GetStatus(userID string) (*models.Status, error)
 	GetUsersByChannelId(channelID string) ([]*models.User, error)
+	SearchChannels(userID string, text string) ([]map[string]string, error)
 }
 
 type channelUseCase interface {

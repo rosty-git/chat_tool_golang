@@ -17,11 +17,14 @@ type userService interface {
 	UpdateStatus(db *gorm.DB, userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
 	GetStatus(db *gorm.DB, userID string) (*models.Status, error)
 	GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error)
+	Search(db *gorm.DB, userID string, text string) ([]*models.User, error)
 }
 
 type channelService interface {
 	GetByUserId(db *gorm.DB, userID string, channelType models.ChannelType) ([]*models.Channel, error)
 	GetUsers(db *gorm.DB, channelID string) ([]*models.User, error)
+	Search(db *gorm.DB, text string) ([]*models.Channel, error)
+	GetDirectByMembers(db *gorm.DB, memberID1 string, memberID2 string) (*models.Channel, error)
 }
 
 type UseCase struct {
@@ -131,4 +134,37 @@ func (uc *UseCase) StatusesWatchdog() {
 
 		time.Sleep(5 * time.Minute)
 	}
+}
+
+func (uc *UseCase) SearchChannels(userID string, text string) ([]map[string]string, error) {
+	var results []map[string]string
+
+	channels, err := uc.channelService.Search(uc.db, text)
+	if err != nil {
+		return nil, err
+	}
+	slog.Info("SearchChannels", "channels", channels)
+
+	for _, channel := range channels {
+		results = append(results, map[string]string{"id": channel.ID, "name": channel.Name, "channelType": "O"})
+	}
+
+	users, err := uc.userService.Search(uc.db, userID, text)
+	if err != nil {
+		return nil, err
+	}
+	slog.Info("SearchChannels", "users", users)
+
+	for _, user := range users {
+		channel, err := uc.channelService.GetDirectByMembers(uc.db, userID, user.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		slog.Info("SearchChannels", "channel", channel)
+
+		results = append(results, map[string]string{"id": channel.ID, "name": user.Name, "channelType": "D"})
+	}
+
+	return results, nil
 }

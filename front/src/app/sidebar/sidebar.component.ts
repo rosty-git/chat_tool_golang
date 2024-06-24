@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+import { DataService } from '../data.service';
 import { DirectChannelsComponent } from '../directChannels/directChannels.component';
 import { OpenChannelsComponent } from '../openChannels/openChannels.component';
 
@@ -10,4 +11,12 @@ import { OpenChannelsComponent } from '../openChannels/openChannels.component';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
 })
-export class SidebarComponent {}
+export class SidebarComponent {
+  constructor(private dataService: DataService) {}
+
+  clickSearch() {
+    console.log('clickSearch');
+
+    this.dataService.openChannelSearchModal();
+  }
+}

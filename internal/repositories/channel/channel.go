@@ -1,6 +1,8 @@
 package channelrepository
 
 import (
+	"fmt"
+
 	"github.com/elef-git/chat_tool_golang/internal/models"
 	"gorm.io/gorm"
 
@@ -96,4 +98,39 @@ func (r *Repository) GetUnreadCount(db *gorm.DB, channelID string, userID string
 		return nil
 	})
 	return count, err
+}
+
+func (r *Repository) SearchOpenChannels(db *gorm.DB, text string) ([]*models.Channel, error) {
+	slog.Info("channelRepo Search", "text", text)
+
+	var channels []*models.Channel
+	err := db.Where("MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE)", text).
+		Where("type = ?", "O").
+		Find(&channels).Error
+
+	if err != nil {
+		fmt.Println("Error executing query:", err)
+		return nil, err
+	}
+
+	return channels, nil
+}
+
+func (r *Repository) GetDirectByMembers(db *gorm.DB, memberID1 string, memberID2 string) (*models.Channel, error) {
+	s1 := memberID1 + "__" + memberID2
+	s2 := memberID2 + "__" + memberID1
+
+	var channel *models.Channel
+	err := db.Where("name = ?", s1).
+		Or("name = ?", s2).
+		Find(&channel).Error
+
+	slog.Info("GetDirectByMembers", "channel", channel)
+
+	if err != nil {
+		fmt.Println("Error executing query:", err)
+		return nil, err
+	}
+
+	return channel, nil
 }

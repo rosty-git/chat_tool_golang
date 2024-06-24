@@ -1,0 +1,13 @@
+<div class="channel-item">
+  <app-user-avatar
+    class="pl-3 my-2"
+    size="small"
+    [userId]="userId"
+    [userName]="userName"></app-user-avatar>
+  <div class="pl-1 channel-name">{{ userName }}</div>
+  @if (unread > 0) {
+    <div class="w-full flex right mx-5">
+      <div class="unread-badge">{{ unread }}</div>
+    </div>
+  }
+</div>

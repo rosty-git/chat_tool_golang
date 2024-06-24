@@ -19,6 +19,7 @@ type userRepository interface {
 	CreateOrUpdateStatus(db *gorm.DB, userID string, status string, manual bool, dndEndTime string) (*models.Status, error)
 	GetStatus(db *gorm.DB, userID string) (*models.Status, error)
 	GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error)
+	Search(db *gorm.DB, userID string, text string) ([]*models.User, error)
 }
 
 type config interface {
@@ -117,4 +118,8 @@ func (s *Service) GetStatus(db *gorm.DB, userID string) (*models.Status, error) 
 
 func (s *Service) GetNotUpdatedStatuses(db *gorm.DB) ([]*models.Status, error) {
 	return s.userRepository.GetNotUpdatedStatuses(db)
+}
+
+func (s *Service) Search(db *gorm.DB, userID string, text string) ([]*models.User, error) {
+	return s.userRepository.Search(db, userID, text)
 }

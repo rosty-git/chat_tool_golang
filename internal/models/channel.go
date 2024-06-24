@@ -32,7 +32,7 @@ func (ct ChannelType) Value() (driver.Value, error) {
 type Channel struct {
 	BaseModel
 
-	Name          string      `json:"name"`
+	Name          string      `json:"name" gorm:"index:,class:FULLTEXT"`
 	Type          ChannelType `json:"type" sql:"type:ENUM('O', 'P', 'D', 'G')" gorm:"column:type"`
 	TotalMsgCount uint64      `json:"totalMsgCount"`
 }

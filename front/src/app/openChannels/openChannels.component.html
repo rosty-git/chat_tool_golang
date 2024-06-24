@@ -21,10 +21,7 @@
             'li-active': channelsState$.active === channel.id && channelsState$.isOpenActive,
             'li-mouse-on': this.mouseOn === channel.id
           }">
-          <div class="channel-item">
-            <span class="material-symbols-outlined globe-icon my-2 mx-3"> language </span>
-            <div class="channel-name">{{ channel.name }}</div>
-          </div>
+          <app-open-channel [name]="channel.name"></app-open-channel>
         </li>
       }
     </ul>

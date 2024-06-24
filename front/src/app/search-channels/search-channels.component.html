@@ -1,0 +1,35 @@
+@if (isOpen) {
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <div class="p-6 input-container">
+        <div class="flex justify-between">
+          <div class="modal-title">Find Channels</div>
+          <div
+            class="modal-close-icon"
+            (click)="closeModal()">
+            <span class="material-symbols-outlined"> close </span>
+          </div>
+        </div>
+        <div class="py-8">
+          <form [formGroup]="searchForm">
+            <input
+              formControlName="text"
+              type="text"
+              class="search-input border-solid border-2 rounded p-2" />
+          </form>
+        </div>
+      </div>
+      <div class="border-solid"></div>
+      @for (channel of channels; track channel.id) {
+        @if (channel.channelType === "D") {
+          <app-direct-channel
+            [userName]="channel.name"
+            [userId]="channel.id"
+            [unread]="0"></app-direct-channel>
+        } @else if (channel.channelType === "O") {
+          <app-open-channel [name]="channel.name"></app-open-channel>
+        }
+      }
+    </div>
+  </div>
+}

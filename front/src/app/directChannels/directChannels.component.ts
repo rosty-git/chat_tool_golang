@@ -7,12 +7,18 @@ import {
 } from '@ng-icons/heroicons/mini';
 
 import { Channel, ChannelsState, DataService } from '../data.service';
+import { DirectChannelComponent } from '../direct-channel/direct-channel.component';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-direct-channels',
   standalone: true,
-  imports: [NgIconComponent, NgClass, UserAvatarComponent],
+  imports: [
+    NgIconComponent,
+    NgClass,
+    UserAvatarComponent,
+    DirectChannelComponent,
+  ],
   templateUrl: './directChannels.component.html',
   styleUrl: './directChannels.component.scss',
   viewProviders: [provideIcons({ heroChevronRightMini, heroChevronDownMini })],
@@ -53,7 +59,7 @@ export class DirectChannelsComponent {
 
     this.dataService.directChannelCollapse$.subscribe((value) => {
       this.collapsed = value;
-    })
+    });
   }
 
   onClick(): void {
