@@ -38,3 +38,11 @@
 .input-container {
     border-bottom: 1px solid gainsboro;
 }
+
+.channel-item:hover {
+    cursor: pointer;
+}
+
+.channel-item:hover {
+    background-color: rgba(63, 67, 80, 0.08);
+}

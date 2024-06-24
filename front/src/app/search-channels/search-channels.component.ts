@@ -42,8 +42,6 @@ export class SearchChannelsComponent {
 
     this.searchForm.valueChanges.subscribe((value) => {
       this.api.get(`/v1/api/channels/search/${value.text}`).then((resp) => {
-        console.log(resp);
-
         this.channels = (resp as SearchResults).results;
       });
     });
@@ -60,5 +58,17 @@ export class SearchChannelsComponent {
     if (this.isOpen && target.classList.contains('modal-backdrop')) {
       this.closeModal();
     }
+  }
+
+  setActive(channel: Channel) {
+    this.dataService.closeChannelSearchModal();
+
+    if (channel.channelType === 'O') {
+      this.dataService.setOpenActive(channel.id);
+    } else {
+      this.dataService.setDirectActive(channel.id);
+    }
+
+    this.searchForm.reset();
   }
 }

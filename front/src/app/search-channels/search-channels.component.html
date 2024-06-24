@@ -21,14 +21,18 @@
       </div>
       <div class="border-solid"></div>
       @for (channel of channels; track channel.id) {
-        @if (channel.channelType === "D") {
-          <app-direct-channel
-            [userName]="channel.name"
-            [userId]="channel.id"
-            [unread]="0"></app-direct-channel>
-        } @else if (channel.channelType === "O") {
-          <app-open-channel [name]="channel.name"></app-open-channel>
-        }
+        <div class="channel-item" (click)="setActive(channel)">
+          @if (channel.channelType === "D") {
+            <div class="px-4">
+              <app-direct-channel
+                [userName]="channel.name"
+                [userId]="channel.id"
+                [unread]="0"></app-direct-channel>
+            </div>
+          } @else if (channel.channelType === "O") {
+            <div class="px-4"><app-open-channel [name]="channel.name"></app-open-channel></div>
+          }
+        </div>
       }
     </div>
   </div>

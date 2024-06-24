@@ -721,7 +721,6 @@ export class DataService {
   }
 
   openChannelSearchModal() {
-    console.log('openChannelSearchModal');
     this.showChannelSearchModal.next(true);
   }
 
