@@ -23,9 +23,8 @@
     </div>
   </div>
   <a
-    class="download-button"
-    href="{{ this.s3Prefix + file.s3_key }}"
-    download>
+    (click)="downloadFile(this.s3Prefix + file.s3_key, file.name)"
+    class="download-button">
     <span class="material-symbols-outlined px-4"> download </span>
   </a>
 </div>
