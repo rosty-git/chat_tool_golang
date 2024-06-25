@@ -1,4 +1,9 @@
-<div class="basis-1/5 border-2 message-container">
+<div
+  class="basis-1/5 border-2 message-container file-drop-area"
+  (dragover)="onDragOver($event)"
+  (drop)="onDrop($event)"
+  (dragleave)="onDragLeave($event)"
+  [class.file-over]="isFileOver">
   <form
     [formGroup]="messageForm"
     (keydown.enter)="sendMessage()">

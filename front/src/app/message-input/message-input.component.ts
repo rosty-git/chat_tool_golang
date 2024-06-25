@@ -86,71 +86,7 @@ export class MessageInputComponent {
     this.filesUploading = true;
 
     if (input.files?.length) {
-      for (let i = 0; i < input.files.length; i += 1) {
-        const file = input.files[i];
-
-        console.log(file);
-
-        this.files.push({
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          ext: file.name.split('.').pop()!,
-          progress: 1,
-        });
-      }
-
-      for (let i = 0; i < input.files.length; i += 1) {
-        const file = input.files[i];
-
-        const createdFile = await this.api.post('/v1/api/files', {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-        });
-
-        const objIndex = this.files.findIndex(
-          (fileItem) =>
-            fileItem.name === file.name &&
-            fileItem.size === file.size &&
-            fileItem.type === file.type,
-        );
-
-        const createdFileId = (createdFile as { id: string }).id;
-
-        this.files[objIndex].id = createdFileId;
-
-        const buffer = await file.arrayBuffer();
-
-        const blob = new Blob([buffer], { type: file.type });
-
-        const url = URL.createObjectURL(blob);
-
-        this.files[objIndex].blobUrl = url;
-
-        const fileExt = file.name.split('.').pop();
-
-        const s3Key = `${createdFileId}.${fileExt}`;
-
-        const presignedUrl = await this.api.post(
-          `/v1/api/files/get-presigned-url/${s3Key}`,
-          {},
-        );
-
-        await axios.put((presignedUrl as { url: string }).url, buffer, {
-          onUploadProgress: (progressEvent) => {
-            this.files[objIndex].progress = Math.round(progressEvent.progress! * 100);
-          },
-        });
-        this.files[objIndex].progress = 100;
-
-        const updatedFile = await this.api.put(
-          `/v1/api/files/${createdFileId}/${s3Key}`,
-          {},
-        );
-
-        console.log({ updatedFile });
-      }
+      await this.processFiles(input.files)
     }
 
     this.filesUploading = false;
@@ -183,5 +119,106 @@ export class MessageInputComponent {
     });
 
     this.isOpen = !this.isOpen;
+  }
+
+  isFileOver: boolean = false;
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    this.isFileOver = true;
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    this.isFileOver = false;
+
+    if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+      const { files } = event.dataTransfer;
+      this.uploadFiles(files);
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onDragLeave(_event: DragEvent) {
+    this.isFileOver = false;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async uploadFiles(files: FileList) {
+    this.filesUploading = true;
+
+    if (files?.length) {
+      await this.processFiles(files);
+    }
+
+    this.filesUploading = false;
+  }
+
+  async processFiles(files: FileList) {
+    for (let i = 0; i < files.length; i += 1) {
+      const file = files[i];
+
+      this.files.push({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        ext: file.name.split('.').pop()!,
+        progress: 1,
+      });
+    }
+
+    for (let i = 0; i < files.length; i += 1) {
+      const file = files[i];
+
+      const createdFile = await this.api.post('/v1/api/files', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      });
+
+      const objIndex = this.files.findIndex(
+        (fileItem) =>
+          fileItem.name === file.name &&
+                fileItem.size === file.size &&
+                fileItem.type === file.type,
+      );
+
+      const createdFileId = (createdFile as { id: string }).id;
+
+      this.files[objIndex].id = createdFileId;
+
+      const buffer = await file.arrayBuffer();
+
+      const blob = new Blob([buffer], { type: file.type });
+
+      const url = URL.createObjectURL(blob);
+
+      this.files[objIndex].blobUrl = url;
+
+      const fileExt = file.name.split('.').pop();
+
+      const s3Key = `${createdFileId}.${fileExt}`;
+
+      const presignedUrl = await this.api.post(
+        `/v1/api/files/get-presigned-url/${s3Key}`,
+        {},
+      );
+
+      await axios.put((presignedUrl as { url: string }).url, buffer, {
+        onUploadProgress: (progressEvent) => {
+          this.files[objIndex].progress = Math.round(
+            progressEvent.progress! * 100,
+          );
+        },
+      });
+      this.files[objIndex].progress = 100;
+
+      const updatedFile = await this.api.put(
+        `/v1/api/files/${createdFileId}/${s3Key}`,
+        {},
+      );
+
+      console.log({ updatedFile });
+    }
   }
 }
