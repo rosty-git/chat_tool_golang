@@ -54,6 +54,7 @@ export type FrontFile = {
   ext: string;
   blobUrl?: string;
   s3_key?: string;
+  progress?: number;
 };
 
 const getFirstAndLastCreatedAt = (

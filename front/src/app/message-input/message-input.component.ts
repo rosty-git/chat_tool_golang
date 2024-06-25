@@ -96,6 +96,7 @@ export class MessageInputComponent {
           size: file.size,
           type: file.type,
           ext: file.name.split('.').pop()!,
+          progress: 1,
         });
       }
 
@@ -136,7 +137,12 @@ export class MessageInputComponent {
           {},
         );
 
-        await axios.put((presignedUrl as { url: string }).url, buffer);
+        await axios.put((presignedUrl as { url: string }).url, buffer, {
+          onUploadProgress: (progressEvent) => {
+            this.files[objIndex].progress = Math.round(progressEvent.progress! * 100);
+          },
+        });
+        this.files[objIndex].progress = 100;
 
         const updatedFile = await this.api.put(
           `/v1/api/files/${createdFileId}/${s3Key}`,

@@ -12,31 +12,44 @@
     </div>
     <div class="files-container px-1">
       @for (file of files; track file) {
-        <div class="file-item p-2">
-          @if (file.type.startsWith("image") && file.blobUrl) {
-            <div class="img-container">
-              <img
-                src="{{ file.blobUrl }}"
-                alt="{{ file.name }}" />
+        <div class="file-item flex-col">
+          <div class="flex">
+            @if (file.type.startsWith("image") && file.blobUrl) {
+              <div class="img-container flex p-2">
+                <img
+                  src="{{ file.blobUrl }}"
+                  alt="{{ file.name }}" />
+              </div>
+            } @else if (file.type === "application/pdf") {
+              <div class="p-2">
+                <span class="material-symbols-outlined"> picture_as_pdf </span>
+              </div>
+            } @else {
+              <div class="img-placeholder"></div>
+            }
+            <div class="file-info p-1">
+              <div class="file-name">{{ file.name }}</div>
+              <div class="file-meta">
+                <div>{{ file.type.split("/")[1].toUpperCase() }} {{ (file.size / 1024).toFixed(0) }} KB</div>
+              </div>
             </div>
-          } @else if (file.type === "application/pdf") {
-            <span class="material-symbols-outlined"> picture_as_pdf </span>
-          } @else {
-            <div class="img-plasholder"></div>
-          }
-          <div class="file-info px-1">
-            <div class="file-name">{{ file.name }}</div>
-            <div class="file-meta">
-              <div>{{ file.type.split("/")[1].toUpperCase() }} {{ (file.size / 1024).toFixed(0) }} KB</div>
+            <div class="w-8">
+              <a
+                class="file-delete"
+                (click)="deleteFile(file.name, file.size, file.type)">
+                <span class="material-symbols-outlined"> close </span>
+              </a>
             </div>
           </div>
-          <div class="w-8"></div>
-          <div>
-            <a
-              class="file-delete"
-              (click)="deleteFile(file.name, file.size, file.type)">
-              <span class="material-symbols-outlined"> close </span>
-            </a>
+          <div class="progress-container">
+            @if (file.progress && file.progress < 100) {
+              <div class="progress progress-striped">
+                <div
+                  role="progressbar"
+                  class="progress-bar"
+                  [style.width.%]="file.progress"></div>
+              </div>
+            }
           </div>
         </div>
       }
