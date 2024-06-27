@@ -29,5 +29,118 @@
       }
     }
   </div>
-  <app-message-input class="basis-1/5 p-2"></app-message-input>
+  <div class="basis-1/5 p-2">
+    <div
+      class="basis-1/5 border-2 message-container file-drop-area"
+      (dragover)="onDragOver($event)"
+      (drop)="onDrop($event)"
+      (dragleave)="onDragLeave($event)"
+      [class.file-over]="isFileOver">
+      <form
+        [formGroup]="messageForm"
+        (keydown.enter)="sendMessage()">
+        <div class="-space-y-px">
+          <textarea
+            class="custom-textarea w-full h-40 p-2"
+            formControlName="message"
+            rows="1"
+            required
+            (keydown.enter)="handleEnterKey($event)"></textarea>
+        </div>
+        <div class="files-container px-1">
+          @for (file of files; track file) {
+            <div class="file-item flex-col">
+              <div class="flex">
+                @if (file.type.startsWith("image") && file.blobUrl) {
+                  <div class="img-container flex p-2">
+                    <img
+                      src="{{ file.blobUrl }}"
+                      alt="{{ file.name }}" />
+                  </div>
+                } @else if (file.type === "application/pdf") {
+                  <div class="p-2">
+                    <span class="material-symbols-outlined"> picture_as_pdf </span>
+                  </div>
+                } @else {
+                  <div class="img-placeholder"></div>
+                }
+                <div class="file-info p-1">
+                  <div class="file-name">{{ file.name }}</div>
+                  <div class="file-meta">
+                    <div>{{ file.type.split("/")[1].toUpperCase() }} {{ (file.size / 1024).toFixed(0) }} KB</div>
+                  </div>
+                </div>
+                <div class="w-8">
+                  <a
+                    class="file-delete"
+                    (click)="deleteFile(file.name, file.size, file.type)">
+                    <span class="material-symbols-outlined"> close </span>
+                  </a>
+                </div>
+              </div>
+              <div class="progress-container">
+                @if (file.progress && file.progress < 100) {
+                  <div class="progress progress-striped">
+                    <div
+                      role="progressbar"
+                      class="progress-bar"
+                      [style.width.%]="file.progress"></div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="flex justify-end items-center space-x-1">
+          <input
+            type="file"
+            class="file-input"
+            multiple
+            (change)="onFileSelected($event)"
+            #fileUpload />
+          <button
+            class="attach-button"
+            (click)="fileUpload.value = ''; fileUpload.click()">
+            <span class="material-symbols-outlined attach-icon"> attach_file </span>
+          </button>
+          <button
+            class="emoji-button"
+            (click)="toggleDropdown()">
+            <span class="material-symbols-outlined emoji-icon"> mood </span>
+          </button>
+          <div class="emoji-dropdown">
+            <emoji-mart
+              class="emoji-dropdown-content"
+              [ngClass]="{ 'emoji-dropdown-show': isOpen }"
+              title="Pick your emoji…"
+              emoji="point_up"
+              (emojiClick)="addEmoji($event)"></emoji-mart>
+          </div>
+          <div class="p-1">
+            <button
+              (click)="sendMessage()"
+              class="text-sm font-normal rounded-md text-white send-button"
+              [ngClass]="{
+                'send-button-active': (this.messageForm.value.message || this.files.length) && !this.filesUploading,
+                'send-button-disabled': !((this.messageForm.value.message || this.files.length) && !this.filesUploading)
+              }">
+              <span
+                class="px-4 material-symbols-outlined"
+                [ngClass]="{
+                  'material-symbols-outlined-active':
+                    (this.messageForm.value.message || this.files.length) && !this.filesUploading,
+                  'material-symbols-outlined-disabled': !(
+                    (this.messageForm.value.message || this.files.length) &&
+                    !this.filesUploading
+                  )
+                }">
+                send
+              </span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
