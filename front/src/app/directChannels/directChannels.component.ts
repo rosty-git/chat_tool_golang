@@ -26,7 +26,7 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 export class DirectChannelsComponent {
   channels$: Channel[] = [];
 
-  collapsed = true;
+  collapsed = false;
 
   active = '';
 
@@ -63,7 +63,7 @@ export class DirectChannelsComponent {
   }
 
   onClick(): void {
-    this.dataService.changeDirectChannelCollapse();
+    this.dataService.setDirectChannelCollapse(!this.collapsed);
   }
 
   setActive(id: string) {

@@ -172,13 +172,12 @@ export class MessengerComponent implements OnInit, OnDestroy {
 
         if (channelType === 'open') {
           this.dataService.setOpenActive(channelId);
-
-          this.dataService.changeOpenChannelCollapse();
         } else if (channelType === 'direct') {
           this.dataService.setDirectActive(channelId);
-
-          this.dataService.changeDirectChannelCollapse();
         }
+
+        this.dataService.setOpenChannelCollapse(false);
+        this.dataService.setDirectChannelCollapse(false);
       }
     });
   }

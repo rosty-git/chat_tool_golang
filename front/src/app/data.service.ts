@@ -116,11 +116,11 @@ export class DataService {
 
   offlineMessagesSending = false;
 
-  private openChannelCollapse = new BehaviorSubject<boolean>(true);
+  private openChannelCollapse = new BehaviorSubject<boolean>(false);
 
   openChannelCollapse$ = this.openChannelCollapse.asObservable();
 
-  private directChannelCollapse = new BehaviorSubject<boolean>(true);
+  private directChannelCollapse = new BehaviorSubject<boolean>(false);
 
   directChannelCollapse$ = this.directChannelCollapse.asObservable();
 
@@ -707,18 +707,6 @@ export class DataService {
   clearSearchedPosts() {
     this.searchedPosts.next([]);
     this.showSearchedPosts.next(false);
-  }
-
-  changeDirectChannelCollapse() {
-    const value = this.directChannelCollapse.getValue();
-
-    this.directChannelCollapse.next(!value);
-  }
-
-  changeOpenChannelCollapse() {
-    const value = this.openChannelCollapse.getValue();
-
-    this.openChannelCollapse.next(!value);
   }
 
   setDirectChannelCollapse(value: boolean) {

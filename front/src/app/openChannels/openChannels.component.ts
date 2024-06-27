@@ -21,7 +21,7 @@ import { OpenChannelComponent } from '../open-channel/open-channel.component';
   ],
 })
 export class OpenChannelsComponent {
-  collapsed = true;
+  collapsed = false;
 
   active = '';
 
@@ -60,7 +60,7 @@ export class OpenChannelsComponent {
   }
 
   onClick(): void {
-    this.dataService.changeOpenChannelCollapse();
+    this.dataService.setOpenChannelCollapse(!this.collapsed);
   }
 
   setActive(id: string) {
