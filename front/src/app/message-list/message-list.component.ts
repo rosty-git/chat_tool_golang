@@ -327,7 +327,7 @@ export class MessageListComponent implements AfterViewInit {
     const message = this.messageForm.value.message!;
 
     this.messageForm.setValue({
-      message: `${message}${event.emoji.native}`,
+      message: `${message || ''}${event.emoji.native}`,
     });
 
     this.isOpen = !this.isOpen;
