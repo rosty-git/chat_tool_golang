@@ -78,7 +78,7 @@ export class MessageListComponent implements AfterViewInit {
     this.scrollFrameDiv = new ElementRef('');
     this.scrollContainer = this.scrollFrameDiv as unknown as HTMLElement;
 
-    this.dataService.channelsActive$.subscribe((value) => {
+    this.dataService.channelsState$.subscribe((value) => {
       const posts = value.channels?.[value.active]?.posts ?? [];
       if (posts.length) {
         this.posts.next(posts);
@@ -87,10 +87,9 @@ export class MessageListComponent implements AfterViewInit {
       }
     });
 
-    this.dataService.channelsActive$
+    this.dataService.channelsState$
       .pipe(distinctUntilKeyChanged('active'))
       .subscribe((value) => {
-        console.log('active');
         this.channelsState$ = value;
 
         if (
@@ -105,7 +104,9 @@ export class MessageListComponent implements AfterViewInit {
           });
         }
 
-        this.dataService.markChannelAsRead(value.active);
+        if (value.active) {
+          this.dataService.markChannelAsRead(value.active);
+        }
       });
 
     this.dataService.postsLoading$.subscribe((value) => {
@@ -257,6 +258,19 @@ export class MessageListComponent implements AfterViewInit {
 
   sendMessage() {
     if (this.messageForm.value.message) {
+      const channelsOrderStringify = localStorage.getItem('channelsOrder');
+      let channelsOrder = channelsOrderStringify
+        ? JSON.parse(channelsOrderStringify)
+        : [];
+
+      channelsOrder = channelsOrder.filter(
+        (i: string) => i !== this.channelsState$.active,
+      );
+
+      channelsOrder.unshift(this.channelsState$.active);
+
+      localStorage.setItem('channelsOrder', JSON.stringify(channelsOrder));
+
       const message = this.messageForm.value.message as string;
 
       const frontId = crypto.randomUUID().toString();

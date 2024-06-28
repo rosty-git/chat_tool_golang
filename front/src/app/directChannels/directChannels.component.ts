@@ -39,7 +39,7 @@ export class DirectChannelsComponent {
   };
 
   constructor(private dataService: DataService) {
-    this.dataService.channelsActive$.subscribe((value) => {
+    this.dataService.channelsState$.subscribe((value) => {
       const directChannels: Channel[] = [];
       // eslint-disable-next-line no-restricted-syntax, guard-for-in
       for (const channelId in value.channels) {
@@ -49,10 +49,12 @@ export class DirectChannelsComponent {
             name: value.channels[channelId].name,
             unread: value.channels[channelId].unread,
             membersIds: value.channels[channelId].membersIds,
+            index: value.channels[channelId].index,
           });
         }
       }
-      this.channels$ = directChannels;
+
+      this.channels$ = directChannels.sort((a, b) => a.index - b.index);
 
       this.channelsState$ = value;
     });

@@ -36,7 +36,7 @@ export class OpenChannelsComponent {
   };
 
   constructor(private dataService: DataService) {
-    this.dataService.channelsActive$.subscribe((value) => {
+    this.dataService.channelsState$.subscribe((value) => {
       const openChannels: Channel[] = [];
       // eslint-disable-next-line no-restricted-syntax, guard-for-in
       for (const channelId in value.channels) {
@@ -46,6 +46,7 @@ export class OpenChannelsComponent {
             name: value.channels[channelId].name,
             unread: value.channels[channelId].unread,
             membersIds: value.channels[channelId].membersIds,
+            index: 100,
           });
         }
       }
