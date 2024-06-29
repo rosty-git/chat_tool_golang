@@ -43,6 +43,10 @@
         <img
           src="{{ state.files?.[state.index]?.blobUrl }}"
           alt="{{ state.files?.[state.index]?.name }}" />
+      } @else if (state.files?.[state.index]?.type === "application/pdf") {
+        <div class="flex items-center justify-center">
+          <app-pdf-viewer></app-pdf-viewer>
+        </div>
       } @else {
         <div class="flex items-center justify-center">
           <div class="text-gray-400">{{ state.files?.[state.index]?.type }}</div>
