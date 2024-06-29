@@ -43,7 +43,7 @@ export class MessageBoxComponent implements AfterViewInit {
     this.scrollFrame = new ElementRef('');
     this.scrollContainer = this.scrollFrame as unknown as HTMLElement;
 
-    this.dataService.channelsActive$.subscribe((value) => {
+    this.dataService.channelsState$.subscribe((value) => {
       const posts = value.channels?.[value.active]?.posts ?? [];
       if (posts.length) {
         this.posts.next(posts);
@@ -52,7 +52,7 @@ export class MessageBoxComponent implements AfterViewInit {
       }
     });
 
-    this.dataService.channelsActive$
+    this.dataService.channelsState$
       .pipe(distinctUntilKeyChanged('active'))
       .subscribe((value) => {
         this.activeChannel.next(value.active);

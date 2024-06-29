@@ -1,9 +1,24 @@
 .channel-item {
-    display: flex;
-    align-items: center;
-  }
+  display: flex;
+  align-items: center;
+}
 
-  .channel-name {
-    font-weight: 400;
-    font-size: 14px;
-  }
+.channel-name {
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+.unread-badge {
+  background: white;
+  color: rgb(27, 63, 145);
+
+  min-width: 20px;
+  height: auto;
+  border-radius: 8px;
+  font-size: 11px;
+  text-align: center;
+}

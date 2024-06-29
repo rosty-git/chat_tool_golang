@@ -40,6 +40,7 @@ export type Channel = {
   lastCreatedAt?: string;
   firstCreatedAt?: string;
   posts?: PostItem[];
+  index: number;
 };
 
 export type ChannelsResp = {
@@ -95,14 +96,14 @@ export class DataService {
 
   statuses$ = this.statuses.asObservable();
 
-  private channelsActive = new BehaviorSubject<ChannelsState>({
+  private channelsState = new BehaviorSubject<ChannelsState>({
     isOpenActive: false,
     isDirectActive: false,
     active: '',
     channels: {},
   });
 
-  channelsActive$ = this.channelsActive.asObservable();
+  channelsState$ = this.channelsState.asObservable();
 
   private userId = new BehaviorSubject<string>('');
 
@@ -137,7 +138,7 @@ export class DataService {
   showChannelSearchModal$ = this.showChannelSearchModal.asObservable();
 
   private setPosts(channelId: string, newPosts: PostItem[]) {
-    const currentChannelsState = this.channelsActive.getValue();
+    const currentChannelsState = this.channelsState.getValue();
 
     const { last, first } = getFirstAndLastCreatedAt(newPosts);
 
@@ -152,11 +153,11 @@ export class DataService {
       lastCreatedAt: last,
     };
 
-    this.channelsActive.next(currentChannelsState);
+    this.channelsState.next(currentChannelsState);
   }
 
   private addPostAfter(options: { channelId: string; post: PostItem }) {
-    const currentChannelsState = this.channelsActive.getValue();
+    const currentChannelsState = this.channelsState.getValue();
 
     if (currentChannelsState.channels?.[options.channelId]) {
       const existingPosts =
@@ -172,7 +173,7 @@ export class DataService {
 
       currentChannelsState.channels[options.channelId] = updatedChannel;
 
-      this.channelsActive.next(currentChannelsState);
+      this.channelsState.next(currentChannelsState);
     }
   }
 
@@ -181,7 +182,7 @@ export class DataService {
 
     const { last } = getFirstAndLastCreatedAt(options.posts);
 
-    const currentChannelsState = this.channelsActive.getValue();
+    const currentChannelsState = this.channelsState.getValue();
 
     if (
       options.posts.length &&
@@ -200,7 +201,7 @@ export class DataService {
 
       currentChannelsState.channels[options.channelId] = updatedChannel;
 
-      this.channelsActive.next(currentChannelsState);
+      this.channelsState.next(currentChannelsState);
     }
   }
 
@@ -208,7 +209,7 @@ export class DataService {
     console.log('addPostsBefore', { channelId, newPosts });
 
     if (newPosts.length) {
-      const currentChannelsState = this.channelsActive.getValue();
+      const currentChannelsState = this.channelsState.getValue();
 
       const { first } = getFirstAndLastCreatedAt(newPosts);
 
@@ -225,7 +226,7 @@ export class DataService {
 
         currentChannelsState.channels[channelId] = updatedChannel;
 
-        this.channelsActive.next(currentChannelsState);
+        this.channelsState.next(currentChannelsState);
       }
     }
   }
@@ -254,7 +255,7 @@ export class DataService {
     console.log('getPostsAfter', { options });
 
     return new Promise((resolve, reject) => {
-      const channelsState = this.channelsActive.getValue();
+      const channelsState = this.channelsState.getValue();
 
       if (channelsState.channels?.[options.channelId].lastCreatedAt) {
         const last = channelsState.channels[options.channelId].lastCreatedAt;
@@ -294,7 +295,7 @@ export class DataService {
     console.log('Get posts before', options);
 
     return new Promise((resolve, reject) => {
-      const channelsState = this.channelsActive.getValue();
+      const channelsState = this.channelsState.getValue();
 
       if (
         channelsState.channels &&
@@ -329,12 +330,6 @@ export class DataService {
             console.error(err);
             reject(err);
           });
-      } else {
-        reject(
-          new Error(
-            'channelsState.channels?.[options.channelId].firstCreatedAt is undefined',
-          ),
-        );
       }
     });
   }
@@ -362,6 +357,14 @@ export class DataService {
             files: options.files?.length ? options.files : [],
           },
         });
+
+        const channelsOrderStringify = localStorage.getItem('channelsOrder');
+
+        const channelsOrder = channelsOrderStringify
+          ? JSON.parse(channelsOrderStringify)
+          : [];
+
+        this.updateChannelsIndexes(channelsOrder);
       }
 
       this.api
@@ -435,7 +438,7 @@ export class DataService {
   }
 
   setOpenActive(channelId: string): void {
-    const currentChannelsState = this.channelsActive.getValue();
+    const currentChannelsState = this.channelsState.getValue();
 
     localStorage.setItem('activeChannel', `open_${channelId}`);
 
@@ -445,11 +448,11 @@ export class DataService {
       isOpenActive: true,
       isDirectActive: false,
     };
-    this.channelsActive.next(newState);
+    this.channelsState.next(newState);
   }
 
   setDirectActive(channelId: string): void {
-    const currentChannelsState = this.channelsActive.getValue();
+    const currentChannelsState = this.channelsState.getValue();
 
     localStorage.setItem('activeChannel', `direct_${channelId}`);
 
@@ -459,7 +462,7 @@ export class DataService {
       isDirectActive: true,
       isOpenActive: false,
     };
-    this.channelsActive.next(newState);
+    this.channelsState.next(newState);
   }
 
   async getStatusesForChannelMembers(channels: Channel[]) {
@@ -488,7 +491,7 @@ export class DataService {
 
     const openChannels = (resp as ChannelsResp).channels;
 
-    const currentChannelsState = this.channelsActive.getValue();
+    const currentChannelsState = this.channelsState.getValue();
 
     // eslint-disable-next-line no-restricted-syntax
     for (const channel of openChannels) {
@@ -513,7 +516,7 @@ export class DataService {
       currentChannelsState.channels[channel.id] = channel;
     }
 
-    this.channelsActive.next(currentChannelsState);
+    this.channelsState.next(currentChannelsState);
 
     this.getStatusesForChannelMembers(openChannels);
   }
@@ -525,7 +528,7 @@ export class DataService {
 
     const directChannels = (resp as ChannelsResp).channels;
 
-    const currentChannelsState = this.channelsActive.getValue();
+    const currentChannelsState = this.channelsState.getValue();
 
     // eslint-disable-next-line no-restricted-syntax
     for (const channel of directChannels) {
@@ -543,6 +546,17 @@ export class DataService {
 
       channel.unread = unread;
 
+      const channelsOrderStringify = localStorage.getItem('channelsOrder');
+
+      const channelsOrder = channelsOrderStringify
+        ? JSON.parse(channelsOrderStringify)
+        : [];
+
+      channel.index =
+        channelsOrder.indexOf(channel.id) >= 0
+          ? channelsOrder.indexOf(channel.id)
+          : 100;
+
       if (!currentChannelsState.channels) {
         currentChannelsState.channels = {};
       }
@@ -550,7 +564,7 @@ export class DataService {
       currentChannelsState.channels[channel.id] = channel;
     }
 
-    this.channelsActive.next(currentChannelsState);
+    this.channelsState.next(currentChannelsState);
 
     this.getStatusesForChannelMembers(directChannels);
   }
@@ -574,7 +588,7 @@ export class DataService {
     this.api
       .put(`/v1/api/channels/${channelId}/markasread`, {})
       .then(() => {
-        const currentChannelsState = this.channelsActive.getValue();
+        const currentChannelsState = this.channelsState.getValue();
 
         if (currentChannelsState.channels?.[channelId]) {
           const updatedChannel = {
@@ -584,14 +598,14 @@ export class DataService {
 
           currentChannelsState.channels[channelId] = updatedChannel;
 
-          this.channelsActive.next(currentChannelsState);
+          this.channelsState.next(currentChannelsState);
         }
       })
       .catch((err) => console.error(err));
   }
 
   incUnread(channelId: string) {
-    const currentChannelsState = this.channelsActive.getValue();
+    const currentChannelsState = this.channelsState.getValue();
 
     if (currentChannelsState.channels) {
       const updatedChannels = {
@@ -607,7 +621,7 @@ export class DataService {
         channels: updatedChannels,
       };
 
-      this.channelsActive.next(updatedChannelsState);
+      this.channelsState.next(updatedChannelsState);
     }
   }
 
@@ -645,7 +659,7 @@ export class DataService {
     message: string;
     frontId: string;
   }) {
-    const currentChannelsState = this.channelsActive.getValue();
+    const currentChannelsState = this.channelsState.getValue();
 
     const userName = this.userName.getValue();
 
@@ -661,7 +675,7 @@ export class DataService {
         files: [],
       });
 
-      this.channelsActive.next(currentChannelsState);
+      this.channelsState.next(currentChannelsState);
 
       this.offlineMessages.push({
         id: crypto.randomUUID().toString(),
@@ -723,5 +737,21 @@ export class DataService {
 
   closeChannelSearchModal() {
     this.showChannelSearchModal.next(false);
+  }
+
+  updateChannelsIndexes(channelsOrder: string[]) {
+    const currentChannelsState = this.channelsState.getValue();
+
+    if (currentChannelsState.channels) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const channelId of Object.keys(currentChannelsState.channels)) {
+        currentChannelsState.channels[channelId].index =
+          channelsOrder.indexOf(channelId) >= 0
+            ? channelsOrder.indexOf(channelId)
+            : 100;
+      }
+    }
+
+    this.channelsState.next(currentChannelsState);
   }
 }

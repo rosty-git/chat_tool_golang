@@ -53,8 +53,8 @@ const USER_UPDATE_AWAY_STATUS_INTERVAL = 300_000;
     SidebarComponent,
     CommonModule,
     SearchedPostsComponent,
-    SearchChannelsComponent
-  ]
+    SearchChannelsComponent,
+  ],
 })
 export class MessengerComponent implements OnInit, OnDestroy {
   private awayTimeoutId: ReturnType<typeof setTimeout>;
@@ -77,7 +77,7 @@ export class MessengerComponent implements OnInit, OnDestroy {
       this.dataService.setAwayStatus();
     }, USER_UPDATE_AWAY_STATUS_INTERVAL);
 
-    this.dataService.channelsActive$.subscribe((value) => {
+    this.dataService.channelsState$.subscribe((value) => {
       this.channelsState$ = value;
     });
 
@@ -110,6 +110,12 @@ export class MessengerComponent implements OnInit, OnDestroy {
             const audio = new Audio('assets/new-message-notification.wav');
 
             webSocketMsg.Payload = webSocketMsg.Payload as NewPostPayload;
+
+            const newChannelsOrder = this.updateChannelsOrder(
+              webSocketMsg.Payload.channel_id,
+            );
+
+            this.dataService.updateChannelsIndexes(newChannelsOrder);
 
             if (
               this.channelsState$.active === webSocketMsg.Payload.channel_id
@@ -200,5 +206,21 @@ export class MessengerComponent implements OnInit, OnDestroy {
         }, USER_UPDATE_AWAY_STATUS_INTERVAL);
       });
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  updateChannelsOrder(channelId: string): string[] {
+    const channelsOrderStringify = localStorage.getItem('channelsOrder');
+    let channelsOrder = channelsOrderStringify
+      ? JSON.parse(channelsOrderStringify)
+      : [];
+
+    channelsOrder = channelsOrder.filter((i: string) => i !== channelId);
+
+    channelsOrder.unshift(channelId);
+
+    localStorage.setItem('channelsOrder', JSON.stringify(channelsOrder));
+
+    return channelsOrder;
   }
 }
