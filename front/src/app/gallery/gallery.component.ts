@@ -2,13 +2,14 @@ import { Component } from '@angular/core';
 
 import { environment } from '../../environments/environment';
 import { DataService, GalleryState } from '../data.service';
+import { PdfViewerComponent } from '../pdf-viewer/pdf-viewer.component';
 
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [],
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.scss',
+  imports: [PdfViewerComponent],
 })
 export class GalleryComponent {
   state: GalleryState = {
