@@ -11,7 +11,10 @@
     <p>{{ message }}</p>
     <div class="files-container px-1">
       @for (file of files; track file) {
-        <app-file [file]="file"></app-file>
+        <app-file
+          [file]="file"
+          [index]="files.indexOf(file)"
+          [postId]="id"></app-file>
       }
     </div>
   </div>

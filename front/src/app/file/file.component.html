@@ -1,20 +1,30 @@
 <div class="file-item p-2">
   @if (file.type.startsWith("image") && file.blobUrl) {
-    <div class="img-container">
+    <div
+      class="img-container"
+      (click)="click(index)">
       <img
         src="{{ file.blobUrl }}"
         alt="{{ file.name }}" />
     </div>
   } @else if (file.type.startsWith("image") && file.s3_key) {
-    <div class="img-container">
+    <div
+      class="img-container"
+      (click)="click(index)">
       <img
         src="{{ this.s3Prefix + file.s3_key }}"
         alt="{{ file.name }}" />
     </div>
   } @else if (file.type === "application/pdf") {
-    <span class="material-symbols-outlined pdf-icon"> picture_as_pdf </span>
+    <span
+      class="material-symbols-outlined pdf-icon"
+      (click)="click(index)">
+      picture_as_pdf
+    </span>
   } @else {
-    <div class="img-plasholder"></div>
+    <div
+      class="img-plasholder"
+      (click)="click(index)"></div>
   }
   <div class="file-info px-1">
     <div class="file-name">{{ file.name }}</div>

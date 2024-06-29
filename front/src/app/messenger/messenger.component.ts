@@ -4,6 +4,7 @@ import { interval, retry, tap } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { ChannelsState, DataService } from '../data.service';
+import { GalleryComponent } from '../gallery/gallery.component';
 import { HeaderComponent } from '../header/header.component';
 import { LoginComponent } from '../login/login.component';
 import { MessageListComponent } from '../message-list/message-list.component';
@@ -54,7 +55,8 @@ const USER_UPDATE_AWAY_STATUS_INTERVAL = 300_000;
     CommonModule,
     SearchedPostsComponent,
     SearchChannelsComponent,
-  ],
+    GalleryComponent
+  ]
 })
 export class MessengerComponent implements OnInit, OnDestroy {
   private awayTimeoutId: ReturnType<typeof setTimeout>;

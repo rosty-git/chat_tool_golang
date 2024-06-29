@@ -31,6 +31,12 @@ export type ChannelsState = {
   };
 };
 
+export type GalleryState = {
+  isOpen: boolean;
+  files?: FrontFile[];
+  index?: number;
+};
+
 export type Channel = {
   id: string;
   name: string;
@@ -136,6 +142,10 @@ export class DataService {
   private showChannelSearchModal = new BehaviorSubject<boolean>(false);
 
   showChannelSearchModal$ = this.showChannelSearchModal.asObservable();
+
+  private galleryState = new BehaviorSubject<GalleryState>({ isOpen: false });
+
+  galleryState$ = this.galleryState.asObservable();
 
   private setPosts(channelId: string, newPosts: PostItem[]) {
     const currentChannelsState = this.channelsState.getValue();
@@ -753,5 +763,71 @@ export class DataService {
     }
 
     this.channelsState.next(currentChannelsState);
+  }
+
+  showGalleryOnIndex(postId: string, index: number) {
+    const currentChannelsState = this.channelsState.getValue();
+
+    const files = currentChannelsState.channels?.[
+      currentChannelsState.active
+    ].posts?.find((i) => i.id === postId)?.files;
+
+    if (files && files.length) {
+      this.galleryState.next({ isOpen: true, files, index });
+    }
+  }
+
+  closeGallery() {
+    this.galleryState.next({ isOpen: false });
+  }
+
+  increaseGalleryIndex() {
+    const currentGalleryState = this.galleryState.getValue();
+
+    if (
+      currentGalleryState.index !== null &&
+      currentGalleryState.index !== undefined &&
+      currentGalleryState.files &&
+      currentGalleryState.index + 1 < currentGalleryState.files?.length
+    ) {
+      this.galleryState.next({
+        ...currentGalleryState,
+        index: currentGalleryState.index + 1,
+      });
+    } else if (
+      currentGalleryState.index !== null &&
+      currentGalleryState.index !== undefined &&
+      currentGalleryState.files
+    ) {
+      this.galleryState.next({
+        ...currentGalleryState,
+        index: 0,
+      });
+    }
+  }
+
+  decreaseGalleryIndex() {
+    const currentGalleryState = this.galleryState.getValue();
+
+    if (
+      currentGalleryState.index !== null &&
+      currentGalleryState.index !== undefined &&
+      currentGalleryState.files &&
+      currentGalleryState.index - 1 >= 0
+    ) {
+      this.galleryState.next({
+        ...currentGalleryState,
+        index: currentGalleryState.index - 1,
+      });
+    } else if (
+      currentGalleryState.index !== null &&
+      currentGalleryState.index !== undefined &&
+      currentGalleryState.files
+    ) {
+      this.galleryState.next({
+        ...currentGalleryState,
+        index: (currentGalleryState.files?.length ?? 0) - 1,
+      });
+    }
   }
 }

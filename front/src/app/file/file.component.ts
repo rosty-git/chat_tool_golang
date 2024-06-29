@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 import { environment } from '../../environments/environment';
-import { FrontFile } from '../data.service';
+import { DataService, FrontFile } from '../data.service';
 
 @Component({
   selector: 'app-file',
@@ -14,7 +14,13 @@ import { FrontFile } from '../data.service';
 export class FileComponent {
   @Input() file: FrontFile = { name: '', size: 0, type: '', ext: '' };
 
+  @Input() index: number = 0;
+
+  @Input() postId: string = '';
+
   s3Prefix = environment.S3_PREFIX;
+
+  constructor(private dataService: DataService) {}
 
   // eslint-disable-next-line class-methods-use-this
   downloadFile(url: string, fileName: string) {
@@ -32,5 +38,12 @@ export class FileComponent {
 
         a.remove();
       });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  click(index: number) {
+    console.log(`click ${index}`);
+
+    this.dataService.showGalleryOnIndex(this.postId, index);
   }
 }
